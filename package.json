@@ -54,9 +54,6 @@
     "url": "https://github.com/ihreapotheken/IA-SDK-React-Native/issues"
   },
   "homepage": "https://github.com/ihreapotheken/IA-SDK-React-Native#readme",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "devDependencies": {
     "@eslint/compat": "^1.3.2",
     "@eslint/eslintrc": "^3.3.1",
