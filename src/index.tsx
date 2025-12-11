@@ -306,7 +306,7 @@ export class IaSdk {
    */
   finishAllActivities(): Promise<void> {
     return new Promise(
-      (resolve, reject) => {
+      (resolve, _) => {
         if (Platform.OS === 'android') {
           IaSdkReactNative.finishAllActivitiesAndroid!();
           resolve();
