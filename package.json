@@ -1,5 +1,5 @@
 {
-  "name": "ia-sdk-react-native",
+  "name": "@ihreapotheken/ia-sdk-react-native",
   "version": "1.0.0",
   "description": "Ihre Apotheken React Native SDK",
   "main": "./lib/module/index.js",
