@@ -22,7 +22,6 @@ jobs:
         run: |
           VERSION=${{ github.ref_name }}
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
-          cd packages/ia-sdk
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
