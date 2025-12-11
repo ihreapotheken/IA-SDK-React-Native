@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.firebase.appdistribution"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -78,8 +79,9 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "iasdkreactnative.example"
+    
     defaultConfig {
-        applicationId "iasdkreactnative.example"
+        applicationId "de.ihreapotheken.reactnative"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -103,8 +105,40 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            firebaseAppDistribution {
+                appId = "1:805028679903:android:594d3964ea5373ea24d96a"
+                artifactType = "APK"
+                artifactPath = rootProject.file("./app/build/outputs/apk/release/app-release.apk").path
+                serviceCredentialsFile = rootProject.file("./app/fb-distribution-service-credentials.json").path
+                testers = [
+                    "cvitaman@gmail.com",
+                    "4ot.testing@gmail.com",
+                    "julia.schindel@ihreapotheken.de",
+                    "lorenathiel2@gmail.com",
+                ].join(", ")
+            }
         }
     }
+}
+
+repositories {
+  mavenCentral()
+  google()
+  gradlePluginPortal()
+  maven {
+      url uri("https://api.mapbox.com/downloads/v2/releases/maven")
+  }
+  maven {
+      url uri("https://nexus.link4.health/repository/link4health-anonymous/")
+  }
+  maven {
+      url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+      credentials {
+          it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+          it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+      }
+  }
+  mavenLocal()
 }
 
 dependencies {

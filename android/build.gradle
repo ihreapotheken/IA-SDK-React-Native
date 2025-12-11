@@ -6,15 +6,50 @@ buildscript {
   repositories {
     google()
     mavenCentral()
+    gradlePluginPortal()
+    maven {
+        url uri("https://api.mapbox.com/downloads/v2/releases/maven")
+    }
+    maven {
+        url uri("https://nexus.link4.health/repository/link4health-anonymous/")
+    }
+    maven {
+        url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+        credentials {
+            it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+            it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+        }
+    }
+    mavenLocal()
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:8.7.2"
-    // noinspection DifferentKotlinGradleVersion
+    classpath "com.android.tools.build:gradle:8.12.3"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
   }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url uri("https://api.mapbox.com/downloads/v2/releases/maven")
+        }
+        maven {
+            url uri("https://nexus.link4.health/repository/link4health-anonymous/")
+        }
+        maven {
+            url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+            credentials {
+                it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+                it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+            }
+        }
+        mavenLocal()
+    }
+}
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
@@ -26,7 +61,7 @@ def getExtOrIntegerDefault(name) {
 }
 
 android {
-  namespace "com.iasdkreactnative"
+  namespace "de.ihreapotheken.reactnative"
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
@@ -67,6 +102,21 @@ android {
 repositories {
   mavenCentral()
   google()
+  gradlePluginPortal()
+  maven {
+      url uri("https://api.mapbox.com/downloads/v2/releases/maven")
+  }
+  maven {
+      url uri("https://nexus.link4.health/repository/link4health-anonymous/")
+  }
+  maven {
+      url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+      credentials {
+          it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+          it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+      }
+  }
+  mavenLocal()
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
@@ -74,4 +124,39 @@ def kotlin_version = getExtOrDefault("kotlinVersion")
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  def envFile = rootProject.file(".env")
+  def index = 0
+  while (!envFile.exists()) {
+      index++
+      envFile = rootProject.file(("../" * index) + ".env")
+      if (!envFile.exists()) {
+          envFile = rootProject.file(("../" * index) + "node_modules/ia-sdk-react-native/.env")
+          if (envFile.exists()) {
+              break
+          }
+      }
+  }
+  def env = [:]
+  envFile.eachLine { line ->
+      line = line.trim()
+      if (!line || line.startsWith("#")) return
+      def parts = line.split("=", 2)
+      env[parts[0]] = parts.length > 1 ? parts[1] : ""
+  }
+  def iaDeSdkVersion = env["ANDROID_APPSDK_VERSION"]
+  if (iaDeSdkVersion == null) {
+      throw new GradleException("No ANDROID_APPSDK_VERSION provided from .env file.")
+  }
+  iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
+  def iaDeSdkDeps = [
+          "integrations",
+          "otc",
+          "ordering",
+          "pharmacy",
+          "apofinder",
+  ]
+  iaDeSdkDeps.each { dep ->
+      def fullDep = "de.ihreapotheken.sdk:${dep}:${iaDeSdkVersion}"
+      implementation fullDep
+  }
 }

@@ -1,0 +1,18 @@
+{
+  "entryPoints": ["./src/index.tsx"],
+  "exclude": [
+    "node_modules/@nativescript/core",
+    "**/*.android.ts",
+    "**/*.ios.ts"
+  ],
+  "out": "docs",
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "includeVersion": true,
+  "hideGenerator": true,
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "skipErrorChecking": true
+}
