@@ -22,8 +22,7 @@ jobs:
         run: |
           VERSION=${{ github.ref_name }}
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
-          yarn cache clean --all
-          yarn install
+          yarn install --mode update-lockfile
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
