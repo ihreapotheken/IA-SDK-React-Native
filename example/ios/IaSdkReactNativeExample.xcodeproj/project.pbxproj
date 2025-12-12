@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		1ADF6E343C76B13180A622F3 /* libPods-IaSdkReactNativeExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C02045386767353633647A8 /* libPods-IaSdkReactNativeExample.a */; };
+		2D21C4C82EEC51B600971711 /* IACardLink in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4C72EEC51B600971711 /* IACardLink */; };
+		2D21C4CA2EEC51B600971711 /* IAIntegrations in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4C92EEC51B600971711 /* IAIntegrations */; };
+		2D21C4CC2EEC51B600971711 /* IAOrdering in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4CB2EEC51B600971711 /* IAOrdering */; };
+		2D21C4CE2EEC51B600971711 /* IAOverTheCounter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4CD2EEC51B600971711 /* IAOverTheCounter */; };
+		2D21C4D02EEC51B600971711 /* IAPharmacy in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4CF2EEC51B600971711 /* IAPharmacy */; };
+		2D21C4D22EEC51B600971711 /* IAPrescription in Frameworks */ = {isa = PBXBuildFile; productRef = 2D21C4D12EEC51B600971711 /* IAPrescription */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		D2FB9E1FBB50CE60A58F9356 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -32,6 +38,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D21C4CE2EEC51B600971711 /* IAOverTheCounter in Frameworks */,
+				2D21C4CA2EEC51B600971711 /* IAIntegrations in Frameworks */,
+				2D21C4D22EEC51B600971711 /* IAPrescription in Frameworks */,
+				2D21C4C82EEC51B600971711 /* IACardLink in Frameworks */,
+				2D21C4D02EEC51B600971711 /* IAPharmacy in Frameworks */,
+				2D21C4CC2EEC51B600971711 /* IAOrdering in Frameworks */,
 				1ADF6E343C76B13180A622F3 /* libPods-IaSdkReactNativeExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,6 +156,9 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */,
+			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -191,9 +206,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-IaSdkReactNativeExample/Pods-IaSdkReactNativeExample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-IaSdkReactNativeExample/Pods-IaSdkReactNativeExample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -230,9 +249,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-IaSdkReactNativeExample/Pods-IaSdkReactNativeExample-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-IaSdkReactNativeExample/Pods-IaSdkReactNativeExample-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -515,6 +538,50 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ihreapotheken/IA-SDK-iOS";
+			requirement = {
+				kind = exactVersion;
+				version = "0.19.7-beta";
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2D21C4C72EEC51B600971711 /* IACardLink */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IACardLink;
+		};
+		2D21C4C92EEC51B600971711 /* IAIntegrations */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IAIntegrations;
+		};
+		2D21C4CB2EEC51B600971711 /* IAOrdering */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IAOrdering;
+		};
+		2D21C4CD2EEC51B600971711 /* IAOverTheCounter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IAOverTheCounter;
+		};
+		2D21C4CF2EEC51B600971711 /* IAPharmacy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IAPharmacy;
+		};
+		2D21C4D12EEC51B600971711 /* IAPrescription */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D21C4C62EEC51B600971711 /* XCRemoteSwiftPackageReference "IA-SDK-iOS" */;
+			productName = IAPrescription;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }
