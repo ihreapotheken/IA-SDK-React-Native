@@ -1,5 +1,5 @@
 import { View, StyleSheet, Button } from 'react-native';
-import { IaSdk, IaSdkBase } from 'ia-sdk-react-native';
+import { IaSdk, IaSdkBase } from '@ihreapotheken/ia-sdk-react-native';
 
 
 export default function App() {

@@ -14,31 +14,29 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 source $SCRIPT_DIR/dev-env-setup.sh
 
 # Change current working directory.
-cd "$PROJECT_DIR/apps/demo"
+cd "$PROJECT_DIR"
 
 # Clean any temporary files.
-ns clean
-
-# Verify the build.
-ns prepare ios --release
+npm install
+yarn install
 
 # Define the iOS output file paths.
-XCARCHIVE_PATH="$PROJECT_DIR/apps/demo/platforms/ios/build/ia-lib-demo.xcarchive"
-IPA_DIR="$PROJECT_DIR/apps/demo/platforms/ios/build/ipa"
+XCARCHIVE_PATH="$PROJECT_DIR/example/ios/build/ia-lib-demo.xcarchive"
+IPA_DIR="$PROJECT_DIR/example/ios/build/ipa"
 
 # Build the iOS demo app.
 xcodebuild archive \
-  -workspace $PROJECT_DIR/apps/demo/platforms/ios/demo.xcworkspace \
-  -scheme demo \
+  -workspace $PROJECT_DIR/example/ios/IaSdkReactNativeExample.xcworkspace \
+  -scheme IaSdkReactNativeExample \
   -allowProvisioningUpdates \
   -archivePath $XCARCHIVE_PATH
 
 # Export the archive to Testflight.
 xcodebuild -exportArchive \
   -archivePath $XCARCHIVE_PATH \
-  -exportOptionsPlist "$PROJECT_DIR/tools/assets/App_Resources/iOS/ExportOptions.plist" \
+  -exportOptionsPlist "$PROJECT_DIR/example/ios/ExportOptions.plist" \
   -allowProvisioningUpdates \
-  -exportPath "$PROJECT_DIR/demo/ios/build/ios/archive/"
+  -exportPath "$PROJECT_DIR/example/ios/build/ios/archive/"
 
 # Display an informative message.
 set -a # Automatically export all variables

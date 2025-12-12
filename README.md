@@ -17,7 +17,7 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/react-native
 
 ---
 
-- [React Native SDK](https://reactnative.dev/docs/set-up-your-environment) 8.9 and up
+- [React Native SDK](https://reactnative.dev/docs/set-up-your-environment) 0.83.0 and up
 - [Node Package Manager](https://docs.npmjs.com/getting-started) 11.6 and up
 - [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
 
@@ -67,7 +67,7 @@ Afterwards, the library can be installed from the command line:
 npm install @ihreapotheken/ia-sdk-react-native@VERSION_NUMBER
 ```
 
-The `VERSION_NUMBER` value can be referenced from the 
+The `VERSION_NUMBER` value can be referenced from the
 [package release page](https://github.com/ihreapotheken/IA-SDK-React-Native/pkgs/npm/ia-sdk-react-native).
 
 ### 4.2. Plugin usage

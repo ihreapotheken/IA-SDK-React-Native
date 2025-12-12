@@ -14,22 +14,20 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 source $SCRIPT_DIR/dev-env-setup.sh
 
 # Change current working directory.
-cd "$PROJECT_DIR/apps/demo" 
+cd "$PROJECT_DIR/" 
 
-# Clean any temporary files.
-ns clean
-
-# Verify the build.
-ns prepare android --release
+# Install any missing prerequisite dependencies.
+npm install
+yarn install
 
 # Move to native project location.
-cd "$PROJECT_DIR/apps/demo/platforms/android"
+cd "$PROJECT_DIR/example/android"
 
 # Build the Android project.
 ./gradlew assembleRelease
 
 # Define the output location.
-APK_OUTPUT_DIR="$PROJECT_DIR/apps/demo/platforms/android/app/build/outputs/apk/release"
+APK_OUTPUT_DIR="$PROJECT_DIR/example/android/app/build/outputs/apk/release"
 
 # After the app is built, it needs to be aligned.
 zipalign -v -p 4 \
@@ -38,7 +36,7 @@ zipalign -v -p 4 \
 
 # Once the app is aligned, it needs to be signed.
 apksigner sign \
-  --ks "$PROJECT_DIR/tools/assets/App_Resources/Android/demo.jks" \
+  --ks "$PROJECT_DIR/example/android/app/demo.jks" \
   --ks-key-alias demo \
   --ks-pass pass:Password1! \
   --out "$APK_OUTPUT_DIR/app-release.apk" \
@@ -48,7 +46,7 @@ apksigner sign \
 apksigner verify "$APK_OUTPUT_DIR/app-release.apk"
 
 # Upload the APK to the Firebase app distribution service.
-cd $PROJECT_DIR/apps/demo/platforms/android
+cd $PROJECT_DIR/example/android
 ./gradlew appDistributionUploadRelease
 
 # Display an informative message.
