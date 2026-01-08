@@ -48,17 +48,12 @@ public class IaSdkReactNativeImpl: NSObject {
                 .apofinder,
             ])
         }
-        let masterDelegate = IaClientDelegate()
-        IASDK.setDelegates(
-            sdk: masterDelegate,
-            ordering: masterDelegate,
-            prescription: masterDelegate,
-            cardLink: masterDelegate,
+        IASDK.setDelegate(
+            IaClientDelegate(),
         )
         Task.init {
             do {
                 let prerequisitesOptions = IASDKPrerequisitesOptions(
-                    shouldShowIndicator: true,
                     isCancellable: true,
                     isAnimated: true,
                     shouldRunLegal: true,
@@ -232,7 +227,7 @@ public class IaSdkReactNativeImpl: NSObject {
     static public var orderSignatureListener = CurrentValueSubject<SignatureCodes?, Never>(nil)
 }
 
-class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
+class IaClientDelegate: SDKDelegate {
     func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?)
         -> HandlingDecision
     {
