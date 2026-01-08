@@ -24,7 +24,7 @@ import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
-import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
+import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import de.ihreapotheken.sdk.ordering.OrderingModule
 import de.ihreapotheken.sdk.otc.OtcModule
 import de.ihreapotheken.sdk.pharmacy.PharmacyModule
@@ -114,7 +114,7 @@ class IaSdkReactNativeModule(
     if (context !is Activity) {
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    intent.putExtra("viewId", SdkEntryPoint.StartScreen.name)
+    intent.putExtra("viewId", IaScreen.StartScreen::class.simpleName!!)
     context.startActivity(intent)
   }
 
