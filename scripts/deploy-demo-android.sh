@@ -18,6 +18,11 @@ cd "$PROJECT_DIR/"
 
 # Install any missing prerequisite dependencies.
 npm install
+yarn cache clean
+watchman watch-del-all
+rm -rf node_modules
+rm -rf $TMPDIR/react-*
+rm -rf $TMPDIR/metro-*
 yarn install
 
 # Move to native project location.

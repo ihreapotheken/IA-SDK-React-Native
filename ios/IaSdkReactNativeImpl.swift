@@ -141,7 +141,7 @@ public class IaSdkReactNativeImpl: NSObject {
     ) {
         Task.init {
             do {
-                try await IASDK.deleteAllUserRelatedData()
+                try await IASDK.clearAllData()
                 completionHandler(nil)
             } catch {
                 completionHandler("\(String(describing: error)) \(error.localizedDescription)")
