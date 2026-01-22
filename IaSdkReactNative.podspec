@@ -35,13 +35,20 @@ Pod::Spec.new do |s|
 
   install_modules_dependencies(s)
 
-  if defined?(:spm_dependency)
-    spm_dependency(s,  
-      url: 'https://github.com/ihreapotheken/IA-SDK-iOS', 
-      requirement: {kind: 'exact', version: appSdkVersionId}, 
-      products: ['IAOverTheCounter', 'IAOrdering', 'IAPharmacy', 'IAIntegrations', 'IACardLink', 'IAPrescription'] 
-    ) 
-  else 
-    raise "Please upgrade React Native to >=0.75.0 to use SPM dependencies." 
-  end 
+  # if defined?(:spm_dependency)
+  #   spm_dependency(s,  
+  #     url: 'https://github.com/ihreapotheken/IA-SDK-iOS', 
+  #     requirement: {kind: 'exact', version: appSdkVersionId}, 
+  #     products: ['IAOverTheCounter', 'IAOrdering', 'IAPharmacy', 'IAIntegrations', 'IACardLink', 'IAPrescription'] 
+  #   ) 
+  # else 
+  #   raise "Please upgrade React Native to >=0.75.0 to use SPM dependencies." 
+  # end 
+
+  s.dependency 'IAIntegrations', appSdkVersionId
+  s.dependency 'IAOverTheCounter', appSdkVersionId
+  s.dependency 'IAOrdering', appSdkVersionId
+  s.dependency 'IAPharmacy', appSdkVersionId
+  s.dependency 'IACardLink', appSdkVersionId
+  s.dependency 'IAPrescription', appSdkVersionId
 end

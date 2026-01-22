@@ -18,6 +18,11 @@ cd "$PROJECT_DIR"
 
 # Clean any temporary files.
 npm install
+yarn cache clean
+watchman watch-del-all
+rm -rf node_modules
+rm -rf $TMPDIR/react-*
+rm -rf $TMPDIR/metro-*
 yarn install
 
 # Define the iOS output file paths.
