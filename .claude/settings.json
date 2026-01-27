@@ -18,7 +18,13 @@
       "Bash(node -e:*)",
       "Bash(yarn build)",
       "Bash(npx tsc:*)",
-      "Bash(yarn android)"
+      "Bash(yarn android)",
+      "Read(//Users/matanljubas/**)",
+      "Bash(bundle install:*)",
+      "Bash(npm view:*)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }

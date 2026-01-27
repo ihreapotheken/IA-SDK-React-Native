@@ -30,7 +30,9 @@ jobs:
 
       - name: Update package versions and publish
         run: |
-          VERSION=${{ github.ref_name }}
+          RAW_VERSION=${{ github.ref_name }}
+          VERSION=$(echo "$RAW_VERSION" | sed 's/\.0\([0-9]\)/.\1/g' | sed 's/\.\([0-9]*\)$/-\1/')
+          echo "Transformed version: $RAW_VERSION -> $VERSION"
 
           # List of packages in dependency order
           PACKAGES=(
