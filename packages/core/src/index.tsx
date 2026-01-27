@@ -8,7 +8,6 @@ import type {
 import {
   IaBaseModule,
   ServerEnvironment,
-  Salutation,
 } from '@ihreapotheken/ia-sdk-interface';
 import IaSdkCoreNative from './NativeIaSdkCore';
 
