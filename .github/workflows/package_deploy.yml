@@ -22,6 +22,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
       - name: Build all packages
         run: yarn build
@@ -47,6 +49,9 @@ jobs:
 
             # Update version in package.json
             sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+
+            # Replace workspace:* dependencies with actual version
+            sed -i "s/\"workspace:\*\"/\"$VERSION\"/g" package.json
 
             # Publish to GitHub Packages
             npm publish || echo "Failed to publish $PACKAGE_DIR, continuing..."
