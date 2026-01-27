@@ -15,10 +15,11 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 │   ├── ordering/      # Order management and checkout
 │   ├── over-the-counter/ # OTC product browsing
 │   └── prescription/  # Prescription management
-├── example/           # Full example app with all modules
+├── example/           # Full example app with all modules (workspace)
 └── test/              # Minimal example apps
-    ├── cardlink-example/           # CardLink module only
-    └── cardlink-pharmacy-example/  # CardLink + Pharmacy modules
+    ├── cardlink-demo/              # CardLink only (published packages)
+    ├── cardlink-example/           # CardLink only (workspace)
+    └── cardlink-pharmacy-example/  # CardLink + Pharmacy (workspace)
 ```
 
 ## Key Commands
@@ -30,7 +31,7 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 ### Running Example Apps
 - `cd example && yarn android` - Run full example on Android
 - `cd example && yarn ios` - Run full example on iOS
-- `cd temp/cardlink-example && yarn android` - Run CardLink-only example
+- `cd test/cardlink-demo && npm run android` - Run CardLink demo (published packages)
 
 ### iOS Setup
 ```bash
