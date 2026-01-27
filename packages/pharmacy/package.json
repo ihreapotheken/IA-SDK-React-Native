@@ -1,0 +1,82 @@
+{
+  "name": "@ihreapotheken/ia-sdk-pharmacy",
+  "version": "1.0.0",
+  "description": "Pharmacy module for the ia.de AppSDK React Native service",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "*.podspec"
+  ],
+  "scripts": {
+    "build": "bob build",
+    "clean": "del-cli lib android/build ios/build",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihreapotheken/IA-SDK-React-Native.git",
+    "directory": "packages/pharmacy"
+  },
+  "author": "ihreapotheken <info@ihreapotheken.de> (https://ihreapotheken.de)",
+  "license": "MIT",
+  "publishConfig": {
+    "@ihreapotheken:registry": "https://npm.pkg.github.com",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@ihreapotheken/ia-sdk-interface": "workspace:*"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "20.0.1",
+    "@react-native/babel-preset": "0.81.1",
+    "@types/react": "^19.1.0",
+    "del-cli": "^6.0.0",
+    "react": "19.1.0",
+    "react-native": "0.81.1",
+    "react-native-builder-bob": "^0.40.16",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "@ihreapotheken/ia-sdk-core": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "codegenConfig": {
+    "name": "IaSdkPharmacySpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "de.ihreapotheken.reactnative.pharmacy"
+    }
+  }
+}

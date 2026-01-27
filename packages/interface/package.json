@@ -1,0 +1,38 @@
+{
+  "name": "@ihreapotheken/ia-sdk-interface",
+  "version": "1.0.0",
+  "description": "Interface definitions for the ia.de AppSDK React Native service",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "del-cli lib",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihreapotheken/IA-SDK-React-Native.git",
+    "directory": "packages/interface"
+  },
+  "author": "ihreapotheken <info@ihreapotheken.de> (https://ihreapotheken.de)",
+  "license": "MIT",
+  "publishConfig": {
+    "@ihreapotheken:registry": "https://npm.pkg.github.com",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "devDependencies": {
+    "del-cli": "^6.0.0",
+    "typescript": "^5.9.2"
+  }
+}

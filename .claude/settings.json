@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(pod install)",
+      "Bash(npx react-native:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(grep:*)",
+      "Bash(yarn install:*)",
+      "Bash(./gradlew:*)",
+      "Bash(yarn ios)",
+      "Bash(xcrun simctl boot:*)",
+      "Bash(open:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(yarn example:*)",
+      "Bash(tee:*)",
+      "Bash(node -e:*)",
+      "Bash(yarn build)",
+      "Bash(npx tsc:*)",
+      "Bash(yarn android)"
+    ]
+  }
+}

@@ -9,34 +9,30 @@ PODS:
   - hermes-engine (0.81.1):
     - hermes-engine/Pre-built (= 0.81.1)
   - hermes-engine/Pre-built (0.81.1)
-  - IACardLink (0.20.9-beta):
+  - IACardLink (1.0.0-beta.4):
     - GematikOpenSSL (= 4.3.1)
-    - IACore (= 0.20.9-beta)
-  - IACore (0.20.9-beta):
-    - IOSKit (= 0.20.9-beta)
-  - IAIntegrations (0.20.9-beta):
-    - IACore (= 0.20.9-beta)
-  - IAOrdering (0.20.9-beta):
-    - IACore (= 0.20.9-beta)
-  - IAOverTheCounter (0.20.9-beta):
-    - IACore (= 0.20.9-beta)
-  - IAPharmacy (0.20.9-beta):
-    - IACore (= 0.20.9-beta)
-  - IAPrescription (0.20.9-beta):
-    - IACore (= 0.20.9-beta)
-  - IaSdkReactNative (1.0.0):
+    - IACore (= 1.0.0-beta.4)
+  - IACore (1.0.0-beta.4):
+    - IOSKit (= 1.0.0-beta.4)
+  - IAIntegrations (1.0.0-beta.4):
+    - IACore (= 1.0.0-beta.4)
+  - IAOrdering (1.0.0-beta.4):
+    - IACore (= 1.0.0-beta.4)
+  - IAOverTheCounter (1.0.0-beta.4):
+    - IACore (= 1.0.0-beta.4)
+  - IAPharmacy (1.0.0-beta.4):
+    - IACore (= 1.0.0-beta.4)
+  - IAPrescription (1.0.0-beta.4):
+    - IACore (= 1.0.0-beta.4)
+  - IaSdkCardLink (1.0.0):
     - boost
     - DoubleConversion
     - fast_float
     - fmt
     - glog
     - hermes-engine
-    - IACardLink (= 0.20.9-beta)
-    - IAIntegrations (= 0.20.9-beta)
-    - IAOrdering (= 0.20.9-beta)
-    - IAOverTheCounter (= 0.20.9-beta)
-    - IAPharmacy (= 0.20.9-beta)
-    - IAPrescription (= 0.20.9-beta)
+    - IACardLink (= 1.0.0-beta.4)
+    - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -58,7 +54,161 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - IOSKit (0.20.9-beta)
+  - IaSdkCore (1.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - IACardLink (= 1.0.0-beta.4)
+    - IAIntegrations (= 1.0.0-beta.4)
+    - IAOrdering (= 1.0.0-beta.4)
+    - IAOverTheCounter (= 1.0.0-beta.4)
+    - IAPharmacy (= 1.0.0-beta.4)
+    - IAPrescription (= 1.0.0-beta.4)
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - IaSdkOrdering (1.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - IAOrdering (= 1.0.0-beta.4)
+    - IaSdkCore
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - IaSdkOtc (1.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - IAOverTheCounter (= 1.0.0-beta.4)
+    - IaSdkCore
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - IaSdkPharmacy (1.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - IAPharmacy (= 1.0.0-beta.4)
+    - IaSdkCore
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - IaSdkPrescription (1.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - IAPrescription (= 1.0.0-beta.4)
+    - IaSdkCore
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - IOSKit (1.0.0-beta.4)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2315,7 +2465,12 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
-  - IaSdkReactNative (from `../..`)
+  - IaSdkCardLink (from `../../packages/cardlink`)
+  - IaSdkCore (from `../../packages/core`)
+  - IaSdkOrdering (from `../../packages/ordering`)
+  - IaSdkOtc (from `../../packages/over-the-counter`)
+  - IaSdkPharmacy (from `../../packages/pharmacy`)
+  - IaSdkPrescription (from `../../packages/prescription`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -2413,8 +2568,18 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-07-07-RNv0.81.0-e0fc67142ec0763c6b6153ca2bf96df815539782
-  IaSdkReactNative:
-    :path: "../.."
+  IaSdkCardLink:
+    :path: "../../packages/cardlink"
+  IaSdkCore:
+    :path: "../../packages/core"
+  IaSdkOrdering:
+    :path: "../../packages/ordering"
+  IaSdkOtc:
+    :path: "../../packages/over-the-counter"
+  IaSdkPharmacy:
+    :path: "../../packages/pharmacy"
+  IaSdkPrescription:
+    :path: "../../packages/prescription"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2553,15 +2718,20 @@ SPEC CHECKSUMS:
   GematikOpenSSL: e0c7ed81c689ef7747104e8c22ab8846a1910ba1
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 4f8246b1f6d79f625e0d99472d1f3a71da4d28ca
-  IACardLink: 4d86126d3b334eefec13ead6e6789ebd1f436833
-  IACore: 6eea87bdb7c312dcb46ec6b06b81524435fb74bf
-  IAIntegrations: 10b2c4ae6df341ded0ed06f26fabb822b8f103d9
-  IAOrdering: cf40c3290ffc5791683c2848a40f031f9f1a4574
-  IAOverTheCounter: 67e7a440515de1d2992587786c5e898bc00ca567
-  IAPharmacy: ba460f1830d4e4bfd62fd6dbdb88dbc23cfed929
-  IAPrescription: b80c696fb6447f7cb9bce6a637e8b1c016a0053c
-  IaSdkReactNative: 84d41eab50904ff731409b215bf188376ea9388c
-  IOSKit: e689b27c3c574c95c2d8b023ef955b41931e37c5
+  IACardLink: 7acbf13b403c700b14c3e3b2c01a67d8f3ba7ced
+  IACore: 148d0324f8280410334669806c5399af678d41c9
+  IAIntegrations: f40fe458d5a36171b26196d77580f245690a5a8a
+  IAOrdering: 831bbe32f55e6aabab4d4ebcf985224b54dbf377
+  IAOverTheCounter: 485108f2ee67d716467e2dd588d62dd0b5b940f8
+  IAPharmacy: a3f147bd51a2e791612d4be7be72d8ef1751ad94
+  IAPrescription: 7f60393cfe148579efbae153598f27f5987a5754
+  IaSdkCardLink: 8ef036dd339d99456289afb1aa2f0235220c1c5d
+  IaSdkCore: 02797c00d508f97c9bc007a0ae69918ce456d598
+  IaSdkOrdering: af5ea093e410174d74a5d4c8578edcfe1f0d9067
+  IaSdkOtc: a364e4f478a3a1b0d6d13982bcfd8404d33e9aba
+  IaSdkPharmacy: dfaf8ae70f867b4e6469e8a3b3c1e372c59e02eb
+  IaSdkPrescription: 5baeff826e15efd90ce0a01372fe1a86929328bd
+  IOSKit: 8e32b5d489f6d211d0834fef955a351a0bd72009
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: c4b9e2fd0ab200e3af72b013ed6113187c607077
   RCTRequired: e97dd5dafc1db8094e63bc5031e0371f092ae92a
