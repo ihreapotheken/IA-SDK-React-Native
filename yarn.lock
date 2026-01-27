@@ -4793,55 +4793,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ia-sdk-cardlink-example@workspace:temp/cardlink-example":
-  version: 0.0.0-use.local
-  resolution: "ia-sdk-cardlink-example@workspace:temp/cardlink-example"
-  dependencies:
-    "@babel/core": "npm:^7.25.2"
-    "@babel/preset-env": "npm:^7.25.3"
-    "@babel/runtime": "npm:^7.25.0"
-    "@ihreapotheken/ia-sdk-cardlink": "workspace:*"
-    "@ihreapotheken/ia-sdk-core": "workspace:*"
-    "@ihreapotheken/ia-sdk-interface": "workspace:*"
-    "@react-native-community/cli": "npm:20.0.0"
-    "@react-native-community/cli-platform-android": "npm:20.0.0"
-    "@react-native-community/cli-platform-ios": "npm:20.0.0"
-    "@react-native/babel-preset": "npm:0.81.1"
-    "@react-native/metro-config": "npm:0.81.1"
-    "@react-native/typescript-config": "npm:0.81.1"
-    "@types/react": "npm:^19.1.0"
-    react: "npm:19.1.0"
-    react-native: "npm:0.81.1"
-    react-native-builder-bob: "npm:^0.40.16"
-    react-native-monorepo-config: "npm:^0.1.9"
-  languageName: unknown
-  linkType: soft
-
-"ia-sdk-cardlink-pharmacy-example@workspace:temp/cardlink-pharmacy-example":
-  version: 0.0.0-use.local
-  resolution: "ia-sdk-cardlink-pharmacy-example@workspace:temp/cardlink-pharmacy-example"
-  dependencies:
-    "@babel/core": "npm:^7.25.2"
-    "@babel/preset-env": "npm:^7.25.3"
-    "@babel/runtime": "npm:^7.25.0"
-    "@ihreapotheken/ia-sdk-cardlink": "workspace:*"
-    "@ihreapotheken/ia-sdk-core": "workspace:*"
-    "@ihreapotheken/ia-sdk-interface": "workspace:*"
-    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*"
-    "@react-native-community/cli": "npm:20.0.0"
-    "@react-native-community/cli-platform-android": "npm:20.0.0"
-    "@react-native-community/cli-platform-ios": "npm:20.0.0"
-    "@react-native/babel-preset": "npm:0.81.1"
-    "@react-native/metro-config": "npm:0.81.1"
-    "@react-native/typescript-config": "npm:0.81.1"
-    "@types/react": "npm:^19.1.0"
-    react: "npm:19.1.0"
-    react-native: "npm:0.81.1"
-    react-native-builder-bob: "npm:^0.40.16"
-    react-native-monorepo-config: "npm:^0.1.9"
-  languageName: unknown
-  linkType: soft
-
 "ia-sdk-react-native-example@workspace:example":
   version: 0.0.0-use.local
   resolution: "ia-sdk-react-native-example@workspace:example"
