@@ -47,6 +47,8 @@ export interface InitConfig {
   clientId: string;
   /** Specified server environment for the ia.de services. */
   serverEnvironment: ServerEnvironment;
+  /** Apofinder channel identifier for pharmacy collection filtering. */
+  channelId?: number;
 }
 
 /**

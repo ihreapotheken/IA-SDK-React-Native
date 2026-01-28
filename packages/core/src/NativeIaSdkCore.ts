@@ -7,6 +7,7 @@ export interface Spec extends TurboModule {
     accessKey: string,
     clientId: string,
     serverEnvironmentId: string,
+    channelId: number | null,
     completionHandler: (error: string | null) => void
   ): void;
 
@@ -31,6 +32,7 @@ export interface Spec extends TurboModule {
     accessKey: string,
     clientId: string,
     serverEnvironmentId: string,
+    channelId: number | null,
     completionHandler: (error: string | null) => void
   ): void;
 

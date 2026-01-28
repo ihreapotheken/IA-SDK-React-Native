@@ -49,6 +49,7 @@ class IaSdkCoreModule(
     accessKey: String,
     clientId: String,
     serverEnvironmentId: String,
+    channelId: Double?,
     completionHandler: Callback,
   ) {
     // Register SDK with dynamically registered modules
@@ -75,6 +76,7 @@ class IaSdkCoreModule(
           shouldRunLegal = true,
           shouldRunOnboarding = false,
         ),
+        channelId = channelId?.toInt(),
       ),
       environmentType = serverEnv,
       sdkEventListener = object : SdkEventListener {

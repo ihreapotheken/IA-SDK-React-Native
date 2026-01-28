@@ -41,6 +41,7 @@ export class IaSdk {
   private accessKey: string | null = null;
   private clientId: string | null = null;
   private serverEnv: ServerEnvironment | null = null;
+  private channelId: number | null = null;
   private initialized = false;
   private modulesRegistered = false;
 
@@ -119,6 +120,7 @@ export class IaSdk {
     this.accessKey = config.accessKey;
     this.clientId = config.clientId;
     this.serverEnv = config.serverEnvironment;
+    this.channelId = config.channelId ?? null;
 
     return new Promise((resolve, reject) => {
       const completionHandler = (error: string | null) => {
@@ -135,6 +137,7 @@ export class IaSdk {
           config.accessKey,
           config.clientId,
           config.serverEnvironment,
+          config.channelId ?? null,
           completionHandler
         );
       }
@@ -144,6 +147,7 @@ export class IaSdk {
           config.accessKey,
           config.clientId,
           config.serverEnvironment,
+          config.channelId ?? null,
           completionHandler
         );
       }
@@ -234,6 +238,7 @@ export class IaSdk {
           accessKey: this.accessKey!,
           clientId: this.clientId!,
           serverEnvironment: this.serverEnv!,
+          channelId: this.channelId ?? undefined,
         }).then(
           () => {
             IaSdkCoreNative.startDashboardActivityIOS?.();

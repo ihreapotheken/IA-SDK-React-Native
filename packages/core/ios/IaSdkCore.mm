@@ -6,10 +6,12 @@
 - (void)initIaSdkIOS:(NSString *)accessKey
             clientId:(NSString *)clientId
  serverEnvironmentId:(NSString *)serverEnvironmentId
+           channelId:(NSNumber *)channelId
    completionHandler:(RCTResponseSenderBlock)completion {
   [[IaSdkCoreImpl shared] initIaSdkIOS:accessKey
                               clientId:clientId
                    serverEnvironmentId:serverEnvironmentId
+                             channelId:channelId
                      completionHandler:^(NSString *err) {
                        completion(@[ err ?: [NSNull null] ]);
                      }];

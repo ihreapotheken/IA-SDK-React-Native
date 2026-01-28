@@ -65,15 +65,19 @@ public class IaSdkCoreImpl: NSObject {
         return modules
     }
 
-    @objc(initIaSdkIOS:clientId:serverEnvironmentId:completionHandler:)
+    @objc(initIaSdkIOS:clientId:serverEnvironmentId:channelId:completionHandler:)
     public func initIaSdkIOS(
         accessKey: String,
         clientId: String,
         serverEnvironmentId: String,
+        channelId: NSNumber?,
         completionHandler: @escaping (String?) -> Void
     ) {
         IASDK.configuration.apiKey = accessKey
         IASDK.configuration.clientID = clientId
+        if let channelId = channelId {
+            IASDK.configuration.channelID = channelId.intValue
+        }
 
         let specifiedServerEnvironment: EnvironmentID
         switch serverEnvironmentId {
