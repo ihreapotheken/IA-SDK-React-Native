@@ -1,0 +1,86 @@
+def getExtOrDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['IaSdkPrescription_' + name]
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "com.facebook.react"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["IaSdkPrescription_" + name]).toInteger()
+}
+
+android {
+  namespace "de.ihreapotheken.reactnative.prescription"
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+  }
+
+  buildFeatures { buildConfig true }
+  buildTypes { release { minifyEnabled false } }
+  lintOptions { disable "GradleCompatible" }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main { java.srcDirs += ["generated/java", "generated/jni"] }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+  gradlePluginPortal()
+  maven { url uri("https://api.mapbox.com/downloads/v2/releases/maven") }
+  maven { url uri("https://nexus.link4.health/repository/link4health-anonymous/") }
+  maven {
+      url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+      credentials {
+          it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+          it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+      }
+  }
+  mavenLocal()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Find .env file
+  def envFile = rootProject.file(".env")
+  def index = 0
+  while (!envFile.exists()) {
+      index++
+      envFile = rootProject.file(("../" * index) + ".env")
+      if (!envFile.exists()) {
+          envFile = rootProject.file(("../" * index) + "node_modules/@ihreapotheken/ia-sdk-prescription/.env")
+          if (envFile.exists()) break
+      }
+  }
+  def env = [:]
+  envFile.eachLine { line ->
+      line = line.trim()
+      if (!line || line.startsWith("#")) return
+      def parts = line.split("=", 2)
+      env[parts[0]] = parts.length > 1 ? parts[1] : ""
+  }
+  def iaDeSdkVersion = env["ANDROID_APPSDK_VERSION"]
+  if (iaDeSdkVersion == null) {
+      throw new GradleException("No ANDROID_APPSDK_VERSION provided from .env file.")
+  }
+  iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
+
+  // Prescription module - functionality may be part of ordering module in Android SDK
+  // Need integrations for IaSdkActivity, IaScreen, etc.
+  implementation "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
+  // Reference core module for IaSdkCoreModule.registerModuleType
+  compileOnly project(':ihreapotheken_ia-sdk-core')
+}

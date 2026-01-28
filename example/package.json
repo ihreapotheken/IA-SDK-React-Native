@@ -10,6 +10,13 @@
     "build:ios": "react-native build-ios --mode Debug"
   },
   "dependencies": {
+    "@ihreapotheken/ia-sdk-cardlink": "workspace:*",
+    "@ihreapotheken/ia-sdk-core": "workspace:*",
+    "@ihreapotheken/ia-sdk-interface": "workspace:*",
+    "@ihreapotheken/ia-sdk-ordering": "workspace:*",
+    "@ihreapotheken/ia-sdk-over-the-counter": "workspace:*",
+    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*",
+    "@ihreapotheken/ia-sdk-prescription": "workspace:*",
     "react": "19.1.0",
     "react-native": "0.81.1"
   },
