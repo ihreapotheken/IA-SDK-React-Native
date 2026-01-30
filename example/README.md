@@ -1,31 +1,30 @@
-# IA SDK React Native Example
+# IA SDK React Native Example App
 
-Full example app demonstrating all modules of the ia.de AppSDK React Native integration.
-
-## Overview
-
-This example app showcases the complete SDK functionality including:
-
-- SDK initialization and configuration
-- Module registration pattern
-- CardLink (NFC prescription transfer)
-- Pharmacy details and selection
-- Order management and checkout
-- Prescription management
-- OTC product browsing
-- Guest user data management
+This is a demo application showcasing the `@ihreapotheken/ia-sdk-react-native` library.
 
 ## Prerequisites
 
-- Node.js 20.x or later
-- Yarn 4.x (managed via corepack)
-- React Native development environment ([setup guide](https://reactnative.dev/docs/set-up-your-environment))
-- Xcode 16.0+ (for iOS)
-- Android Studio with SDK 30+ (for Android)
+- Node.js >= 20
+- [React Native development environment](https://reactnative.dev/docs/set-up-your-environment) set up for iOS and/or Android
+- For iOS: CocoaPods installed (`gem install cocoapods`)
 
-## Getting Started
+## Secrets Setup
 
-### 1. Install Dependencies
+Before running the app, you need to configure your secrets:
+
+1. Copy the example secrets file:
+   ```sh
+   cp .secrets.example .secrets
+   ```
+
+2. Edit `.secrets` and add your access key:
+   ```
+   APPSDK_ACCESS_KEY=your_access_key_here
+   ```
+
+The app will throw an error on startup if `APPSDK_ACCESS_KEY` is not configured.
+
+## Installation
 
 From the repository root:
 
@@ -33,144 +32,90 @@ From the repository root:
 yarn install
 ```
 
-### 2. Build the Packages
+For iOS, install CocoaPods dependencies:
 
 ```sh
-yarn build
+# Using npm
+npm start
+
+# OR using Yarn
+yarn start
 ```
 
-### 3. Run the App
+## Step 2: Build and run your app
 
-#### Android
+With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+
+### Android
 
 ```sh
-cd example
+# Using npm
+npm run android
+
+# OR using Yarn
 yarn android
 ```
 
-#### iOS
+### iOS
 
-First, install CocoaPods dependencies:
+For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+
+The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
 
 ```sh
-cd example
 bundle install
-cd ios && bundle exec pod install && cd ..
 ```
 
-Then run the app:
+Then, and every time you update your native dependencies, run:
 
 ```sh
+bundle exec pod install
+```
+
+For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+
+```sh
+# Using npm
+npm run ios
+
+# OR using Yarn
 yarn ios
 ```
 
-## Project Structure
+If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 
-```
-example/
-├── src/
-│   └── App.tsx          # Main application with SDK integration
-├── android/             # Android native project
-│   ├── app/
-│   │   └── build.gradle # App configuration
-│   └── settings.gradle  # Project settings
-├── ios/                 # iOS native project
-│   ├── Podfile          # CocoaPods configuration
-│   └── IaSdkReactNativeExample/
-├── app.json             # React Native app configuration
-├── metro.config.js      # Metro bundler configuration (monorepo)
-└── babel.config.js      # Babel configuration
-```
+This is one way to run your app — you can also build it directly from Android Studio or Xcode.
 
-## SDK Integration Pattern
+## Step 3: Modify your app
 
-This example demonstrates the recommended SDK usage pattern:
+Now that you have successfully run the app, let's make changes!
 
-### Module Registration
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
-```typescript
-import { iaSdk, ServerEnvironment } from '@ihreapotheken/ia-sdk-core';
-import { IaModuleCardLink } from '@ihreapotheken/ia-sdk-cardlink';
-import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
-import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
-import { IaModulePrescription } from '@ihreapotheken/ia-sdk-prescription';
-import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
+When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
-// Register all modules before initialization
-await iaSdk.register([
-  new IaModuleCardLink(),
-  new IaModulePharmacy(),
-  new IaModuleOrdering(),
-  new IaModulePrescription(),
-  new IaModuleOverTheCounter(),
-]);
+- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
+- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
 
-// Initialize with credentials
-await iaSdk.initialize({
-  accessKey: ACCESS_KEY,
-  clientId: CLIENT_ID,
-  serverEnvironment: ServerEnvironment.Staging,
-});
-```
+## Congratulations! :tada:
 
-### Using Modules
+You've successfully run and modified your React Native App. :partying_face:
 
-```typescript
-// Core functionality
-await iaSdk.startDashboardActivity();
-await iaSdk.logout();
+### Now what?
 
-// Module-specific functionality
-const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
-await pharmacy.launchPharmacyDetails();
+- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
+- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
-const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-await ordering.launchCartScreen();
-```
+# Troubleshooting
 
-## Comparison with Flutter SDK
+If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
-This React Native SDK follows the same architectural patterns as the [Flutter SDK](https://github.com/ihreapotheken/IA-SDK-Flutter):
+# Learn More
 
-| Concept | React Native | Flutter |
-|---------|--------------|---------|
-| Singleton | `iaSdk` | `IaSdk.instance` |
-| Registration | `iaSdk.register([...])` | `IaSdk.instance.register(modules: [...])` |
-| Initialization | `iaSdk.initialize({...})` | `IaSdk.instance.initialize(config: ...)` |
-| Module Access | `iaSdk.getModule<T>(type)` | `IaSdk.instance.cardLink` |
+To learn more about React Native, take a look at the following resources:
 
-## Troubleshooting
-
-### Metro Bundler Issues
-
-```sh
-npx react-native start --reset-cache
-```
-
-### Android Build Issues
-
-```sh
-cd android && ./gradlew clean && cd ..
-```
-
-### iOS Pod Issues
-
-```sh
-cd ios && rm -rf Pods Podfile.lock && bundle exec pod install && cd ..
-```
-
-### Module Not Found
-
-Ensure workspace packages are built:
-
-```sh
-# From repository root
-yarn build
-```
-
-## Learn More
-
-- [Main SDK Documentation](../README.md)
-- [API Reference](https://ihreapotheken.github.io/docs/appsdk/react-native)
-- [Flutter SDK](https://github.com/ihreapotheken/IA-SDK-Flutter)
-- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [React Native Website](https://reactnative.dev) - learn more about React Native.
+- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
+- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
+- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
+- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.

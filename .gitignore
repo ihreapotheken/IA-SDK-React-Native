@@ -86,3 +86,6 @@ android/generated
 nitrogen/
 
 docs/
+
+# Secrets
+example/.secrets

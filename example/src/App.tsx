@@ -6,12 +6,17 @@ import {
   ActivityIndicator,
   type GestureResponderEvent,
 } from 'react-native';
+import { APPSDK_ACCESS_KEY } from '@env';
 import {
   iaSdk,
   ServerEnvironment,
   Salutation,
   IaBaseModule,
 } from '@ihreapotheken/ia-sdk-core';
+
+if (!APPSDK_ACCESS_KEY) {
+  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
+}
 import type { IaOrderingModule } from '@ihreapotheken/ia-sdk-interface';
 import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
@@ -40,7 +45,6 @@ function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppB
       style={styles.button}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.7}
     >
       <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
     </TouchableOpacity>
@@ -94,8 +98,8 @@ export default function App() {
       console.log('Running SDK init...');
       console.log('isRegistered:', isRegistered, 'isInitialized:', isInitialized);
       await iaSdk.initialize({
-        accessKey: '3a8c71f2b5d490e6a1f7c23d9e084b6c5f1a9d27e3c4b508d6f2a91c0e7b4d35',
-        clientId: '5004',
+        accessKey: APPSDK_ACCESS_KEY as string,
+        clientId: '6001',
         serverEnvironment: ServerEnvironment.Staging,
       });
       console.log('SDK initialized successfully!');
