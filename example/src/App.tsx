@@ -1,9 +1,3 @@
-import { View, StyleSheet, Button } from 'react-native';
-import { IaSdk, IaSdkBase } from '@ihreapotheken/ia-sdk-react-native';
-import { APPSDK_ACCESS_KEY } from '@env';
-if (!APPSDK_ACCESS_KEY) {
-  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
-}
 import {
   View,
   StyleSheet,
@@ -12,12 +6,17 @@ import {
   ActivityIndicator,
   type GestureResponderEvent,
 } from 'react-native';
+import { APPSDK_ACCESS_KEY } from '@env';
 import {
   iaSdk,
   ServerEnvironment,
   Salutation,
   IaBaseModule,
 } from '@ihreapotheken/ia-sdk-core';
+
+if (!APPSDK_ACCESS_KEY) {
+  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
+}
 import type { IaOrderingModule } from '@ihreapotheken/ia-sdk-interface';
 import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
@@ -42,114 +41,13 @@ interface AppButtonProps {
 function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppButtonProps) {
   const textColor = disabled ? '#888888' : color;
   return (
-    <View style={styles.container}>
-      <Button
-        title="INITIALIZE"
-        onPress={
-          async () => {
-            try {
-              console.log("Running SDK init.");
-              await iaSdk.initIaSdk(
-                APPSDK_ACCESS_KEY,
-                "6001",
-                IaSdkBase.ServerEnvironment.Staging,
-              );
-              console.log("SDK initialized successfully.");
-            } catch (e) {
-              console.error("SDK init error:", e);
-            }
-          }
-        }
-        color="#000000"
-      />
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="START DASHBOARD ACTIVITY"
-          onPress={
-            async () => {
-              try {
-                await iaSdk.startDashboardActivity();
-              } catch (e) {
-                console.error("Start dashboard activity error:", e);
-              }
-            }
-          }
-          color="#000000"
-        />
-      </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="LOGOUT"
-          onPress={
-            async () => {
-              try {
-                await iaSdk.logout();
-              } catch (e) {
-                console.error("Start dashboard activity error:", e);
-              }
-            }
-          }
-          color="#000000"
-        />
-      </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="SET GUEST USER DATA"
-          onPress={
-            async () => {
-              try {
-                await iaSdk.setGuestUserData(
-                  IaSdkBase.Salutation.NotDisclosed, 
-                  'First', 
-                  'Last', 
-                  'Email@email.com', 
-                  49, 
-                  24332442,
-                );
-              } catch (e) {
-                console.error("Start dashboard activity error:", e);
-              }
-            }
-          }
-          color="#000000"
-        />
-      </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="CLEAR CART"
-          onPress={
-            async () => {
-              try {
-                await iaSdk.clearCart();
-              } catch (e) {
-                console.error("Start dashboard activity error:", e);
-              }
-            }
-          }
-          color="#000000"
-        />
-      </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="TRANSFER PRESCRIPTIONS"
-          onPress={
-            async () => {
-              try {
-                await iaSdk.transferPrescriptions(
-                  images, 
-                  pdfs, 
-                  ['{"urls":["Task\/test9ba2fee0d07e4ef2b6205f8012e1445b\/$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}'], 
-                  'AAAAAA',
-                );
-              } catch (e) {
-                console.error("Start dashboard activity error:", e);
-              }
-            }
-          }
-          color="#000000"
-        />
-      </View>
-    </View>
+    <TouchableOpacity
+      style={styles.button}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -200,8 +98,8 @@ export default function App() {
       console.log('Running SDK init...');
       console.log('isRegistered:', isRegistered, 'isInitialized:', isInitialized);
       await iaSdk.initialize({
-        accessKey: '3a8c71f2b5d490e6a1f7c23d9e084b6c5f1a9d27e3c4b508d6f2a91c0e7b4d35',
-        clientId: '5004',
+        accessKey: APPSDK_ACCESS_KEY as string,
+        clientId: '6001',
         serverEnvironment: ServerEnvironment.Staging,
       });
       console.log('SDK initialized successfully!');
