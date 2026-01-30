@@ -1,97 +1,103 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# IA SDK React Native Example App
 
-# Getting Started
+This is a demo application showcasing the `@ihreapotheken/ia-sdk-react-native` library.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Prerequisites
 
-## Step 1: Start Metro
+- Node.js >= 20
+- [React Native development environment](https://reactnative.dev/docs/set-up-your-environment) set up for iOS and/or Android
+- For iOS: CocoaPods installed (`gem install cocoapods`)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Secrets Setup
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Before running the app, you need to configure your secrets:
+
+1. Copy the example secrets file:
+   ```sh
+   cp .secrets.example .secrets
+   ```
+
+2. Edit `.secrets` and add your access key:
+   ```
+   APPSDK_ACCESS_KEY=your_access_key_here
+   ```
+
+The app will throw an error on startup if `APPSDK_ACCESS_KEY` is not configured.
+
+## Installation
+
+From the repository root:
 
 ```sh
-# Using npm
-npm start
+yarn install
+```
 
-# OR using Yarn
+For iOS, install CocoaPods dependencies:
+
+```sh
+cd example/ios && bundle install && bundle exec pod install && cd ../..
+```
+
+## Running the App
+
+### Start Metro Bundler
+
+```sh
+cd example
 yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+If you've made changes to `.secrets`, clear the cache:
 
 ```sh
-# Using npm
-npm run android
+yarn start --reset-cache
+```
 
-# OR using Yarn
+### Run on Android
+
+```sh
 yarn android
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Run on iOS
 
 ```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Demo Features
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+The example app demonstrates the following SDK capabilities:
 
-## Step 3: Modify your app
+- **Initialize** - Initialize the SDK with your access key
+- **Start Dashboard Activity** - Launch the SDK dashboard
+- **Logout** - Log out the current user
+- **Set Guest User Data** - Configure guest user information
+- **Clear Cart** - Clear the shopping cart
+- **Transfer Prescriptions** - Transfer prescription data
 
-Now that you have successfully run the app, let's make changes!
+## Troubleshooting
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Metro cache issues
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+If secrets aren't being picked up, reset the Metro cache:
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+```sh
+yarn start --reset-cache
+```
 
-## Congratulations! :tada:
+### iOS build issues
 
-You've successfully run and modified your React Native App. :partying_face:
+Clean and reinstall pods:
 
-### Now what?
+```sh
+cd ios && rm -rf Pods Podfile.lock && bundle exec pod install
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### Android build issues
 
-# Troubleshooting
+Clean the Gradle build:
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+```sh
+cd android && ./gradlew clean
+```

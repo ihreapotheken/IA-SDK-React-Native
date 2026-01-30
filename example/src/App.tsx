@@ -1,5 +1,10 @@
 import { View, StyleSheet, Button } from 'react-native';
 import { IaSdk, IaSdkBase } from '@ihreapotheken/ia-sdk-react-native';
+import { APPSDK_ACCESS_KEY } from '@env';
+
+if (!APPSDK_ACCESS_KEY) {
+  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
+}
 
 
 export default function App() {
@@ -14,8 +19,8 @@ export default function App() {
             try {
               console.log("Running SDK init.");
               await iaSdk.initIaSdk(
-                "3a8c71f2b5d490e6a1f7c23d9e084b6c5f1a9d27e3c4b508d6f2a91c0e7b4d35",
-                "5004",
+                APPSDK_ACCESS_KEY,
+                "6001",
                 IaSdkBase.ServerEnvironment.Staging,
               );
               console.log("SDK initialized successfully.");
