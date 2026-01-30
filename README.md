@@ -17,9 +17,10 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/react-native
 
 ---
 
-- [React Native SDK](https://reactnative.dev/docs/set-up-your-environment) 0.83.0 and up
-- [Node Package Manager](https://docs.npmjs.com/getting-started) 11.6 and up
-- [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
+- [React Native SDK](https://reactnative.dev/docs/set-up-your-environment) 0.81.0 and up
+- [Node.js](https://nodejs.org/) 20.x and up
+- [npm](https://docs.npmjs.com/getting-started) 10.x and up
+- [GitHub Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for package registry access
 
 ## 3. Platform Support
 
@@ -45,62 +46,186 @@ The library is supported on both of the major mobile operating systems, with con
 ---
 
 For official reference, please see
-[the NativeScript SDK documentation](https://reactnative.dev/docs/the-new-architecture/create-module-library)
-on using modules.
+[the React Native documentation](https://reactnative.dev/docs/libraries)
+on using libraries.
 
-### 4.1. Add the dependency to the `package.json` file
+### 4.1. Configure the GitHub Package Registry
 
-The library is accessed from Github NPM Package Registry.
+The library is accessed from GitHub NPM Package Registry.
 
-Firstly, the location must be defined in your app's `.npmrc` file, located in the root of your project:
+Create a `.npmrc` file in the root of your project:
 
 ```
 @ihreapotheken:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
 ```
 
-Make sure to replace `YOUR_GITHUB_PAT` with the actual value of your Github Personal Access Token.
+Replace `YOUR_GITHUB_PAT` with your GitHub Personal Access Token.
 
-Afterwards, the library can be installed from the command line:
+### 4.2. Install the packages
+
+Install the core package and the modules you need:
 
 ```sh
-npm install @ihreapotheken/ia-sdk-react-native@VERSION_NUMBER
+# Core package (required)
+npm install @ihreapotheken/ia-sdk-core@VERSION
+
+# Install only the modules you need
+npm install @ihreapotheken/ia-sdk-cardlink@VERSION
+npm install @ihreapotheken/ia-sdk-pharmacy@VERSION
+npm install @ihreapotheken/ia-sdk-ordering@VERSION
+npm install @ihreapotheken/ia-sdk-prescription@VERSION
+npm install @ihreapotheken/ia-sdk-over-the-counter@VERSION
 ```
 
-The `VERSION_NUMBER` value can be referenced from the
-[package release page](https://github.com/ihreapotheken/IA-SDK-React-Native/pkgs/npm/ia-sdk-react-native).
+The `VERSION` value can be referenced from the
+[package release page](https://github.com/ihreapotheken/IA-SDK-React-Native/packages).
 
-### 4.2. Plugin usage
+### 4.3. Module Registration and Initialization
 
-Methods and properties made available as public APIs implemented with the `IaSdk` object.
+The SDK uses a modular architecture. Register only the modules you need to minimize app size:
 
-The client setup requires instantiation of this object for usage:
+```typescript
+import { iaSdk, ServerEnvironment } from '@ihreapotheken/ia-sdk-core';
+import { IaModuleCardLink } from '@ihreapotheken/ia-sdk-cardlink';
+import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
 
-```ts
-import { IaSdk } from 'ia-sdk-react-native';
+// Register modules before initialization
+await iaSdk.register([
+  new IaModuleCardLink(),
+  new IaModulePharmacy(),
+]);
 
-export class MyAppClass {
-  iaSdk = new IaSdk();
+// Initialize the SDK
+await iaSdk.initialize({
+  accessKey: 'your-access-key',
+  clientId: 'your-client-id',
+  serverEnvironment: ServerEnvironment.Staging,
+});
+```
+
+Each module must be registered before calling `initialize()`. The registration and initialization
+should only be invoked once during the application runtime.
+
+### 4.4. Using the SDK
+
+After initialization, use the SDK methods:
+
+```typescript
+import { iaSdk, Salutation, IaBaseModule } from '@ihreapotheken/ia-sdk-core';
+import type { IaPharmacyModule } from '@ihreapotheken/ia-sdk-interface';
+
+// Core methods (always available after initialization)
+await iaSdk.startDashboardActivity();
+await iaSdk.logout();
+await iaSdk.finishAllActivities();
+
+// Set guest user data for checkout
+await iaSdk.setGuestUserData({
+  salutation: Salutation.Mr,
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phoneNumberCountryCode: 49,
+  phoneNumberWithoutCountryCode: '1234567890',
+});
+
+// Access registered modules
+if (iaSdk.hasModule(IaBaseModule.Pharmacy)) {
+  const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
+  await pharmacy.launchPharmacyDetails();
+  await pharmacy.setPharmacyId('pharmacy-123');
 }
 ```
 
-You may then proceed with API usages on this object:
+## 5. Available Modules
 
-```ts
-	async initialize() {
-		try {
-			await this.iaSdk.initIaSdk(
-				isAndroid
-					? "a1f4b6e3c7d58f9032eeaa1bc02b4f44f9863d1e5c7a49f7d23e0c96b17af5cd"
-					: "e9f3d6a12c4b8f75d1e0a93c5b7d6e2f3c1a9b8e7f4d2c0a1b6e5d3f8c7a1b9e",
-				"5004",
-				IaSdkBase.ServerEnvironment.Staging,
-			);
-		} catch (error) {
-			console.error("Init failed:", error);
-		}
-	}
+---
+
+| Package | Description | Key Methods |
+|---------|-------------|-------------|
+| `@ihreapotheken/ia-sdk-core` | Core SDK functionality (required) | `initialize()`, `startDashboardActivity()`, `logout()`, `setGuestUserData()` |
+| `@ihreapotheken/ia-sdk-interface` | TypeScript interface definitions | Type exports only |
+| `@ihreapotheken/ia-sdk-cardlink` | NFC prescription transfer | Available through dashboard |
+| `@ihreapotheken/ia-sdk-pharmacy` | Pharmacy details and management | `launchPharmacyDetails()`, `setPharmacyId()` |
+| `@ihreapotheken/ia-sdk-ordering` | Order management and checkout | `transferPrescriptions()`, `clearCart()`, `launchCartScreen()` |
+| `@ihreapotheken/ia-sdk-prescription` | Prescription management | Module registered for UI |
+| `@ihreapotheken/ia-sdk-over-the-counter` | OTC product browsing | `launchProductSearchRoute()` |
+
+### Module Dependency Graph
+
 ```
+@ihreapotheken/ia-sdk-interface (foundation)
+    ↑
+    └─── @ihreapotheken/ia-sdk-core (required)
+         ↑ (peer dependency)
+         ├─── @ihreapotheken/ia-sdk-cardlink
+         ├─── @ihreapotheken/ia-sdk-pharmacy
+         ├─── @ihreapotheken/ia-sdk-ordering
+         ├─── @ihreapotheken/ia-sdk-over-the-counter
+         └─── @ihreapotheken/ia-sdk-prescription
+```
+
+## 6. Example Apps
+
+---
+
+### Full Example
+
+The `example/` directory contains a complete example app demonstrating all modules:
+
+```sh
+cd example
+yarn install
+yarn android  # or yarn ios
+```
+
+### Minimal Examples
+
+The `test/` directory contains minimal example apps for specific use cases:
+
+- `test/cardlink-demo/` - CardLink module only using published packages
+
+## 7. Project Structure
+
+---
+
+```
+├── packages/              # SDK modules
+│   ├── core/             # Core SDK functionality
+│   ├── interface/        # Shared TypeScript interfaces
+│   ├── cardlink/         # NFC prescription transfer
+│   ├── pharmacy/         # Pharmacy details
+│   ├── ordering/         # Order management
+│   ├── over-the-counter/ # OTC products
+│   └── prescription/     # Prescription management
+├── example/              # Full example app (workspace)
+└── test/                 # Minimal example apps
+    └── cardlink-demo/    # CardLink only (published packages)
+```
+
+## 8. App Size
+
+---
+
+Example app sizes with CardLink module only:
+
+| Platform | Size |
+|----------|------|
+| Android APK (all architectures) | ~174 MB |
+| iOS App | ~52 MB |
+
+Note: Android APK size is for all architectures. Play Store delivery uses split APKs (~45-50 MB per device).
+
+## 9. Related Projects
+
+---
+
+| Project | Description |
+|---------|-------------|
+| [IA-SDK-Flutter](https://github.com/ihreapotheken/IA-SDK-Flutter) | Flutter plugin implementation |
+| [IA-SDK-Android](https://github.com/ihreapotheken/IA-SDK-Android) | Native Android SDK |
+| [IA-SDK-iOS](https://github.com/ihreapotheken/IA-SDK-iOS) | Native iOS SDK |
 
 ---
 

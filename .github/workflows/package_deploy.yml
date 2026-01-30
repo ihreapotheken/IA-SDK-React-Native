@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - '*'
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,17 +13,52 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@ihreapotheken'
-      - name: Publish package
+
+      - name: Install dependencies
+        run: yarn install
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+
+      - name: Build all packages
+        run: yarn build
+
+      - name: Update package versions and publish
         run: |
-          VERSION=${{ github.ref_name }}
-          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
-          npm install
-          yarn install --mode update-lockfile
-          npm publish
+          RAW_VERSION=${{ github.ref_name }}
+          VERSION=$(echo "$RAW_VERSION" | sed 's/\.0\([0-9]\)/.\1/g' | sed 's/\.\([0-9]*\)$/-\1/')
+          echo "Transformed version: $RAW_VERSION -> $VERSION"
+
+          # List of packages in dependency order
+          PACKAGES=(
+            "packages/interface"
+            "packages/core"
+            "packages/cardlink"
+            "packages/ordering"
+            "packages/over-the-counter"
+            "packages/pharmacy"
+            "packages/prescription"
+          )
+
+          for PACKAGE_DIR in "${PACKAGES[@]}"; do
+            echo "Publishing $PACKAGE_DIR..."
+            cd $PACKAGE_DIR
+
+            # Update version in package.json
+            sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+
+            # Replace workspace:* dependencies with actual version
+            sed -i "s/\"workspace:\*\"/\"$VERSION\"/g" package.json
+
+            # Publish to GitHub Packages
+            npm publish || echo "Failed to publish $PACKAGE_DIR, continuing..."
+
+            cd ${{ github.workspace }}
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
