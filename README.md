@@ -81,7 +81,26 @@ npm install @ihreapotheken/ia-sdk-over-the-counter@VERSION
 The `VERSION` value can be referenced from the
 [package release page](https://github.com/ihreapotheken/IA-SDK-React-Native/packages).
 
-### 4.3. Module Registration and Initialization
+### 4.3. iOS Permissions
+
+Add the following keys to your `Info.plist` file:
+
+```xml
+<!-- Location permission - required for pharmacy finder and directions -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Used to show pharmacies nearby.</string>
+
+<!-- Camera permission - required for prescription upload -->
+<key>NSCameraUsageDescription</key>
+<string>Camera access is needed for prescription upload.</string>
+```
+
+| Permission | Key | Purpose |
+|------------|-----|---------|
+| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Find nearby pharmacies |
+| Camera | `NSCameraUsageDescription` | Upload prescriptions via camera |
+
+### 4.4. Module Registration and Initialization
 
 The SDK uses a modular architecture. Register only the modules you need to minimize app size:
 
@@ -107,7 +126,7 @@ await iaSdk.initialize({
 Each module must be registered before calling `initialize()`. The registration and initialization
 should only be invoked once during the application runtime.
 
-### 4.4. Using the SDK
+### 4.5. Using the SDK
 
 After initialization, use the SDK methods:
 
