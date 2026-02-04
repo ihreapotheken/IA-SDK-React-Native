@@ -141,7 +141,7 @@ repositories {
       url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
       credentials {
           it.username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
-          it.password = System.getenv("GITHUB_TOKEN") ?: "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"
+          it.password = System.getenv("GITHUB_TOKEN") ?: "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"
       }
   }
   mavenLocal()
