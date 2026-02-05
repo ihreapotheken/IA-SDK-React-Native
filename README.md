@@ -83,22 +83,42 @@ The `VERSION` value can be referenced from the
 
 ### 4.3. iOS Permissions
 
-Add the following keys to your `Info.plist` file:
+Add the following keys to your `Info.plist` file based on the modules you use:
 
 ```xml
-<!-- Location permission - required for pharmacy finder and directions -->
+<!-- Location permission - required for Apofinder (pharmacy finder) module -->
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>Used to show pharmacies nearby.</string>
 
-<!-- Camera permission - required for prescription upload -->
+<!-- Camera permission - required for Prescription (RX) module -->
 <key>NSCameraUsageDescription</key>
 <string>Camera access is needed for prescription upload.</string>
+
+<!-- NFC permission - required for CardLink module -->
+<key>NFCReaderUsageDescription</key>
+<string>NFC is used to read your health insurance card for prescription redemption.</string>
+<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+<array>
+    <string>D2760001448000</string>
+    <string>D27600014601</string>
+    <string>D27600014606</string>
+    <string>D27600000102</string>
+    <string>A000000167455349474E</string>
+    <string>D27600006601</string>
+    <string>D27600014602</string>
+    <string>E828BD080FA000000167455349474E</string>
+    <string>E828BD080FD27600006601</string>
+    <string>D27600014603</string>
+</array>
 ```
 
-| Permission | Key | Purpose |
-|------------|-----|---------|
-| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Find nearby pharmacies |
-| Camera | `NSCameraUsageDescription` | Upload prescriptions via camera |
+| Permission | Key | Required For | Purpose |
+|------------|-----|--------------|---------|
+| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Apofinder module | Find nearby pharmacies and get directions |
+| Camera | `NSCameraUsageDescription` | Prescription (RX) module | Scan and upload prescriptions via camera |
+| NFC | `NFCReaderUsageDescription` | CardLink module | Read health insurance cards via NFC for prescription redemption |
+
+**Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
 
 ### 4.4. Module Registration and Initialization
 
@@ -249,4 +269,5 @@ Note: Android APK size is for all architectures. Play Store delivery uses split 
 ---
 
 For further information, please see the
-[API reference](https://ihreapotheken.github.io/docs/appsdk/react-native).
+[API reference](https://ihreapotheken.github.io/docs/appsdk/react-native) 
+and [Usage and Testing documentation](https://ihreapotheken.github.io/docs/appsdk/common/usage-and-testing).
