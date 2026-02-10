@@ -19,9 +19,25 @@
       "Bash(yarn build)",
       "Bash(npx tsc:*)",
       "Bash(yarn android)",
-      "Read(//Users/matanljubas/**)",
       "Bash(bundle install:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(yarn add:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(adb shell:*)",
+      "Bash(adb bugreport:*)",
+      "Bash(adb logcat:*)",
+      "Bash(adb pull:*)",
+      "Bash(python3:*)",
+      "Bash(jar xf:*)",
+      "Bash(adb reverse:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(kill:*)",
+      "Bash(jar tf:*)"
     ],
     "additionalDirectories": [
       "/tmp"

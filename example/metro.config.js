@@ -24,6 +24,12 @@ const workspacePackages = {
 const config = {
   watchFolders: [root],
   resolver: {
+    // Prevent workspace packages' devDependencies from creating duplicate
+    // react/react-native instances in the bundle. All imports must resolve
+    // from the example app's node_modules (the single source of truth).
+    blockList: [
+      /packages\/[^/]+\/node_modules\/(react|react-native)\/.*/,
+    ],
     // Ensure Metro can resolve workspace packages
     nodeModulesPaths: [
       path.resolve(__dirname, 'node_modules'),

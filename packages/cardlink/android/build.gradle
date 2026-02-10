@@ -5,6 +5,7 @@ def getExtOrDefault(name) {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "com.facebook.react"
+apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["IaSdkCardLink_" + name]).toInteger()
@@ -81,8 +82,13 @@ dependencies {
   }
   iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
 
-  // CardLink module - need integrations for base types
+  // CardLink module
   implementation "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
+  implementation "de.ihreapotheken.sdk:cardlink:${iaDeSdkVersion}"
+
+  // JSON serialization (must match Kotlin 2.1.x; SDK already uses 1.8.0 transitively)
+  implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
+
   // Reference core module for IaSdkCoreModule.registerModuleType
   compileOnly project(':ihreapotheken_ia-sdk-core')
 }

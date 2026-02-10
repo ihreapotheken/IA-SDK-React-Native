@@ -55,5 +55,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NFCReaderUsageDescription</key>
+	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+		<string>D2760001448000</string>
+		<string>D27600014601</string>
+		<string>D27600014606</string>
+		<string>D27600000102</string>
+		<string>A000000167455349474E</string>
+		<string>D27600006601</string>
+		<string>D27600014602</string>
+		<string>E828BD080FA000000167455349474E</string>
+		<string>E828BD080FD27600006601</string>
+		<string>D27600014603</string>
+	</array>
 </dict>
 </plist>

@@ -16,6 +16,12 @@ export {
   IaBaseModule,
   ServerEnvironment,
   Salutation,
+  // CardLink enums
+  IaCardLinkFlowType,
+  IaCardLinkConsentStatus,
+  IaCardLinkConsentEvent,
+  IaCardLinkEvent,
+  IaCardLinkEnvironment,
 } from '@ihreapotheken/ia-sdk-interface';
 export type {
   IaModule,
@@ -30,6 +36,10 @@ export type {
   IaPharmacyModule,
   IaPrescriptionModule,
   AnyIaModule,
+  // CardLink types
+  IaCardLinkLaunchOptions,
+  IaCardLinkSession,
+  IaCardLinkEventSubscription,
 } from '@ihreapotheken/ia-sdk-interface';
 
 /**

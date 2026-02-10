@@ -1,5 +1,6 @@
 #import <IaSdkCardLinkSpec/IaSdkCardLinkSpec.h>
+#import <React/RCTEventEmitter.h>
 
-@interface IaSdkCardLink : NSObject <NativeIaSdkCardLinkSpec>
+@interface IaSdkCardLink : RCTEventEmitter <NativeIaSdkCardLinkSpec>
 
 @end

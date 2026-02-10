@@ -103,6 +103,11 @@ android {
             keyPassword 'Password1!'
         }
     }
+    packaging {
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+        }
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -153,6 +158,9 @@ repositories {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+
+    // Memory leak detection (only runs in debug builds)
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -9,7 +10,8 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme"
-      android:supportsRtl="true">
+      android:supportsRtl="true"
+      android:largeHeap="true">
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
@@ -22,5 +24,38 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <!-- Disable Mapbox auto-initialization to reduce memory usage.
+           Mapbox is pulled transitively by the SDK but not needed for CardLink. -->
+      <provider
+        android:name="androidx.startup.InitializationProvider"
+        android:authorities="${applicationId}.androidx-startup"
+        tools:node="merge">
+        <meta-data
+          android:name="com.mapbox.maps.loader.MapboxMapsInitializer"
+          tools:node="remove" />
+        <meta-data
+          android:name="com.mapbox.common.MapboxSDKCommonInitializer"
+          tools:node="remove" />
+      </provider>
+
+      <!-- Disable Mapbox runtime components (receiver + service) not needed for CardLink. -->
+      <receiver
+        android:name="com.mapbox.common.location.LocationUpdatesReceiver"
+        tools:node="remove" />
+      <service
+        android:name="com.mapbox.common.LifecycleService"
+        tools:node="remove" />
+
+      <!-- Prevent CardLink activities from lingering in the back stack after dismissal.
+           Without this, they stay alive consuming ~200MB+ of memory. -->
+      <activity
+        android:name="de.ihreapotheken.sdk.cardlink.CardLinkActivity"
+        android:noHistory="true"
+        tools:node="merge" />
+      <activity
+        android:name="de.ihreapotheken.sdk.cardlink.MyCardsActivity"
+        android:noHistory="true"
+        tools:node="merge" />
     </application>
 </manifest>

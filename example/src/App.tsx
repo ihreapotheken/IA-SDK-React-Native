@@ -4,6 +4,9 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  Platform,
   type GestureResponderEvent,
 } from 'react-native';
 import { APPSDK_ACCESS_KEY } from '@env';
@@ -30,6 +33,9 @@ import {
   mockPdfPrescription,
   mockEPrescriptionCode,
 } from './testData';
+import { CardLinkView } from './views';
+
+type TabName = 'home' | 'cardlink';
 
 interface AppButtonProps {
   title: string;
@@ -51,10 +57,15 @@ function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppB
   );
 }
 
+// Store module instance for CardLink view
+let cardLinkModuleInstance: IaModuleCardLink | null = null;
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabName>('home');
   const [isRegistered, setIsRegistered] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [cardLinkModule, setCardLinkModule] = useState<IaModuleCardLink | null>(null);
 
   const withLoading = useCallback(async <T,>(callback: () => Promise<T>): Promise<T | undefined> => {
     setIsLoading(true);
@@ -73,15 +84,16 @@ export default function App() {
     const registerModules = async () => {
       try {
         console.log('Registering SDK modules...');
+        cardLinkModuleInstance = new IaModuleCardLink();
         await iaSdk.register([
           new IaModuleOrdering(),
           new IaModuleOverTheCounter(),
           new IaModulePharmacy(),
           new IaModulePrescription(),
-          new IaModuleCardLink(),
+          cardLinkModuleInstance,
         ]);
         console.log('SDK modules registered successfully.');
-        // Use setTimeout to ensure state update triggers re-render
+        setCardLinkModule(cardLinkModuleInstance);
         setTimeout(() => {
           setIsRegistered(true);
           console.log('isRegistered set to true');
@@ -160,8 +172,8 @@ export default function App() {
       await iaSdk.finishAllActivities();
     });
 
-  return (
-    <View style={styles.container}>
+  const renderHomeTab = () => (
+    <ScrollView style={styles.tabContent} contentContainerStyle={styles.scrollContent}>
       <Text style={styles.title}>IA SDK React Native Example</Text>
       <Text style={styles.subtitle}>Modular Architecture Demo</Text>
 
@@ -234,8 +246,51 @@ export default function App() {
           onPress={handleFinishAllActivities}
         />
       </View>
+    </ScrollView>
+  );
 
-      {isLoading && (
+  const renderCardLinkTab = () => {
+    if (!cardLinkModule) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading CardLink module...</Text>
+        </View>
+      );
+    }
+    return <CardLinkView cardLinkModule={cardLinkModule} />;
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Tab Content */}
+      <View style={styles.contentContainer}>
+        {activeTab === 'home' && renderHomeTab()}
+        {activeTab === 'cardlink' && renderCardLinkTab()}
+      </View>
+
+      {/* Tab Bar */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'home' && styles.tabActive]}
+          onPress={() => setActiveTab('home')}
+        >
+          <Text style={[styles.tabText, activeTab === 'home' && styles.tabTextActive]}>
+            Home
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'cardlink' && styles.tabActive]}
+          onPress={() => setActiveTab('cardlink')}
+        >
+          <Text style={[styles.tabText, activeTab === 'cardlink' && styles.tabTextActive]}>
+            CardLink
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Loading Overlay (Home tab only) */}
+      {isLoading && activeTab === 'home' && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#000000" />
         </View>
@@ -247,10 +302,19 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
     backgroundColor: '#f5f5f5',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  tabContent: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+    alignItems: 'center',
   },
   title: {
     fontSize: 20,
@@ -280,6 +344,39 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    paddingBottom: 20, // Safe area padding
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  tabActive: {
+    borderTopWidth: 2,
+    borderTopColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  tabTextActive: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#666',
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

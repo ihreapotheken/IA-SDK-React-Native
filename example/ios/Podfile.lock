@@ -9,21 +9,21 @@ PODS:
   - hermes-engine (0.81.1):
     - hermes-engine/Pre-built (= 0.81.1)
   - hermes-engine/Pre-built (0.81.1)
-  - IACardLink (1.0.0-beta.4):
+  - IACardLink (1.0.0-beta.5):
     - GematikOpenSSL (= 4.3.1)
-    - IACore (= 1.0.0-beta.4)
-  - IACore (1.0.0-beta.4):
-    - IOSKit (= 1.0.0-beta.4)
-  - IAIntegrations (1.0.0-beta.4):
-    - IACore (= 1.0.0-beta.4)
-  - IAOrdering (1.0.0-beta.4):
-    - IACore (= 1.0.0-beta.4)
-  - IAOverTheCounter (1.0.0-beta.4):
-    - IACore (= 1.0.0-beta.4)
-  - IAPharmacy (1.0.0-beta.4):
-    - IACore (= 1.0.0-beta.4)
-  - IAPrescription (1.0.0-beta.4):
-    - IACore (= 1.0.0-beta.4)
+    - IACore (= 1.0.0-beta.5)
+  - IACore (1.0.0-beta.5):
+    - IOSKit (= 1.0.0-beta.5)
+  - IAIntegrations (1.0.0-beta.5):
+    - IACore (= 1.0.0-beta.5)
+  - IAOrdering (1.0.0-beta.5):
+    - IACore (= 1.0.0-beta.5)
+  - IAOverTheCounter (1.0.0-beta.5):
+    - IACore (= 1.0.0-beta.5)
+  - IAPharmacy (1.0.0-beta.5):
+    - IACore (= 1.0.0-beta.5)
+  - IAPrescription (1.0.0-beta.5):
+    - IACore (= 1.0.0-beta.5)
   - IaSdkCardLink (1.0.0):
     - boost
     - DoubleConversion
@@ -31,7 +31,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IACardLink (= 1.0.0-beta.4)
+    - IACardLink (= 1.0.0-beta.5)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -61,12 +61,12 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IACardLink (= 1.0.0-beta.4)
-    - IAIntegrations (= 1.0.0-beta.4)
-    - IAOrdering (= 1.0.0-beta.4)
-    - IAOverTheCounter (= 1.0.0-beta.4)
-    - IAPharmacy (= 1.0.0-beta.4)
-    - IAPrescription (= 1.0.0-beta.4)
+    - IACardLink (= 1.0.0-beta.5)
+    - IAIntegrations (= 1.0.0-beta.5)
+    - IAOrdering (= 1.0.0-beta.5)
+    - IAOverTheCounter (= 1.0.0-beta.5)
+    - IAPharmacy (= 1.0.0-beta.5)
+    - IAPrescription (= 1.0.0-beta.5)
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -95,7 +95,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAOrdering (= 1.0.0-beta.4)
+    - IAOrdering (= 1.0.0-beta.5)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -125,7 +125,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAOverTheCounter (= 1.0.0-beta.4)
+    - IAOverTheCounter (= 1.0.0-beta.5)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -155,7 +155,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAPharmacy (= 1.0.0-beta.4)
+    - IAPharmacy (= 1.0.0-beta.5)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -185,7 +185,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAPrescription (= 1.0.0-beta.4)
+    - IAPrescription (= 1.0.0-beta.5)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -208,7 +208,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - IOSKit (1.0.0-beta.4)
+  - IOSKit (1.0.0-beta.5)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2718,20 +2718,20 @@ SPEC CHECKSUMS:
   GematikOpenSSL: e0c7ed81c689ef7747104e8c22ab8846a1910ba1
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 4f8246b1f6d79f625e0d99472d1f3a71da4d28ca
-  IACardLink: 7acbf13b403c700b14c3e3b2c01a67d8f3ba7ced
-  IACore: 148d0324f8280410334669806c5399af678d41c9
-  IAIntegrations: f40fe458d5a36171b26196d77580f245690a5a8a
-  IAOrdering: 831bbe32f55e6aabab4d4ebcf985224b54dbf377
-  IAOverTheCounter: 485108f2ee67d716467e2dd588d62dd0b5b940f8
-  IAPharmacy: a3f147bd51a2e791612d4be7be72d8ef1751ad94
-  IAPrescription: 7f60393cfe148579efbae153598f27f5987a5754
-  IaSdkCardLink: 8ef036dd339d99456289afb1aa2f0235220c1c5d
-  IaSdkCore: 02797c00d508f97c9bc007a0ae69918ce456d598
-  IaSdkOrdering: af5ea093e410174d74a5d4c8578edcfe1f0d9067
-  IaSdkOtc: a364e4f478a3a1b0d6d13982bcfd8404d33e9aba
-  IaSdkPharmacy: dfaf8ae70f867b4e6469e8a3b3c1e372c59e02eb
-  IaSdkPrescription: 5baeff826e15efd90ce0a01372fe1a86929328bd
-  IOSKit: 8e32b5d489f6d211d0834fef955a351a0bd72009
+  IACardLink: f9a5178402d88b864fb43b4513d53fb1182cc253
+  IACore: 5a2809c7e6e257fea1830870f946a49dfbd02c7a
+  IAIntegrations: 92238a84285bf9e405492b5a385e260865772ff4
+  IAOrdering: bc7b4bc2e64dc6dff57dd1a2a0c729fe774fcc89
+  IAOverTheCounter: 2fafcf6b35dfbc9ed191fad35caf50e132a83554
+  IAPharmacy: 8bc8b5aa9b88c413eb7aa6493a48acb06d7a4836
+  IAPrescription: 2dc37aa19a41e342746942f42763003c7686eedc
+  IaSdkCardLink: 20d7c533a24fc72fa215b4f61a5eea5e9350dc04
+  IaSdkCore: 03be335de8e0c8340311f652e49058751832a751
+  IaSdkOrdering: 2d7ab24b98bde8e913fbf66d3bda53d4324f86d3
+  IaSdkOtc: 10a294244ade86b88b26a9db08cb89d77ec268e5
+  IaSdkPharmacy: 85768e46408afa6ebf02ae312ab93ed97f861a29
+  IaSdkPrescription: 101a7cef23f30f691716f3096b8c2276b60814fe
+  IOSKit: 6eea3afe35744a55aacf31a0db2d3344817bd472
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: c4b9e2fd0ab200e3af72b013ed6113187c607077
   RCTRequired: e97dd5dafc1db8094e63bc5031e0371f092ae92a
