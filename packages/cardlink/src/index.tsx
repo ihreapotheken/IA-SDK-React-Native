@@ -1,5 +1,6 @@
 import {
   NativeEventEmitter,
+  NativeModules,
   Platform,
   DeviceEventEmitter,
   type EmitterSubscription,
@@ -30,11 +31,9 @@ export class IaModuleCardLink implements IaCardLinkModule {
 
   constructor() {
     if (Platform.OS === 'ios') {
-      this.eventEmitter = new NativeEventEmitter(
-        IaSdkCardLinkNative as unknown as Parameters<
-          typeof NativeEventEmitter
-        >[0]
-      );
+      // For TurboModules with RCTEventEmitter, use NativeModules to get the actual instance
+      const CardLinkModule = NativeModules.IaSdkCardLink;
+      this.eventEmitter = new NativeEventEmitter(CardLinkModule);
     }
   }
 

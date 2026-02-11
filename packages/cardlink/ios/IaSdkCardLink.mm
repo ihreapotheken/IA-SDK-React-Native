@@ -3,6 +3,7 @@
 
 @interface IaSdkCardLink ()
 @property (nonatomic, assign) BOOL hasListeners;
+@property (nonatomic, assign) NSInteger listenerCount;
 @end
 
 @implementation IaSdkCardLink
@@ -12,11 +13,16 @@ RCT_EXPORT_MODULE()
 - (instancetype)init {
   self = [super init];
   if (self) {
+    NSLog(@"[CardLink iOS] Initializing IaSdkCardLink");
     __weak IaSdkCardLink *weakSelf = self;
     [[IaSdkCardLinkImpl shared] setEventEmitter:^(NSString *eventName, id body) {
       __strong IaSdkCardLink *strongSelf = weakSelf;
+      NSLog(@"[CardLink iOS] Event emitter called: %@, hasListeners: %d", eventName, strongSelf.hasListeners);
       if (strongSelf && strongSelf.hasListeners) {
+        NSLog(@"[CardLink iOS] Sending event to JS: %@", eventName);
         [strongSelf sendEventWithName:eventName body:body];
+      } else {
+        NSLog(@"[CardLink iOS] Event NOT sent (no listeners): %@", eventName);
       }
     }];
   }
@@ -34,10 +40,12 @@ RCT_EXPORT_MODULE()
 }
 
 - (void)startObserving {
+  NSLog(@"[CardLink iOS] startObserving called");
   self.hasListeners = YES;
 }
 
 - (void)stopObserving {
+  NSLog(@"[CardLink iOS] stopObserving called");
   self.hasListeners = NO;
 }
 
@@ -140,11 +148,26 @@ completionHandler:(RCTResponseSenderBlock)completion {
 // MARK: - Event Listener Management
 
 - (void)addListener:(NSString *)eventType {
-  // Managed via startObserving/stopObserving
+  NSLog(@"[CardLink iOS] addListener called for: %@", eventType);
+  self.listenerCount++;
+  NSLog(@"[CardLink iOS] Listener count: %ld", (long)self.listenerCount);
+  if (self.listenerCount == 1 && !self.hasListeners) {
+    NSLog(@"[CardLink iOS] First listener added, calling startObserving");
+    [self startObserving];
+  }
 }
 
 - (void)removeListeners:(double)count {
-  // Managed via startObserving/stopObserving
+  NSLog(@"[CardLink iOS] removeListeners called, count: %.0f", count);
+  self.listenerCount -= (NSInteger)count;
+  if (self.listenerCount < 0) {
+    self.listenerCount = 0;
+  }
+  NSLog(@"[CardLink iOS] Listener count: %ld", (long)self.listenerCount);
+  if (self.listenerCount == 0 && self.hasListeners) {
+    NSLog(@"[CardLink iOS] No more listeners, calling stopObserving");
+    [self stopObserving];
+  }
 }
 
 // MARK: - TurboModule

@@ -29,6 +29,7 @@ public class IaSdkCardLinkImpl: NSObject {
     }
 
     @objc public func setEventEmitter(_ emitter: @escaping (String, Any?) -> Void) {
+        print("[CardLink Swift] setEventEmitter called")
         self.eventEmitter = emitter
     }
 
@@ -107,33 +108,45 @@ public class IaSdkCardLinkImpl: NSObject {
     }
 
     private func handleOutputAction(_ action: CardLinkOutputAction) {
+        print("[CardLink Swift] handleOutputAction called: \(action)")
         switch action {
         case .consentAccepted(let phoneNumber):
+            print("[CardLink Swift] Emitting consent accepted")
             eventEmitter?(CardLinkEventName.consent, "accepted")
         case .consentDeclined:
+            print("[CardLink Swift] Emitting consent declined")
             eventEmitter?(CardLinkEventName.consent, "declined")
         case .sessionCreated(let session):
+            print("[CardLink Swift] Emitting session created")
             let sessionDict: [String: Any] = [
                 "cardSessionId": session.cardSessionId,
                 "sessionExpireTimestamp": session.sessionExpiresAt
             ]
             eventEmitter?(CardLinkEventName.sessionCreated, sessionDict)
         case .backButtonPressed:
+            print("[CardLink Swift] Emitting willExitCardlink")
             eventEmitter?(CardLinkEventName.event, "willExitCardlink")
             CardLink.finish()
         case .prescriptionsRedeemed(let prescriptions):
+            print("[CardLink Swift] Emitting prescriptions redeemed")
             eventEmitter?(CardLinkEventName.prescriptionsRedeemed, prescriptions)
         case .goToCart:
+            print("[CardLink Swift] Emitting goToCart")
             eventEmitter?(CardLinkEventName.event, "goToCart")
         case .openTermsAndConditions:
+            print("[CardLink Swift] Emitting openTermsAndConditions")
             eventEmitter?(CardLinkEventName.event, "openTermsAndConditions")
         case .cardsSaved(let cards):
+            print("[CardLink Swift] Emitting cardSaved")
             eventEmitter?(CardLinkEventName.event, "cardSaved")
         case .willStartScanning:
+            print("[CardLink Swift] Emitting willStartScanning")
             eventEmitter?(CardLinkEventName.event, "willStartScanning")
         case .failedToInitialize(let error):
+            print("[CardLink Swift] Emitting failedToInitialize")
             eventEmitter?(CardLinkEventName.event, "failedToInitialize")
         case .trackEvent(let event):
+            print("[CardLink Swift] Emitting analytics event")
             eventEmitter?(CardLinkEventName.analytics, event)
         case .addedPrescriptionsToCart(_):
             break
