@@ -203,7 +203,7 @@ public class IaSdkCardLinkImpl: NSObject {
     // MARK: - Card Management
 
     @objc public func getSavedCardsIOS(userId: String, completionHandler: @escaping (String?) -> Void) {
-        let cards = CardLink.loadCards(userId: userId)
+        let cards = CardLink.getSavedCards(userId: userId)
 
         do {
             let jsonData = try JSONEncoder().encode(cards)
@@ -267,6 +267,7 @@ public class IaSdkCardLinkImpl: NSObject {
             return .production
         }
     }
+
 }
 
 // MARK: - UIColor Extension

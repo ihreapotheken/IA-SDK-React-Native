@@ -37,7 +37,10 @@
       "Bash(adb reverse:*)",
       "Bash(xcrun simctl:*)",
       "Bash(kill:*)",
-      "Bash(jar tf:*)"
+      "Bash(jar tf:*)",
+      "Bash(watchman watch-del-all:*)",
+      "Bash(bundle exec pod install:*)",
+      "Bash(timeout:*)"
     ],
     "additionalDirectories": [
       "/tmp"
