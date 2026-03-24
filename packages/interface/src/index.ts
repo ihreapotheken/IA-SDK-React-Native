@@ -19,6 +19,122 @@ export enum IaBaseModule {
   CardLink = 'cardLink',
 }
 
+// ============================================================================
+// CardLink Types
+// ============================================================================
+
+/**
+ * Flow type for CardLink operations.
+ */
+export enum IaCardLinkFlowType {
+  /** Main NFC scanning flow for prescription transfer. */
+  CardLink = 'launchCardLinkSdk',
+  /** Saved cards management view. */
+  SavedCards = 'launchCardLinkCards',
+}
+
+/**
+ * Consent status for CardLink operations.
+ */
+export enum IaCardLinkConsentStatus {
+  /** Show consent screen to user. */
+  ShowConsent = 'SHOW_CONSENT',
+  /** User has previously accepted consent. */
+  ConsentAccepted = 'CONSENT_ACCEPTED',
+  /** User has previously declined consent. */
+  ConsentDeclined = 'CONSENT_DECLINED',
+}
+
+/**
+ * Consent event types emitted by CardLink.
+ */
+export enum IaCardLinkConsentEvent {
+  /** User accepted consent. */
+  Accepted = 'accepted',
+  /** User declined consent. */
+  Declined = 'declined',
+}
+
+/**
+ * Lifecycle events emitted by CardLink.
+ */
+export enum IaCardLinkEvent {
+  /** CardLink will close. */
+  WillExit = 'willExitCardlink',
+  /** NFC scanning is about to start. */
+  WillStartScanning = 'willStartScanning',
+  /** CardLink failed to initialize. */
+  FailedToInitialize = 'failedToInitialize',
+  /** User requested to navigate to cart. */
+  GoToCart = 'goToCart',
+  /** User requested to view terms and conditions. */
+  OpenTermsAndConditions = 'openTermsAndConditions',
+  /** Insurance card was saved successfully. */
+  CardSaved = 'cardSaved',
+}
+
+/**
+ * Environment configuration for CardLink SDK.
+ */
+export enum IaCardLinkEnvironment {
+  /** Debug/QA environment. */
+  Debug = 'DEBUG',
+  /** Production environment. */
+  Production = 'PRODUCTION',
+}
+
+/**
+ * Session information from CardLink.
+ */
+export interface IaCardLinkSession {
+  /** Unique session identifier. */
+  cardSessionId: string;
+  /** Session expiration timestamp (Unix epoch milliseconds). */
+  sessionExpireTimestamp: number;
+}
+
+/**
+ * Launch configuration options for CardLink.
+ */
+export interface IaCardLinkLaunchOptions {
+  /** SDK API key for authentication. */
+  sdkApiKey: string;
+  /** Flow type to launch. */
+  flowType: IaCardLinkFlowType;
+  /** Pharmacy identifier. */
+  pharmacyId: string;
+  /** Consent status to display. */
+  consentStatus: IaCardLinkConsentStatus;
+  /** User's phone number. */
+  phoneNumber: string;
+  /** User identifier for card storage. */
+  userId: string;
+  /** Optional CAN code (6 digits). */
+  canCode?: string;
+  /** Optional card display name. */
+  cardName?: string;
+  /** Primary UI color (ARGB integer). */
+  primaryColor?: number;
+  /** Buttons UI color (ARGB integer). */
+  buttonsColor?: number;
+  /** Text link UI color (ARGB integer). */
+  textLinkColor?: number;
+  /** Bottom navigation UI color (ARGB integer). */
+  bottomNavigationColor?: number;
+  /** SDK environment. */
+  environment?: IaCardLinkEnvironment;
+  /** Enable card saving feature. */
+  saveCardEnabled?: boolean;
+}
+
+/**
+ * Subscription handle for CardLink event listeners.
+ */
+export interface IaCardLinkEventSubscription {
+  /** Removes the event listener. */
+  remove(): void;
+}
+
 /**
  * Server environment configuration for the ia.de services.
  */
@@ -119,6 +235,100 @@ export interface IaModule {
  */
 export interface IaCardLinkModule extends IaModule {
   readonly moduleType: IaBaseModule.CardLink;
+
+  /**
+   * Launches the CardLink flow with the specified configuration.
+   * @param options - Launch configuration options.
+   */
+  launch(options: IaCardLinkLaunchOptions): Promise<void>;
+
+  /**
+   * Gets the CardLink SDK version.
+   * @returns The SDK version string, or null if unavailable.
+   */
+  getVersion(): Promise<string | null>;
+
+  /**
+   * Gets the current CardLink SDK environment.
+   * @returns The current environment.
+   */
+  getEnvironment(): Promise<IaCardLinkEnvironment>;
+
+  /**
+   * Gets the path to the CardLink SDK log file.
+   * @returns The log file path, or null if unavailable.
+   */
+  getLogFilePath(): Promise<string | null>;
+
+  /**
+   * Gets saved insurance cards for a user.
+   * @param userId - The user identifier.
+   * @returns JSON-encoded list of saved cards, or null if unavailable.
+   */
+  getSavedCards(userId: string): Promise<string | null>;
+
+  /**
+   * Deletes a specific saved card.
+   * @param userId - The user identifier.
+   * @param cardName - The card name to delete.
+   */
+  deleteCard(userId: string, cardName: string): Promise<void>;
+
+  /**
+   * Deletes all saved cards (iOS only).
+   * @returns Status string ("successDeleteAll" or "emptyStorage"), or null on Android.
+   */
+  deleteAllCards(): Promise<string | null>;
+
+  /**
+   * Deletes all user-related data from CardLink (iOS only).
+   */
+  deleteAllUserRelatedData(): Promise<void>;
+
+  /**
+   * Adds a listener for consent events.
+   * @param callback - Called when consent status changes.
+   * @returns Subscription handle to remove the listener.
+   */
+  addConsentEventListener(
+    callback: (event: IaCardLinkConsentEvent) => void
+  ): IaCardLinkEventSubscription;
+
+  /**
+   * Adds a listener for session creation events.
+   * @param callback - Called when a session is created.
+   * @returns Subscription handle to remove the listener.
+   */
+  addSessionCreatedListener(
+    callback: (session: IaCardLinkSession) => void
+  ): IaCardLinkEventSubscription;
+
+  /**
+   * Adds a listener for prescription redemption events.
+   * @param callback - Called with prescription JSON data.
+   * @returns Subscription handle to remove the listener.
+   */
+  addPrescriptionsRedeemedListener(
+    callback: (prescriptions: string) => void
+  ): IaCardLinkEventSubscription;
+
+  /**
+   * Adds a listener for CardLink lifecycle events.
+   * @param callback - Called when lifecycle events occur.
+   * @returns Subscription handle to remove the listener.
+   */
+  addEventListener(
+    callback: (event: IaCardLinkEvent) => void
+  ): IaCardLinkEventSubscription;
+
+  /**
+   * Adds a listener for analytics events.
+   * @param callback - Called with analytics event names.
+   * @returns Subscription handle to remove the listener.
+   */
+  addAnalyticsEventListener(
+    callback: (eventName: string) => void
+  ): IaCardLinkEventSubscription;
 }
 
 /**
