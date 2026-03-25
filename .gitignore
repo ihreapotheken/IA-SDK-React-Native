@@ -89,3 +89,6 @@ docs/
 
 # Secrets
 example/.secrets
+
+# Generated
+example/src/generatedEnvConfig.ts

@@ -1,7 +1,32 @@
 const path = require('path');
+const fs = require('fs');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const root = path.resolve(__dirname, '..');
+
+// Read .env and write a generated config module for runtime access
+const envPath = path.resolve(root, '.env');
+const envVars = {};
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf-8').split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex > 0) {
+        const key = trimmed.substring(0, eqIndex).trim();
+        const value = trimmed.substring(eqIndex + 1).trim().replace(/^"|"$/g, '');
+        envVars[key] = value;
+      }
+    }
+  });
+}
+const generatedPath = path.resolve(__dirname, 'src', 'generatedEnvConfig.ts');
+fs.writeFileSync(generatedPath, [
+  '// Auto-generated from .env by metro.config.js — do not edit',
+  `export const ANDROID_APPSDK_VERSION = '${envVars.ANDROID_APPSDK_VERSION || 'N/A'}';`,
+  `export const IOS_APPSDK_VERSION = '${envVars.IOS_APPSDK_VERSION || 'N/A'}';`,
+  '',
+].join('\n'));
 const packagesDir = path.resolve(root, 'packages');
 
 // Map of workspace packages to their source directories

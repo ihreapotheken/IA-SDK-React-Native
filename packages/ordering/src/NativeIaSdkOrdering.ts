@@ -1,6 +1,11 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
+export interface NativePdfPrescription {
+  data: string;
+  insuranceType: string;
+}
+
 export interface Spec extends TurboModule {
   // Registration (renamed from 'register' to avoid C++ reserved keyword)
   registerModule?(): void;
@@ -10,7 +15,7 @@ export interface Spec extends TurboModule {
 
   transferPrescriptionsIOS?(
     images: string[] | null,
-    pdfs: string[] | null,
+    pdfs: NativePdfPrescription[] | null,
     codes: string[] | null,
     orderId: string | null,
     completionHandler: (error: string | null) => void
@@ -23,7 +28,7 @@ export interface Spec extends TurboModule {
 
   transferPrescriptionsAndroid?(
     images: string[] | null,
-    pdfs: string[] | null,
+    pdfs: NativePdfPrescription[] | null,
     codes: string[] | null,
     orderId: string | null
   ): void;

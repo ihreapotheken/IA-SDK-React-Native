@@ -14,6 +14,9 @@ import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
+import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
@@ -92,7 +95,7 @@ class IaSdkOrderingModule(
     android.util.Log.d("IaSdkOrdering", "orderId: $orderId")
 
     val channelId = "TRANSFER_PRESCRIPTIONS_EVENT"
-    val imagesList = ArrayList<ByteArray>()
+    val imagePrescriptions = ArrayList<ImagePrescription>()
     if (images != null) {
       for (i in 0 until images.size()) {
         val base64 = images.getString(i)
@@ -101,23 +104,30 @@ class IaSdkOrderingModule(
           try {
             val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
             android.util.Log.d("IaSdkOrdering", "image[$i] decoded: ${bytes.size} bytes")
-            imagesList.add(bytes)
+            imagePrescriptions.add(ImagePrescription(bytes))
           } catch (e: IllegalArgumentException) {
             android.util.Log.e("IaSdkOrdering", "image[$i] decode failed: ${e.message}")
           }
         }
       }
     }
-    val pdfsList = ArrayList<ByteArray>()
+    val pdfPrescriptions = ArrayList<PdfPrescription>()
     if (pdfs != null) {
       for (i in 0 until pdfs.size()) {
-        val base64 = pdfs.getString(i)
-        android.util.Log.d("IaSdkOrdering", "pdf[$i] base64 length: ${base64?.length ?: 0}")
+        val pdfMap = pdfs.getMap(i)
+        val base64 = pdfMap?.getString("data")
+        val insuranceTypeStr = pdfMap?.getString("insuranceType")
+        android.util.Log.d("IaSdkOrdering", "pdf[$i] base64 length: ${base64?.length ?: 0}, insuranceType: $insuranceTypeStr")
         if (base64 != null) {
           try {
             val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
+            val insuranceType = when (insuranceTypeStr) {
+              "privateInsurance" -> PrescriptionInsuranceType.PRIVATE
+              "publicHealthcare" -> PrescriptionInsuranceType.PUBLIC
+              else -> PrescriptionInsuranceType.PUBLIC
+            }
             android.util.Log.d("IaSdkOrdering", "pdf[$i] decoded: ${bytes.size} bytes")
-            pdfsList.add(bytes)
+            pdfPrescriptions.add(PdfPrescription(insuranceType, bytes))
           } catch (e: IllegalArgumentException) {
             android.util.Log.e("IaSdkOrdering", "pdf[$i] decode failed: ${e.message}")
           }
@@ -132,8 +142,8 @@ class IaSdkOrderingModule(
         codesList.add(code)
       }
     }
-    android.util.Log.d("IaSdkOrdering", "Final imagesList size: ${imagesList.size}")
-    android.util.Log.d("IaSdkOrdering", "Final pdfsList size: ${pdfsList.size}")
+    android.util.Log.d("IaSdkOrdering", "Final imagePrescriptions size: ${imagePrescriptions.size}")
+    android.util.Log.d("IaSdkOrdering", "Final pdfPrescriptions size: ${pdfPrescriptions.size}")
     android.util.Log.d("IaSdkOrdering", "Final codesList size: ${codesList.size}")
     IaSdk.ordering.deleteCart()
     IaSdk.ordering.setCheckoutListener(
@@ -149,8 +159,8 @@ class IaSdkOrderingModule(
     IaSdk.ordering.transferPrescriptions(
       context = reactApplicationContext.currentActivity!!,
       transferPrescriptionRequest = TransferPrescriptionRequest(
-        images = imagesList,
-        pdfs = pdfsList,
+        images = imagePrescriptions,
+        pdfs = pdfPrescriptions,
         codes = codesList,
         orderId = orderId,
       ),

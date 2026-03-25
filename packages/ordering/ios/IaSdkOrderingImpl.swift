@@ -56,7 +56,7 @@ public class IaSdkOrderingImpl: NSObject {
     @objc(transferPrescriptionsIOS:pdfs:codes:orderId:completionHandler:)
     public func transferPrescriptionsIOS(
         images: [String]? = nil,
-        pdfs: [String]? = nil,
+        pdfs: [[String: Any]]? = nil,
         codes: [String]? = nil,
         orderId: String? = nil,
         completionHandler: @escaping (String?) -> Void
@@ -74,7 +74,9 @@ public class IaSdkOrderingImpl: NSObject {
         }
         if let pdfArr = pdfs {
             for (i, pdf) in pdfArr.enumerated() {
-                print("[IaSdkOrdering] pdf[\(i)] length: \(pdf.count) chars")
+                let dataStr = pdf["data"] as? String
+                let insuranceType = pdf["insuranceType"] as? String
+                print("[IaSdkOrdering] pdf[\(i)] length: \(dataStr?.count ?? 0) chars, insuranceType: \(insuranceType ?? "nil")")
             }
         }
         if let codesArr = codes {
@@ -92,13 +94,23 @@ public class IaSdkOrderingImpl: NSObject {
                     print("[IaSdkOrdering] Decoded image: \(data?.count ?? 0) bytes")
                     return data
                 } ?? []
-                let pdfData: [PDFPrescription] = pdfs?.compactMap { str in
-                    guard let data = self.decodeBase64(str) else {
+                let pdfData: [PDFPrescription] = pdfs?.compactMap { pdfDict in
+                    guard let base64 = pdfDict["data"] as? String,
+                          let data = self.decodeBase64(base64) else {
                         print("[IaSdkOrdering] Failed to decode PDF")
                         return nil
                     }
-                    print("[IaSdkOrdering] Decoded PDF: \(data.count) bytes")
-                    return PDFPrescription(data: data)
+                    let insuranceType: PrescriptionInsuranceType
+                    switch pdfDict["insuranceType"] as? String {
+                    case "privateInsurance":
+                        insuranceType = .privateInsurance
+                    case "publicHealthcare":
+                        insuranceType = .publicHealthcare
+                    default:
+                        insuranceType = .publicHealthcare
+                    }
+                    print("[IaSdkOrdering] Decoded PDF: \(data.count) bytes, insuranceType: \(insuranceType)")
+                    return PDFPrescription(data: data, insuranceType: insuranceType)
                 } ?? []
                 let codeData: [String] = codes ?? []
 

@@ -186,13 +186,33 @@ export interface GuestUserData {
 }
 
 /**
+ * Insurance type classification for PDF prescriptions.
+ */
+export enum PrescriptionInsuranceType {
+  /** Private health insurance prescription. */
+  PrivateInsurance = 'privateInsurance',
+  /** Public/statutory health insurance prescription. */
+  PublicHealthcare = 'publicHealthcare',
+}
+
+/**
+ * A PDF prescription with its associated insurance type.
+ */
+export interface PdfPrescription {
+  /** Base64-encoded PDF data. */
+  data: string;
+  /** Insurance type for this PDF prescription. */
+  insuranceType: PrescriptionInsuranceType;
+}
+
+/**
  * Parameters for transferring prescriptions.
  */
 export interface TransferPrescriptionsParams {
   /** Base64-encoded images (JPG/PNG). */
   images?: string[] | null;
-  /** Base64-encoded PDF files. */
-  pdfs?: string[] | null;
+  /** PDF prescriptions with insurance type classification. */
+  pdfs?: PdfPrescription[] | null;
   /** JSON-encoded eRezept codes. */
   codes?: string[] | null;
   /** Client order identifier for differentiating orders on checkout completion. */

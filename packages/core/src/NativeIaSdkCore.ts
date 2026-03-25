@@ -51,6 +51,10 @@ export interface Spec extends TurboModule {
   startDashboardActivityAndroid?(): void;
 
   finishAllActivitiesAndroid?(): void;
+
+  transferSDKv1UserDataIOS?(): void;
+
+  transferSDKv1UserDataAndroid?(): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkCore');
