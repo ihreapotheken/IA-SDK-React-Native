@@ -56,6 +56,7 @@ public class IaSdkCardLinkImpl: NSObject {
         bottomNavigationColor: NSNumber?,
         environment: String?,
         saveCardEnabled: NSNumber?,
+        finishAction: String?,
         completionHandler: @escaping (String?) -> Void
     ) {
         // Setup style
@@ -65,7 +66,7 @@ public class IaSdkCardLinkImpl: NSObject {
             textLinkColor: UIColor(argb: textLinkColor?.intValue),
             bottomNavigationColor: UIColor(argb: bottomNavigationColor?.intValue)
         )
-        CardLink.style = style
+        CardLink.legacyStyle = style
 
         // Set environment
         CardLink.environment = parseEnvironment(environment)
@@ -78,7 +79,8 @@ public class IaSdkCardLinkImpl: NSObject {
             phoneNumber: phoneNumber,
             userId: userId.isEmpty ? "guest_user_id" : userId,
             cardName: cardName,
-            isSaveCardEnabled: saveCardEnabled?.boolValue ?? false
+            isSaveCardEnabled: saveCardEnabled?.boolValue ?? false,
+            finishAction: parseFinishAction(finishAction)
         )
 
         self.savedConfiguration = config
@@ -94,7 +96,7 @@ public class IaSdkCardLinkImpl: NSObject {
         }
 
         // Set authentication key and start
-        CardLink.authenticationKey = .init(value: sdkApiKey)
+        CardLink.legacyAuthenticationKey = .init(value: sdkApiKey)
         CardLink.start(
             type: flowTypeEnum,
             forcePresent: false,
@@ -164,7 +166,7 @@ public class IaSdkCardLinkImpl: NSObject {
             return
         }
 
-        CardLink.authenticationKey = .init(value: apiKey)
+        CardLink.legacyAuthenticationKey = .init(value: apiKey)
         CardLink.finish { [weak self] in
             CardLink.start(
                 type: .startCardlink,
@@ -246,7 +248,26 @@ public class IaSdkCardLinkImpl: NSObject {
         }
     }
 
+    // MARK: - Finish
+
+    @objc public func finishIOS(completionHandler: @escaping (String?) -> Void) {
+        CardLink.finish {
+            completionHandler(nil)
+        }
+    }
+
     // MARK: - Helpers
+
+    private func parseFinishAction(_ value: String?) -> CardLinkFinishAction {
+        switch value {
+        case "sendRawPrescriptions":
+            return .sendRawPrescriptions
+        case "uploadPrescriptions":
+            return .uploadPrescriptions
+        default:
+            return .uploadPrescriptions
+        }
+    }
 
     private func parseConsentStatus(_ value: String) -> CardLinkConsentStatus {
         switch value {

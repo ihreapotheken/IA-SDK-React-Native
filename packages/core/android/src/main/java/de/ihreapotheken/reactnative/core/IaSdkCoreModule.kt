@@ -50,6 +50,7 @@ class IaSdkCoreModule(
     clientId: String,
     serverEnvironmentId: String,
     channelId: Double?,
+    shouldFetchThemeFromRemote: Boolean,
     completionHandler: Callback,
   ) {
     // Register SDK with dynamically registered modules
@@ -71,7 +72,7 @@ class IaSdkCoreModule(
       apiKey = accessKey,
       clientId = clientId,
       configuration = IaSdkConfiguration(
-        shouldFetchThemeFromRemote = true,
+        shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
           shouldRunLegal = true,
           shouldRunOnboarding = false,
@@ -147,5 +148,10 @@ class IaSdkCoreModule(
 
   override fun transferSDKv1UserDataAndroid() {
     IaSdk.transferSDKv1UserData(reactApplicationContext.applicationContext)
+  }
+
+  override fun isInitializedAndroid(completionHandler: Callback) {
+    val isInitialized = IaSdk.isInitialized()
+    completionHandler.invoke(isInitialized)
   }
 }

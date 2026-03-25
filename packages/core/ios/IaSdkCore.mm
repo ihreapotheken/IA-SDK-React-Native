@@ -7,11 +7,13 @@
             clientId:(NSString *)clientId
  serverEnvironmentId:(NSString *)serverEnvironmentId
            channelId:(NSNumber *)channelId
+shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
    completionHandler:(RCTResponseSenderBlock)completion {
   [[IaSdkCoreImpl shared] initIaSdkIOS:accessKey
-                              clientId:clientId
-                   serverEnvironmentId:serverEnvironmentId
-                             channelId:channelId
+                             clientId:clientId
+                  serverEnvironmentId:serverEnvironmentId
+                            channelId:channelId
+           shouldFetchThemeFromRemote:shouldFetchThemeFromRemote
                      completionHandler:^(NSString *err) {
                        completion(@[ err ?: [NSNull null] ]);
                      }];

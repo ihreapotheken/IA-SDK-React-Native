@@ -65,12 +65,13 @@ public class IaSdkCoreImpl: NSObject {
         return modules
     }
 
-    @objc(initIaSdkIOS:clientId:serverEnvironmentId:channelId:completionHandler:)
+    @objc(initIaSdkIOS:clientId:serverEnvironmentId:channelId:shouldFetchThemeFromRemote:completionHandler:)
     public func initIaSdkIOS(
         accessKey: String,
         clientId: String,
         serverEnvironmentId: String,
         channelId: NSNumber?,
+        shouldFetchThemeFromRemote: Bool,
         completionHandler: @escaping (String?) -> Void
     ) {
         IASDK.configuration.apiKey = accessKey
@@ -117,6 +118,8 @@ public class IaSdkCoreImpl: NSObject {
             shouldShowIndicator: false,
             prerequisitesOptions: prerequisitesOptions
         )
+
+        IASDK.configuration.shouldLoadRemoteStyleConfiguration = shouldFetchThemeFromRemote
 
         // Enable auto-initialization to match Android behavior
         IASDK.configuration.isAutoInitializationEnabled = true
@@ -215,6 +218,56 @@ public class IaSdkCoreImpl: NSObject {
         Task.init {
             await IASDK.transferSDKv1UserData()
         }
+    }
+
+    @objc(isInitializedIOS:)
+    public func isInitializedIOS(
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        let state = IASDK.initializationState.summary
+        let isInitialized = state == .initializationFinished || state == .initializationAndPrerequisitesFinished
+        completionHandler(isInitialized)
+    }
+
+    @objc(deleteUserIOS:)
+    public func deleteUserIOS(
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        Task.init {
+            do {
+                try await IASDK.deleteUser()
+                completionHandler(nil)
+            } catch {
+                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @objc(getEnvironmentIOS:)
+    public func getEnvironmentIOS(
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        let env = IASDK.getEnvironment()
+        switch env {
+        case .dev:
+            completionHandler("development")
+        case .staging:
+            completionHandler("staging")
+        case .prod:
+            completionHandler("production")
+        @unknown default:
+            completionHandler(nil)
+        }
+    }
+
+    @objc(cleanCacheIOS:prerequisites:completionHandler:)
+    public func cleanCacheIOS(
+        initialization: Bool,
+        prerequisites: Bool,
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        IASDK.cleanCache(initialization: initialization, prerequisites: prerequisites)
+        completionHandler(nil)
     }
 }
 

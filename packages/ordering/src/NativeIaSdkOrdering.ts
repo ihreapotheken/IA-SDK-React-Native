@@ -34,6 +34,15 @@ export interface Spec extends TurboModule {
   ): void;
 
   launchCartScreenAndroid?(): void;
+
+  // iOS-only methods
+  getCartDetailsIOS?(
+    completionHandler: (result: string | null) => void
+  ): void;
+
+  deleteOrderHistoryIOS?(
+    completionHandler: (error: string | null) => void
+  ): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkOrdering');

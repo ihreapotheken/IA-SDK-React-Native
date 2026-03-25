@@ -71,7 +71,8 @@ export class IaModuleCardLink implements IaCardLinkModule {
           options.textLinkColor ?? null,
           options.bottomNavigationColor ?? null,
           options.environment ?? null,
-          options.saveCardEnabled ?? null
+          options.saveCardEnabled ?? null,
+          options.finishAction ?? null
         );
       } else if (Platform.OS === 'ios') {
         IaSdkCardLinkNative.launchIOS?.(
@@ -89,6 +90,7 @@ export class IaModuleCardLink implements IaCardLinkModule {
           options.bottomNavigationColor ?? null,
           options.environment ?? null,
           options.saveCardEnabled ?? null,
+          options.finishAction ?? null,
           (error: string | null) => {
             if (error === null) {
               resolve();
@@ -237,6 +239,24 @@ export class IaModuleCardLink implements IaCardLinkModule {
     }
     return new Promise((resolve, reject) => {
       IaSdkCardLinkNative.deleteAllUserRelatedDataIOS?.((error) => {
+        if (error === null) {
+          resolve();
+        } else {
+          reject(new Error(error));
+        }
+      });
+    });
+  }
+
+  async finish(): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn(
+        '[IaModuleCardLink] finish is only supported on iOS'
+      );
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCardLinkNative.finishIOS?.((error) => {
         if (error === null) {
           resolve();
         } else {
@@ -399,4 +419,5 @@ export {
   IaCardLinkConsentEvent,
   IaCardLinkEvent,
   IaCardLinkEnvironment,
+  IaCardLinkFinishAction,
 } from '@ihreapotheken/ia-sdk-interface';

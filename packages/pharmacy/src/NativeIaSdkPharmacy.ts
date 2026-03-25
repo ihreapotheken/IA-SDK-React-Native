@@ -7,6 +7,12 @@ export interface Spec extends TurboModule {
   launchPharmacyDetailsAndroid?(): void;
   setPharmacyIdIOS?(pharmacyId: string): void;
   setPharmacyIdAndroid?(pharmacyId: string): void;
+  getPharmacyIdIOS?(
+    completionHandler: (result: string | null) => void
+  ): void;
+  getPharmacyIdAndroid?(
+    completionHandler: (result: string | null) => void
+  ): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkPharmacy');

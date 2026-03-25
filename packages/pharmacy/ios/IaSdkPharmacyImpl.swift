@@ -41,4 +41,16 @@ public class IaSdkPharmacyImpl: NSObject {
             }
         }
     }
+
+    @objc(getPharmacyIdIOS:)
+    public func getPharmacyIdIOS(
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        let pharmacyId = IASDK.Pharmacy.getPharmacyID()
+        if let id = pharmacyId {
+            completionHandler(String(id))
+        } else {
+            completionHandler(nil)
+        }
+    }
 }

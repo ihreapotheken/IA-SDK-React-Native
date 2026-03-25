@@ -138,6 +138,46 @@ export class IaModuleOrdering implements IaOrderingModule {
       }
     });
   }
+
+  /**
+   * Gets the current cart details (iOS only).
+   *
+   * @returns JSON-encoded cart details, or null if empty/unavailable.
+   */
+  async getCartDetails(): Promise<string | null> {
+    if (Platform.OS !== 'ios') {
+      console.warn(
+        '[IaModuleOrdering] getCartDetails is only supported on iOS'
+      );
+      return null;
+    }
+    return new Promise((resolve) => {
+      IaSdkOrderingNative.getCartDetailsIOS?.((result: string | null) => {
+        resolve(result);
+      });
+    });
+  }
+
+  /**
+   * Deletes the order history (iOS only).
+   */
+  async deleteOrderHistory(): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn(
+        '[IaModuleOrdering] deleteOrderHistory is only supported on iOS'
+      );
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkOrderingNative.deleteOrderHistoryIOS?.((error: string | null) => {
+        if (error === null) {
+          resolve();
+        } else {
+          reject(new Error(error));
+        }
+      });
+    });
+  }
 }
 
 export default IaModuleOrdering;

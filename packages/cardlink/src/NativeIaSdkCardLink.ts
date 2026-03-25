@@ -21,6 +21,7 @@ export interface Spec extends TurboModule {
     bottomNavigationColor: number | null,
     environment: string | null,
     saveCardEnabled: boolean | null,
+    finishAction: string | null,
     completionHandler: (error: string | null) => void
   ): void;
 
@@ -38,7 +39,8 @@ export interface Spec extends TurboModule {
     textLinkColor: number | null,
     bottomNavigationColor: number | null,
     environment: string | null,
-    saveCardEnabled: boolean | null
+    saveCardEnabled: boolean | null,
+    finishAction: string | null
   ): void;
 
   // iOS getter methods (with callbacks)
@@ -58,6 +60,9 @@ export interface Spec extends TurboModule {
     completionHandler: (result: string | null) => void
   ): void;
   deleteAllUserRelatedDataIOS?(
+    completionHandler: (error: string | null) => void
+  ): void;
+  finishIOS?(
     completionHandler: (error: string | null) => void
   ): void;
 

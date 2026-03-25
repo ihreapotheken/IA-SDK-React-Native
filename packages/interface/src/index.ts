@@ -84,6 +84,17 @@ export enum IaCardLinkEnvironment {
 }
 
 /**
+ * Finish action for CardLink operations.
+ * Determines what happens with prescriptions after NFC scanning.
+ */
+export enum IaCardLinkFinishAction {
+  /** Send raw prescriptions data to the host app. */
+  SendRawPrescriptions = 'sendRawPrescriptions',
+  /** Upload prescriptions to the backend. */
+  UploadPrescriptions = 'uploadPrescriptions',
+}
+
+/**
  * Session information from CardLink.
  */
 export interface IaCardLinkSession {
@@ -125,6 +136,8 @@ export interface IaCardLinkLaunchOptions {
   environment?: IaCardLinkEnvironment;
   /** Enable card saving feature. */
   saveCardEnabled?: boolean;
+  /** Finish action determining what happens with prescriptions after NFC scanning. */
+  finishAction?: IaCardLinkFinishAction;
 }
 
 /**
@@ -165,6 +178,8 @@ export interface InitConfig {
   serverEnvironment: ServerEnvironment;
   /** Apofinder channel identifier for pharmacy collection filtering. */
   channelId?: number;
+  /** Whether the SDK should fetch the theme configuration from the remote server. Defaults to false. */
+  shouldFetchThemeFromRemote?: boolean;
 }
 
 /**
@@ -306,6 +321,11 @@ export interface IaCardLinkModule extends IaModule {
   deleteAllUserRelatedData(): Promise<void>;
 
   /**
+   * Finishes/dismisses the CardLink flow (iOS only).
+   */
+  finish(): Promise<void>;
+
+  /**
    * Adds a listener for consent events.
    * @param callback - Called when consent status changes.
    * @returns Subscription handle to remove the listener.
@@ -369,6 +389,15 @@ export interface IaOrderingModule extends IaModule {
    * Launches the cart screen experience on top of the navigation stack.
    */
   launchCartScreen(): Promise<void>;
+  /**
+   * Gets the current cart details (iOS only).
+   * @returns JSON-encoded cart details, or null if empty/unavailable.
+   */
+  getCartDetails(): Promise<string | null>;
+  /**
+   * Deletes the order history (iOS only).
+   */
+  deleteOrderHistory(): Promise<void>;
 }
 
 /**
@@ -397,6 +426,11 @@ export interface IaPharmacyModule extends IaModule {
    * Specifies a pharmacy identifier to be loaded into the AppSDK module.
    */
   setPharmacyId(pharmacyId: string): Promise<void>;
+  /**
+   * Gets the currently selected pharmacy identifier.
+   * @returns The pharmacy ID string, or null if no pharmacy is selected.
+   */
+  getPharmacyId(): Promise<string | null>;
 }
 
 /**

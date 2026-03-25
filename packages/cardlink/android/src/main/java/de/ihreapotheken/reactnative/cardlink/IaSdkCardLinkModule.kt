@@ -66,7 +66,8 @@ class IaSdkCardLinkModule(
         textLinkColor: Double?,
         bottomNavigationColor: Double?,
         environment: String?,
-        saveCardEnabled: Boolean?
+        saveCardEnabled: Boolean?,
+        finishAction: String?
     ) {
         val activity = reactApplicationContext.currentActivity
         if (activity == null) {
@@ -224,6 +225,8 @@ class IaSdkCardLinkModule(
             sendEvent(EVENT_DELETE_CARD_RESULT, e.message ?: "Unknown error")
         }
     }
+
+    // finishIOS is handled by the base spec class default (no-op on Android)
 
     override fun addListener(eventType: String?) {
         // Required by RN event emitter spec; listener management is on JS side
