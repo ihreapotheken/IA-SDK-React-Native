@@ -5,11 +5,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  SafeAreaView,
   StatusBar,
   Platform,
   type GestureResponderEvent,
 } from 'react-native';
 import { APPSDK_ACCESS_KEY } from '@env';
+import { ANDROID_APPSDK_VERSION, IOS_APPSDK_VERSION } from './generatedEnvConfig';
 import {
   iaSdk,
   ServerEnvironment,
@@ -175,7 +177,10 @@ export default function App() {
   const renderHomeTab = () => (
     <ScrollView style={styles.tabContent} contentContainerStyle={styles.scrollContent}>
       <Text style={styles.title}>IA SDK React Native Example</Text>
-      <Text style={styles.subtitle}>Modular Architecture Demo</Text>
+      <Text style={styles.subtitle}>
+        {Platform.OS === 'ios' ? 'iOS' : 'Android'}{' '}
+        {Platform.OS === 'ios' ? IOS_APPSDK_VERSION : ANDROID_APPSDK_VERSION}
+      </Text>
 
       <Text style={styles.status}>
         Modules: {isRegistered ? 'Registered' : 'Not Registered'}
@@ -262,7 +267,7 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Tab Content */}
       <View style={styles.contentContainer}>
         {activeTab === 'home' && renderHomeTab()}
@@ -295,7 +300,7 @@ export default function App() {
           <ActivityIndicator size="large" color="#000000" />
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -303,7 +308,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : undefined,
   },
   contentContainer: {
     flex: 1,

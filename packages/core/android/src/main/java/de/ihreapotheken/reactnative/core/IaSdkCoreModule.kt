@@ -144,4 +144,8 @@ class IaSdkCoreModule(
   override fun finishAllActivitiesAndroid() {
     IaSdkActivity.finishAllActivities()
   }
+
+  override fun transferSDKv1UserDataAndroid() {
+    IaSdk.transferSDKv1UserData(reactApplicationContext.applicationContext)
+  }
 }

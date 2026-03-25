@@ -4,7 +4,19 @@
 #
 # Usage:
 #
-# sh ./scripts/deploy-client.sh
+# sh ./scripts/deploy-client.sh --beta
+# sh ./scripts/deploy-client.sh --release
+
+# Parse the required --beta or --release argument.
+if [[ "$1" == "--beta" ]]; then
+  TAG_SUFFIX="-beta"
+elif [[ "$1" == "--release" ]]; then
+  TAG_SUFFIX=""
+else
+  echo "Error: Required argument missing."
+  echo "Usage: sh ./scripts/deploy-client.sh --beta | --release"
+  exit 1
+fi
 
 # Declare script and project paths.
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
@@ -22,7 +34,7 @@ git commit -m "React Native library deploy version $APP_SDK_VERSION"
 git push
 
 # Tag the current release.
-git tag "$APP_SDK_BUILD_VERSION-$APP_SDK_BUILD_NUMBER"
+git tag "$APP_SDK_BUILD_VERSION-$APP_SDK_BUILD_NUMBER$TAG_SUFFIX"
 
 # Push the tags, triggering a Github Action workflow for deploying a library update.
 git push --tags

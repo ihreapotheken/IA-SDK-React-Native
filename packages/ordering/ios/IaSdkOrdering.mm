@@ -14,7 +14,7 @@
 }
 
 - (void)transferPrescriptionsIOS:(NSArray<NSString *> *)images
-                            pdfs:(NSArray<NSString *> *)pdfs
+                            pdfs:(NSArray<NSDictionary *> *)pdfs
                            codes:(NSArray<NSString *> *)codes
                          orderId:(NSString *)orderId
                completionHandler:(RCTResponseSenderBlock)completion {

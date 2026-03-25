@@ -31,7 +31,15 @@ jobs:
       - name: Update package versions and publish
         run: |
           RAW_VERSION=${{ github.ref_name }}
-          VERSION=$(echo "$RAW_VERSION" | sed 's/\.0\([0-9]\)/.\1/g' | sed 's/\.\([0-9]*\)$/-\1/')
+          # Strip optional -beta suffix, transform version, then re-append suffix
+          SUFFIX=""
+          CLEAN_VERSION="$RAW_VERSION"
+          if [[ "$RAW_VERSION" == *-beta ]]; then
+            SUFFIX="-beta"
+            CLEAN_VERSION="${RAW_VERSION%-beta}"
+          fi
+          VERSION=$(echo "$CLEAN_VERSION" | sed 's/\.0\([0-9]\)/.\1/g' | sed 's/\.\([0-9]*\)$/-\1/')
+          VERSION="${VERSION}${SUFFIX}"
           echo "Transformed version: $RAW_VERSION -> $VERSION"
 
           # List of packages in dependency order

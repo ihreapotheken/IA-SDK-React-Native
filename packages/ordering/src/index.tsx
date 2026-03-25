@@ -41,7 +41,7 @@ export class IaModuleOrdering implements IaOrderingModule {
     }
     if (params.pdfs) {
       params.pdfs.forEach((pdf, i) => {
-        console.log(`[IaModuleOrdering] pdf[${i}] length: ${pdf.length} chars`);
+        console.log(`[IaModuleOrdering] pdf[${i}] length: ${pdf.data.length} chars, insuranceType: ${pdf.insuranceType}`);
       });
     }
     if (params.codes) {

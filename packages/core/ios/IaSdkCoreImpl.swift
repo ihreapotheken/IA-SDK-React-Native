@@ -209,6 +209,13 @@ public class IaSdkCoreImpl: NSObject {
             }
         }
     }
+
+    @objc(transferSDKv1UserDataIOS)
+    public func transferSDKv1UserDataIOS() {
+        Task.init {
+            await IASDK.transferSDKv1UserData()
+        }
+    }
 }
 
 /// Core SDK delegate for handling SDK events.

@@ -16,6 +16,7 @@ export {
   IaBaseModule,
   ServerEnvironment,
   Salutation,
+  PrescriptionInsuranceType,
   // CardLink enums
   IaCardLinkFlowType,
   IaCardLinkConsentStatus,
@@ -28,6 +29,7 @@ export type {
   InitConfig,
   GuestUserData,
   TransferPrescriptionsParams,
+  PdfPrescription,
   CartState,
   TransactionSignatures,
   IaCardLinkModule,
@@ -274,6 +276,25 @@ export class IaSdk {
 
       if (Platform.OS === 'ios') {
         IaSdkCoreNative.finishAllActivitiesIOS?.();
+        resolve();
+      }
+    });
+  }
+
+  /**
+   * Transfers user data from SDK v1 to the current SDK.
+   *
+   * This method is intended to be invoked before the `initialize` method.
+   */
+  async transferSDKv1UserData(): Promise<void> {
+    return new Promise((resolve) => {
+      if (Platform.OS === 'android') {
+        IaSdkCoreNative.transferSDKv1UserDataAndroid?.();
+        resolve();
+      }
+
+      if (Platform.OS === 'ios') {
+        IaSdkCoreNative.transferSDKv1UserDataIOS?.();
         resolve();
       }
     });
