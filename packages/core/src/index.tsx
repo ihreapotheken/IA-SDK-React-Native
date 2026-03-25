@@ -23,6 +23,7 @@ export {
   IaCardLinkConsentEvent,
   IaCardLinkEvent,
   IaCardLinkEnvironment,
+  IaCardLinkFinishAction,
 } from '@ihreapotheken/ia-sdk-interface';
 export type {
   IaModule,
@@ -144,12 +145,15 @@ export class IaSdk {
         }
       };
 
+      const shouldFetchTheme = config.shouldFetchThemeFromRemote ?? false;
+
       if (Platform.OS === 'android') {
         IaSdkCoreNative.initIaSdkAndroid?.(
           config.accessKey,
           config.clientId,
           config.serverEnvironment,
           config.channelId ?? null,
+          shouldFetchTheme,
           completionHandler
         );
       }
@@ -160,6 +164,7 @@ export class IaSdk {
           config.clientId,
           config.serverEnvironment,
           config.channelId ?? null,
+          shouldFetchTheme,
           completionHandler
         );
       }
@@ -297,6 +302,92 @@ export class IaSdk {
         IaSdkCoreNative.transferSDKv1UserDataIOS?.();
         resolve();
       }
+    });
+  }
+
+  /**
+   * Checks whether the SDK has been initialized.
+   *
+   * @returns True if the SDK is initialized, false otherwise.
+   */
+  async isInitialized(): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (Platform.OS === 'android') {
+        IaSdkCoreNative.isInitializedAndroid?.((result: boolean) => {
+          resolve(result);
+        });
+      } else if (Platform.OS === 'ios') {
+        IaSdkCoreNative.isInitializedIOS?.((result: boolean) => {
+          resolve(result);
+        });
+      } else {
+        resolve(false);
+      }
+    });
+  }
+
+  /**
+   * Deletes the current user and all associated data (iOS only).
+   */
+  async deleteUser(): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn('[IaSdk] deleteUser is only supported on iOS');
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCoreNative.deleteUserIOS?.((error: string | null) => {
+        if (error === null) {
+          resolve();
+        } else {
+          reject(new Error(error));
+        }
+      });
+    });
+  }
+
+  /**
+   * Gets the current server environment (iOS only).
+   *
+   * @returns The environment string ("development", "staging", "production"), or null.
+   */
+  async getEnvironment(): Promise<string | null> {
+    if (Platform.OS !== 'ios') {
+      console.warn('[IaSdk] getEnvironment is only supported on iOS');
+      return null;
+    }
+    return new Promise((resolve) => {
+      IaSdkCoreNative.getEnvironmentIOS?.((result: string | null) => {
+        resolve(result);
+      });
+    });
+  }
+
+  /**
+   * Cleans the SDK cache (iOS only).
+   *
+   * @param initialization Whether to clean initialization cache.
+   * @param prerequisites Whether to clean prerequisites cache.
+   */
+  async cleanCache(
+    initialization: boolean,
+    prerequisites: boolean
+  ): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn('[IaSdk] cleanCache is only supported on iOS');
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCoreNative.cleanCacheIOS?.(
+        initialization,
+        prerequisites,
+        (error: string | null) => {
+          if (error === null) {
+            resolve();
+          } else {
+            reject(new Error(error));
+          }
+        }
+      );
     });
   }
 }

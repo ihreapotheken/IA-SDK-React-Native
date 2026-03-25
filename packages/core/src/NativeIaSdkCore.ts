@@ -8,6 +8,7 @@ export interface Spec extends TurboModule {
     clientId: string,
     serverEnvironmentId: string,
     channelId: number | null,
+    shouldFetchThemeFromRemote: boolean,
     completionHandler: (error: string | null) => void
   ): void;
 
@@ -33,6 +34,7 @@ export interface Spec extends TurboModule {
     clientId: string,
     serverEnvironmentId: string,
     channelId: number | null,
+    shouldFetchThemeFromRemote: boolean,
     completionHandler: (error: string | null) => void
   ): void;
 
@@ -55,6 +57,25 @@ export interface Spec extends TurboModule {
   transferSDKv1UserDataIOS?(): void;
 
   transferSDKv1UserDataAndroid?(): void;
+
+  // isInitialized - both platforms
+  isInitializedIOS?(completionHandler: (result: boolean) => void): void;
+  isInitializedAndroid?(completionHandler: (result: boolean) => void): void;
+
+  // deleteUser - iOS only
+  deleteUserIOS?(completionHandler: (error: string | null) => void): void;
+
+  // getEnvironment - iOS only
+  getEnvironmentIOS?(
+    completionHandler: (result: string | null) => void
+  ): void;
+
+  // cleanCache - iOS only
+  cleanCacheIOS?(
+    initialization: boolean,
+    prerequisites: boolean,
+    completionHandler: (error: string | null) => void
+  ): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkCore');

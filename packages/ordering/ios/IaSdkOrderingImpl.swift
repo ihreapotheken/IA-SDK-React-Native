@@ -141,4 +141,48 @@ public class IaSdkOrderingImpl: NSObject {
             IACartScreen().present()
         }
     }
+
+    @objc(getCartDetailsIOS:)
+    public func getCartDetailsIOS(
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        Task.init {
+            do {
+                let cartDetails = try await IASDK.ordering.getCartDetails(
+                    allowCached: true,
+                    throwIfNil: false,
+                    shouldEmit: false
+                )
+                if let details = cartDetails {
+                    let products = details.products.map { product in
+                        ["pzn": product.pzn, "amount": product.amount] as [String: Any]
+                    }
+                    let dict: [String: Any] = [
+                        "totalAmountInCart": details.totalAmountInCart,
+                        "products": products,
+                    ]
+                    let jsonData = try JSONSerialization.data(withJSONObject: dict)
+                    completionHandler(String(data: jsonData, encoding: .utf8))
+                } else {
+                    completionHandler(nil)
+                }
+            } catch {
+                completionHandler(nil)
+            }
+        }
+    }
+
+    @objc(deleteOrderHistoryIOS:)
+    public func deleteOrderHistoryIOS(
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        Task.init {
+            do {
+                try await IASDK.ordering.deleteOrderHistory()
+                completionHandler(nil)
+            } catch {
+                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
+            }
+        }
+    }
 }

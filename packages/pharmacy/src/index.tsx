@@ -40,6 +40,26 @@ export class IaModulePharmacy implements IaPharmacyModule {
       }
     });
   }
+
+  async getPharmacyId(): Promise<string | null> {
+    return new Promise((resolve) => {
+      if (Platform.OS === 'android') {
+        IaSdkPharmacyNative.getPharmacyIdAndroid?.(
+          (result: string | null) => {
+            resolve(result);
+          }
+        );
+      } else if (Platform.OS === 'ios') {
+        IaSdkPharmacyNative.getPharmacyIdIOS?.(
+          (result: string | null) => {
+            resolve(result);
+          }
+        );
+      } else {
+        resolve(null);
+      }
+    });
+  }
 }
 
 export default IaModulePharmacy;

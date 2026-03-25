@@ -75,6 +75,7 @@ RCT_EXPORT_MODULE()
 bottomNavigationColor:(NSNumber *)bottomNavigationColor
       environment:(NSString *)environment
   saveCardEnabled:(NSNumber *)saveCardEnabled
+     finishAction:(NSString *)finishAction
 completionHandler:(RCTResponseSenderBlock)completion {
   [[IaSdkCardLinkImpl shared] launchIOSWithSdkApiKey:sdkApiKey
                                             flowType:flowType
@@ -90,6 +91,7 @@ completionHandler:(RCTResponseSenderBlock)completion {
                                bottomNavigationColor:bottomNavigationColor
                                          environment:environment
                                      saveCardEnabled:saveCardEnabled
+                                        finishAction:finishAction
                                    completionHandler:^(NSString *err) {
     completion(@[ err ?: [NSNull null] ]);
   }];
@@ -141,6 +143,12 @@ completionHandler:(RCTResponseSenderBlock)completion {
 
 - (void)deleteAllUserRelatedDataIOS:(RCTResponseSenderBlock)completion {
   [[IaSdkCardLinkImpl shared] deleteAllUserRelatedDataIOSWithCompletionHandler:^(NSString *err) {
+    completion(@[ err ?: [NSNull null] ]);
+  }];
+}
+
+- (void)finishIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkCardLinkImpl shared] finishIOSWithCompletionHandler:^(NSString *err) {
     completion(@[ err ?: [NSNull null] ]);
   }];
 }

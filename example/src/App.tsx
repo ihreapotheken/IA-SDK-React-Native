@@ -22,7 +22,11 @@ import {
 if (!APPSDK_ACCESS_KEY) {
   throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
 }
-import type { IaOrderingModule } from '@ihreapotheken/ia-sdk-interface';
+import type {
+  IaOrderingModule,
+  IaPharmacyModule,
+  IaCardLinkModule,
+} from '@ihreapotheken/ia-sdk-interface';
 import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
 import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
@@ -174,6 +178,60 @@ export default function App() {
       await iaSdk.finishAllActivities();
     });
 
+  // --- New API test handlers ---
+
+  const handleIsInitialized = () =>
+    withLoading(async () => {
+      const result = await iaSdk.isInitialized();
+      console.log('isInitialized:', result);
+    });
+
+  const handleDeleteUser = () =>
+    withLoading(async () => {
+      await iaSdk.deleteUser();
+      console.log('User deleted successfully.');
+    });
+
+  const handleGetEnvironment = () =>
+    withLoading(async () => {
+      const env = await iaSdk.getEnvironment();
+      console.log('Environment:', env);
+    });
+
+  const handleCleanCache = () =>
+    withLoading(async () => {
+      await iaSdk.cleanCache(true, true);
+      console.log('Cache cleaned successfully.');
+    });
+
+  const handleGetPharmacyId = () =>
+    withLoading(async () => {
+      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
+      const pharmacyId = await pharmacy.getPharmacyId();
+      console.log('Pharmacy ID:', pharmacyId);
+    });
+
+  const handleGetCartDetails = () =>
+    withLoading(async () => {
+      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
+      const details = await ordering.getCartDetails();
+      console.log('Cart details:', details);
+    });
+
+  const handleDeleteOrderHistory = () =>
+    withLoading(async () => {
+      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
+      await ordering.deleteOrderHistory();
+      console.log('Order history deleted successfully.');
+    });
+
+  const handleCardLinkFinish = () =>
+    withLoading(async () => {
+      const cl = iaSdk.getModule<IaCardLinkModule>(IaBaseModule.CardLink);
+      await cl.finish();
+      console.log('CardLink finished successfully.');
+    });
+
   const renderHomeTab = () => (
     <ScrollView style={styles.tabContent} contentContainerStyle={styles.scrollContent}>
       <Text style={styles.title}>IA SDK React Native Example</Text>
@@ -249,6 +307,72 @@ export default function App() {
         <AppButton
           title="FINISH ALL ACTIVITIES"
           onPress={handleFinishAllActivities}
+        />
+      </View>
+
+      {/* New API test buttons */}
+      <Text style={[styles.subtitle, { marginTop: 20 }]}>New APIs</Text>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="IS INITIALIZED"
+          onPress={handleIsInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="DELETE USER (iOS)"
+          onPress={handleDeleteUser}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="GET ENVIRONMENT (iOS)"
+          onPress={handleGetEnvironment}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="CLEAN CACHE (iOS)"
+          onPress={handleCleanCache}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="GET PHARMACY ID"
+          onPress={handleGetPharmacyId}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="GET CART DETAILS (iOS)"
+          onPress={handleGetCartDetails}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="DELETE ORDER HISTORY (iOS)"
+          onPress={handleDeleteOrderHistory}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="CARDLINK FINISH (iOS)"
+          onPress={handleCardLinkFinish}
+          disabled={!isInitialized}
         />
       </View>
     </ScrollView>
