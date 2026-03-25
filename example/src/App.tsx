@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  Alert,
   type GestureResponderEvent,
 } from 'react-native';
 import { APPSDK_ACCESS_KEY } from '@env';
@@ -180,57 +181,81 @@ export default function App() {
 
   // --- New API test handlers ---
 
-  const handleIsInitialized = () =>
-    withLoading(async () => {
+  const handleIsInitialized = async () => {
+    try {
       const result = await iaSdk.isInitialized();
-      console.log('isInitialized:', result);
-    });
+      Alert.alert('isInitialized', `${result}`);
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleDeleteUser = () =>
-    withLoading(async () => {
+  const handleDeleteUser = async () => {
+    try {
       await iaSdk.deleteUser();
-      console.log('User deleted successfully.');
-    });
+      Alert.alert('Success', 'User deleted successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleGetEnvironment = () =>
-    withLoading(async () => {
+  const handleGetEnvironment = async () => {
+    try {
       const env = await iaSdk.getEnvironment();
-      console.log('Environment:', env);
-    });
+      Alert.alert('Environment', `${env}`);
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleCleanCache = () =>
-    withLoading(async () => {
+  const handleCleanCache = async () => {
+    try {
       await iaSdk.cleanCache(true, true);
-      console.log('Cache cleaned successfully.');
-    });
+      Alert.alert('Success', 'Cache cleaned successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleGetPharmacyId = () =>
-    withLoading(async () => {
+  const handleGetPharmacyId = async () => {
+    try {
       const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
       const pharmacyId = await pharmacy.getPharmacyId();
-      console.log('Pharmacy ID:', pharmacyId);
-    });
+      Alert.alert('Pharmacy ID', `${pharmacyId ?? 'null'}`);
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleGetCartDetails = () =>
-    withLoading(async () => {
+  const handleGetCartDetails = async () => {
+    try {
       const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
       const details = await ordering.getCartDetails();
-      console.log('Cart details:', details);
-    });
+      Alert.alert('Cart Details', `${details ?? 'null'}`);
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleDeleteOrderHistory = () =>
-    withLoading(async () => {
+  const handleDeleteOrderHistory = async () => {
+    try {
       const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
       await ordering.deleteOrderHistory();
-      console.log('Order history deleted successfully.');
-    });
+      Alert.alert('Success', 'Order history deleted successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
-  const handleCardLinkFinish = () =>
-    withLoading(async () => {
+  const handleCardLinkFinish = async () => {
+    try {
       const cl = iaSdk.getModule<IaCardLinkModule>(IaBaseModule.CardLink);
       await cl.finish();
-      console.log('CardLink finished successfully.');
-    });
+      Alert.alert('Success', 'CardLink finished successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
   const renderHomeTab = () => (
     <ScrollView style={styles.tabContent} contentContainerStyle={styles.scrollContent}>
@@ -310,9 +335,6 @@ export default function App() {
         />
       </View>
 
-      {/* New API test buttons */}
-      <Text style={[styles.subtitle, { marginTop: 20 }]}>New APIs</Text>
-
       <View style={styles.buttonContainer}>
         <AppButton
           title="IS INITIALIZED"
@@ -320,29 +342,35 @@ export default function App() {
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="DELETE USER (iOS)"
-          onPress={handleDeleteUser}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="DELETE USER"
+            onPress={handleDeleteUser}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="GET ENVIRONMENT (iOS)"
-          onPress={handleGetEnvironment}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="GET ENVIRONMENT"
+            onPress={handleGetEnvironment}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="CLEAN CACHE (iOS)"
-          onPress={handleCleanCache}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="CLEAN CACHE"
+            onPress={handleCleanCache}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
 
       <View style={styles.buttonContainer}>
         <AppButton
@@ -352,29 +380,35 @@ export default function App() {
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="GET CART DETAILS (iOS)"
-          onPress={handleGetCartDetails}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="GET CART DETAILS"
+            onPress={handleGetCartDetails}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="DELETE ORDER HISTORY (iOS)"
-          onPress={handleDeleteOrderHistory}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="DELETE ORDER HISTORY"
+            onPress={handleDeleteOrderHistory}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="CARDLINK FINISH (iOS)"
-          onPress={handleCardLinkFinish}
-          disabled={!isInitialized}
-        />
-      </View>
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="CARDLINK FINISH"
+            onPress={handleCardLinkFinish}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 

@@ -31,6 +31,18 @@
   [[IaSdkOrderingImpl shared] launchCartScreenIOS];
 }
 
+- (void)getCartDetailsIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkOrderingImpl shared] getCartDetailsIOS:^(NSString *result) {
+    completion(@[ result ?: [NSNull null] ]);
+  }];
+}
+
+- (void)deleteOrderHistoryIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkOrderingImpl shared] deleteOrderHistoryIOS:^(NSString *err) {
+    completion(@[ err ?: [NSNull null] ]);
+  }];
+}
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params {
   return std::make_shared<facebook::react::NativeIaSdkOrderingSpecJSI>(params);

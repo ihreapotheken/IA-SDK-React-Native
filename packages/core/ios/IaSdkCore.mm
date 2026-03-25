@@ -57,6 +57,34 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
   [[IaSdkCoreImpl shared] transferSDKv1UserDataIOS];
 }
 
+- (void)isInitializedIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] isInitializedIOS:^(BOOL result) {
+    completion(@[ @(result) ]);
+  }];
+}
+
+- (void)deleteUserIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] deleteUserIOS:^(NSString *err) {
+    completion(@[ err ?: [NSNull null] ]);
+  }];
+}
+
+- (void)getEnvironmentIOS:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] getEnvironmentIOS:^(NSString *result) {
+    completion(@[ result ?: [NSNull null] ]);
+  }];
+}
+
+- (void)cleanCacheIOS:(BOOL)initialization
+        prerequisites:(BOOL)prerequisites
+    completionHandler:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] cleanCacheIOS:initialization
+                          prerequisites:prerequisites
+                      completionHandler:^(NSString *err) {
+    completion(@[ err ?: [NSNull null] ]);
+  }];
+}
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params {
   return std::make_shared<facebook::react::NativeIaSdkCoreSpecJSI>(params);

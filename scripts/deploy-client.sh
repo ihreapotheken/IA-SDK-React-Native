@@ -29,7 +29,7 @@ source $SCRIPT_DIR/dev-env-setup.sh
 cd "$PROJECT_DIR" 
 
 # Add latest updates to source control.
-git add android/ ios/ example/ src/ README.md package.json
+git add example/ packages src/ README.md package.json
 git commit -m "React Native library deploy version $APP_SDK_VERSION"
 git push
 
