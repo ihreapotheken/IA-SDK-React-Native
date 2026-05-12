@@ -181,3 +181,6 @@ export class IaModuleOrdering implements IaOrderingModule {
 }
 
 export default IaModuleOrdering;
+
+export { IaCartButton } from './IaCartButton';
+export type { IaCartButtonProps } from './IaCartButton';

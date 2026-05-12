@@ -37,3 +37,6 @@ export class IaModuleOverTheCounter implements IaOverTheCounterModule {
 }
 
 export default IaModuleOverTheCounter;
+
+export { IaProductGrid } from './IaProductGrid';
+export type { IaProductGridProps } from './IaProductGrid';

@@ -17,6 +17,7 @@ export {
   ServerEnvironment,
   Salutation,
   PrescriptionInsuranceType,
+  IaProductDisplayType,
   // CardLink enums
   IaCardLinkFlowType,
   IaCardLinkConsentStatus,
@@ -25,6 +26,10 @@ export {
   IaCardLinkEnvironment,
   IaCardLinkFinishAction,
 } from '@ihreapotheken/ia-sdk-interface';
+
+// Native UI plumbing for inline SDK components.
+export { IaSdkPlatformView } from './IaSdkPlatformView';
+export type { IaSdkPlatformViewProps } from './IaSdkPlatformView';
 export type {
   IaModule,
   InitConfig,

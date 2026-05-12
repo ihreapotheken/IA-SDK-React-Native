@@ -40,9 +40,9 @@ import {
   mockPdfPrescription,
   mockEPrescriptionCode,
 } from './testData';
-import { CardLinkView } from './views';
+import { CardLinkView, ComponentsView } from './views';
 
-type TabName = 'home' | 'cardlink';
+type TabName = 'home' | 'cardlink' | 'components';
 
 interface AppButtonProps {
   title: string;
@@ -217,6 +217,13 @@ export default function App() {
     }
   };
 
+  const handleSetPharmacy2163 = () =>
+    withLoading(async () => {
+      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
+      await pharmacy.setPharmacyId('2163');
+      console.log('Pharmacy ID set to 2163.');
+    });
+
   const handleGetPharmacyId = async () => {
     try {
       const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
@@ -374,6 +381,14 @@ export default function App() {
 
       <View style={styles.buttonContainer}>
         <AppButton
+          title="SET PHARMACY 2163"
+          onPress={handleSetPharmacy2163}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
           title="GET PHARMACY ID"
           onPress={handleGetPharmacyId}
           disabled={!isInitialized}
@@ -430,6 +445,7 @@ export default function App() {
       <View style={styles.contentContainer}>
         {activeTab === 'home' && renderHomeTab()}
         {activeTab === 'cardlink' && renderCardLinkTab()}
+        {activeTab === 'components' && <ComponentsView />}
       </View>
 
       {/* Tab Bar */}
@@ -448,6 +464,14 @@ export default function App() {
         >
           <Text style={[styles.tabText, activeTab === 'cardlink' && styles.tabTextActive]}>
             CardLink
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'components' && styles.tabActive]}
+          onPress={() => setActiveTab('components')}
+        >
+          <Text style={[styles.tabText, activeTab === 'components' && styles.tabTextActive]}>
+            Components
           </Text>
         </TouchableOpacity>
       </View>
@@ -476,7 +500,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   title: {

@@ -1,5 +1,13 @@
 {
-  "entryPoints": ["./src/index.tsx"],
+  "entryPoints": [
+    "./packages/core/src/index.tsx",
+    "./packages/interface/src/index.ts",
+    "./packages/cardlink/src/index.tsx",
+    "./packages/ordering/src/index.tsx",
+    "./packages/over-the-counter/src/index.tsx",
+    "./packages/pharmacy/src/index.tsx",
+    "./packages/prescription/src/index.tsx"
+  ],
   "exclude": [
     "node_modules/@nativescript/core",
     "**/*.android.ts",
