@@ -1,0 +1,46 @@
+name: Demo App Deploy
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+
+env:
+  PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS]
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write example/.secrets
+        run: echo "APPSDK_ACCESS_KEY=${{ secrets.APPSDK_ACCESS_KEY }}" > example/.secrets
+      - name: Write Android signing files
+        if: env.PLATFORM == 'all' || env.PLATFORM == 'android'
+        run: |
+          echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/app/fb-distribution-service-credentials.json
+          echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/app/demo.jks
+          echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/app/key.properties
+      - name: Deploy both platforms
+        if: env.PLATFORM == 'all'
+        run: sh scripts/deploy-demo.sh
+      - name: Deploy Android
+        if: env.PLATFORM == 'android'
+        run: sh scripts/deploy-demo-android.sh
+      - name: Deploy iOS
+        if: env.PLATFORM == 'ios'
+        run: sh scripts/deploy-demo-ios.sh
