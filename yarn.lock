@@ -1716,6 +1716,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ihreapotheken/ia-sdk-ordering@workspace:packages/ordering"
   dependencies:
+    "@ihreapotheken/ia-sdk-core": "workspace:*"
     "@ihreapotheken/ia-sdk-interface": "workspace:*"
     "@react-native-community/cli": "npm:20.0.1"
     "@react-native/babel-preset": "npm:0.81.1"
@@ -1736,6 +1737,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ihreapotheken/ia-sdk-over-the-counter@workspace:packages/over-the-counter"
   dependencies:
+    "@ihreapotheken/ia-sdk-core": "workspace:*"
     "@ihreapotheken/ia-sdk-interface": "workspace:*"
     "@react-native-community/cli": "npm:20.0.1"
     "@react-native/babel-preset": "npm:0.81.1"

@@ -2,9 +2,22 @@ def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['IaSdkCore_' + name]
 }
 
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+  }
+  dependencies {
+    def composeKotlinVersion = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : "2.1.20"
+    classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:$composeKotlinVersion"
+  }
+}
+
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "com.facebook.react"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["IaSdkCore_" + name]).toInteger()

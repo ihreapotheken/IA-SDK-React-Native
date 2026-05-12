@@ -255,6 +255,21 @@ export interface TransactionSignatures {
 }
 
 /**
+ * Product display type determining which product collection to show in
+ * the [IaProductGrid] component.
+ */
+export enum IaProductDisplayType {
+  /** Currently active pharmacy offers. */
+  CurrentOffers = 'currentOffers',
+  /** Monthly featured products. */
+  ProductsOfTheMonth = 'productsOfTheMonth',
+  /** Product recommendations based on a specific product (pzn). */
+  ProductRecommendations = 'productRecommendations',
+  /** Products that other customers also bought based on a specific product (pzn). */
+  CustomersAlsoBought = 'customersAlsoBought',
+}
+
+/**
  * Base interface for all SDK modules.
  */
 export interface IaModule {

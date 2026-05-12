@@ -39,6 +39,7 @@
     "@ihreapotheken/ia-sdk-interface": "workspace:*"
   },
   "devDependencies": {
+    "@ihreapotheken/ia-sdk-core": "workspace:*",
     "@react-native-community/cli": "20.0.1",
     "@react-native/babel-preset": "0.81.1",
     "@types/react": "^19.1.0",
