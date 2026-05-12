@@ -68,9 +68,6 @@ public class IaSdkCardLinkImpl: NSObject {
         )
         CardLink.legacyStyle = style
 
-        // Set environment
-        CardLink.environment = parseEnvironment(environment)
-
         // Create configuration
         let config = CardLinkConfiguration(
             pharmacyId: pharmacyId,
@@ -187,11 +184,11 @@ public class IaSdkCardLinkImpl: NSObject {
     }
 
     @objc public func getEnvironmentIOS(completionHandler: @escaping (String?) -> Void) {
-        let env = CardLink.environment
+        let env = IASDK.getEnvironment()
         switch env {
-        case .debugDEV, .debugQA:
+        case .dev, .staging:
             completionHandler("DEBUG")
-        case .production:
+        case .prod:
             completionHandler("PRODUCTION")
         @unknown default:
             completionHandler("PRODUCTION")
@@ -277,15 +274,6 @@ public class IaSdkCardLinkImpl: NSObject {
             return .declined
         default:
             return .undetermined
-        }
-    }
-
-    private func parseEnvironment(_ value: String?) -> CLEnvironment {
-        switch value {
-        case "DEBUG":
-            return .debugQA
-        default:
-            return .production
         }
     }
 
