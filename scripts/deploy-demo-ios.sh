@@ -26,6 +26,7 @@ rm -rf $TMPDIR/metro-*
 yarn install
 
 cd "$PROJECT_DIR/example"
+bundle install
 npx react-native build-ios --only-pods
 cd "$PROJECT_DIR"
 
