@@ -25,6 +25,10 @@ rm -rf $TMPDIR/react-*
 rm -rf $TMPDIR/metro-*
 yarn install
 
+cd "$PROJECT_DIR/example"
+npx react-native build-ios --only-pods
+cd "$PROJECT_DIR"
+
 # Define the iOS output file paths.
 XCARCHIVE_PATH="$PROJECT_DIR/example/ios/build/ia-lib-demo.xcarchive"
 IPA_DIR="$PROJECT_DIR/example/ios/build/ipa"
