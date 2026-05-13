@@ -36,5 +36,17 @@ target 'IaSdkReactNativeExample' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Workaround for `fmt` consteval compile errors under Xcode's newer clang
+    # (e.g. iOS 26 SDK). Disables fmt's use of `consteval` and falls back to
+    # plain `constexpr`, which compiles cleanly. Required for Release/Archive
+    # builds; Debug happens to skip the problematic path.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FMT_USE_CONSTEVAL=0'
+      end
+    end
   end
 end
