@@ -49,17 +49,29 @@ jobs:
           echo "==> Keystore file size: $(wc -c < $KEYSTORE) bytes"
           echo "==> Aliases inside keystore (validates store password):"
           keytool -list -keystore "$KEYSTORE" -storepass "$STORE_PASS" 2>&1 | sed -n '/^Your keystore contains/,$p'
-          echo "==> Probing alias '$KEY_ALIAS' with key password (validates key password):"
+          echo "==> Probing alias '$KEY_ALIAS' (validates store password + alias):"
           if keytool -list -keystore "$KEYSTORE" -storepass "$STORE_PASS" -alias "$KEY_ALIAS" >/dev/null 2>&1; then
             echo "  alias exists in store"
           else
             echo "  alias DOES NOT exist with the given storePassword"
             exit 1
           fi
-          if keytool -keypasswd -keystore "$KEYSTORE" -storepass "$STORE_PASS" -alias "$KEY_ALIAS" -keypass "$KEY_PASS" -new "$KEY_PASS" >/dev/null 2>&1; then
+          # Validate the keyPassword by attempting to import the entry into a
+          # throwaway keystore. PKCS12 doesn't support `keytool -keypasswd`,
+          # but `-importkeystore` exercises both store and key passwords on
+          # both JKS and PKCS12.
+          TMP_KS=$(mktemp -u)
+          if keytool -importkeystore -noprompt \
+              -srckeystore "$KEYSTORE" -srcstorepass "$STORE_PASS" \
+              -srcalias "$KEY_ALIAS" -srckeypass "$KEY_PASS" \
+              -destkeystore "$TMP_KS" -deststoretype PKCS12 \
+              -deststorepass "$STORE_PASS" -destkeypass "$KEY_PASS" \
+              >/dev/null 2>&1; then
             echo "  key password is correct"
+            rm -f "$TMP_KS"
           else
             echo "  key password is WRONG (or store/key combination invalid)"
+            rm -f "$TMP_KS"
             exit 1
           fi
       - name: Deploy both platforms
