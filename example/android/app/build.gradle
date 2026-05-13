@@ -3,6 +3,14 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply plugin: "com.google.firebase.appdistribution"
 
+// Load release signing credentials from key.properties when present (CI writes
+// this from a GitHub secret). Falls back to local defaults for dev builds.
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file("app/key.properties")
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -97,10 +105,10 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file(rootProject.file("./app/demo.jks").path)
-            storePassword 'Password1!'
-            keyAlias 'demo'
-            keyPassword 'Password1!'
+            storeFile file(rootProject.file("./app/" + (keystoreProps['storeFile'] ?: 'demo.jks')).path)
+            storePassword keystoreProps['storePassword'] ?: 'Password1!'
+            keyAlias keystoreProps['keyAlias'] ?: 'demo'
+            keyPassword keystoreProps['keyPassword'] ?: 'Password1!'
         }
     }
     packaging {

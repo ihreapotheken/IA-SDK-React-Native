@@ -28,30 +28,13 @@ yarn install
 # Move to native project location.
 cd "$PROJECT_DIR/example/android"
 
-# Build the Android project.
+# Build the Android project. Gradle handles zipalign + V1/V2 signing as part
+# of assembleRelease using the signingConfigs.release config in build.gradle,
+# which reads credentials from app/key.properties (written by CI from a
+# GitHub secret) and falls back to local defaults otherwise.
 ./gradlew assembleRelease
 
-# Define the output location.
-APK_OUTPUT_DIR="$PROJECT_DIR/example/android/app/build/outputs/apk/release"
-
-# After the app is built, it needs to be aligned.
-zipalign -v -p 4 \
-  "$APK_OUTPUT_DIR/app-release.apk" \
-  "$APK_OUTPUT_DIR/app-release-aligned.apk"
-
-# Once the app is aligned, it needs to be signed.
-apksigner sign \
-  --ks "$PROJECT_DIR/example/android/app/demo.jks" \
-  --ks-key-alias demo \
-  --ks-pass pass:Password1! \
-  --out "$APK_OUTPUT_DIR/app-release.apk" \
-  "$APK_OUTPUT_DIR/app-release-aligned.apk"
-
-# Verify the signing process has completed successfully.
-apksigner verify "$APK_OUTPUT_DIR/app-release.apk"
-
 # Upload the APK to the Firebase app distribution service.
-cd $PROJECT_DIR/example/android
 ./gradlew appDistributionUploadRelease
 
 # Display an informative message.
