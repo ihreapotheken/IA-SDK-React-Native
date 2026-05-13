@@ -35,6 +35,33 @@ jobs:
           echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/app/fb-distribution-service-credentials.json
           echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/app/demo.jks
           echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/app/key.properties
+      - name: Validate Android keystore
+        if: env.PLATFORM == 'all' || env.PLATFORM == 'android'
+        run: |
+          set -u
+          KEYSTORE=example/android/app/demo.jks
+          PROPS=example/android/app/key.properties
+          echo "==> key.properties keys present (values redacted):"
+          awk -F= 'NF>=2 && $1 !~ /^[[:space:]]*#/ {print "  - " $1}' "$PROPS"
+          STORE_PASS=$(awk -F= '$1=="storePassword"{print substr($0,index($0,"=")+1)}' "$PROPS")
+          KEY_ALIAS=$(awk -F= '$1=="keyAlias"{print substr($0,index($0,"=")+1)}' "$PROPS")
+          KEY_PASS=$(awk -F= '$1=="keyPassword"{print substr($0,index($0,"=")+1)}' "$PROPS")
+          echo "==> Keystore file size: $(wc -c < $KEYSTORE) bytes"
+          echo "==> Aliases inside keystore (validates store password):"
+          keytool -list -keystore "$KEYSTORE" -storepass "$STORE_PASS" 2>&1 | sed -n '/^Your keystore contains/,$p'
+          echo "==> Probing alias '$KEY_ALIAS' with key password (validates key password):"
+          if keytool -list -keystore "$KEYSTORE" -storepass "$STORE_PASS" -alias "$KEY_ALIAS" >/dev/null 2>&1; then
+            echo "  alias exists in store"
+          else
+            echo "  alias DOES NOT exist with the given storePassword"
+            exit 1
+          fi
+          if keytool -keypasswd -keystore "$KEYSTORE" -storepass "$STORE_PASS" -alias "$KEY_ALIAS" -keypass "$KEY_PASS" -new "$KEY_PASS" >/dev/null 2>&1; then
+            echo "  key password is correct"
+          else
+            echo "  key password is WRONG (or store/key combination invalid)"
+            exit 1
+          fi
       - name: Deploy both platforms
         if: env.PLATFORM == 'all'
         run: sh scripts/deploy-demo.sh
