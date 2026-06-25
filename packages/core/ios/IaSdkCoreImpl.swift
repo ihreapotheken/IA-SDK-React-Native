@@ -22,12 +22,16 @@ public class IaSdkCoreImpl: NSObject {
 
     /// List of registered module type names for dynamic registration.
     /// We store strings to avoid main actor isolation issues with IASDKModule static properties.
-    nonisolated(unsafe) private static var registeredModuleNames: Set<String> = ["integrations"]
+    // Always present: "integrations", plus the mandatory always-on features
+    // "apofinder" (pharmacy selection) and "appointments". These are owned by
+    // the core, not tied to any optional feature module. ("appointments" maps
+    // to no separate IASDKModule on iOS — see buildRegisteredModules.)
+    nonisolated(unsafe) private static var registeredModuleNames: Set<String> = ["integrations", "apofinder", "appointments"]
 
     /// Register additional modules to be initialized with the SDK.
     @objc public static func registerModule(_ moduleType: String) {
         // Validate the module type
-        let validModules = ["ordering", "overTheCounter", "apofinder", "prescription", "cardLink", "pharmacyDetails"]
+        let validModules = ["ordering", "overTheCounter", "apofinder", "prescription", "cardLink", "pharmacyDetails", "appointments"]
         if validModules.contains(moduleType) {
             registeredModuleNames.insert(moduleType)
             print("[IaSdkCore] Registered module: \(moduleType)")
@@ -56,6 +60,10 @@ public class IaSdkCoreImpl: NSObject {
                 modules.append(.cardLink)
             case "pharmacyDetails":
                 modules.append(.pharmacy)
+            case "appointments":
+                // Appointment booking is part of the Integrations module on iOS;
+                // there is no dedicated IASDKModule to register.
+                break
             default:
                 break
             }
@@ -189,6 +197,13 @@ public class IaSdkCoreImpl: NSObject {
         }
     }
 
+    @objc(launchApofinderIOS)
+    public func launchApofinderIOS() {
+        DispatchQueue.main.async {
+            IAApofinderScreen(isCancellable: true, onFinish: { _ in }).present()
+        }
+    }
+
     @objc(logoutIOS:)
     public func logoutIOS(
         completionHandler: @escaping (String?) -> Void
@@ -268,6 +283,118 @@ public class IaSdkCoreImpl: NSObject {
     ) {
         IASDK.cleanCache(initialization: initialization, prerequisites: prerequisites)
         completionHandler(nil)
+    }
+
+    /// Maps a German salutation string to the SDK salutation, or nil if unrecognised.
+    private func mapSalutation(_ salutation: String?) -> IAUserSalutation? {
+        switch salutation?.lowercased() {
+        case "herr":
+            return .male
+        case "frau":
+            return .female
+        case "keine angabe":
+            return .notSpecified
+        case .some:
+            return .diverse
+        default:
+            return nil
+        }
+    }
+
+    private func buildUserAddress(
+        firstName: String,
+        lastName: String,
+        additionalInfo: String?,
+        street: String,
+        houseNumber: String,
+        zipCode: String,
+        city: String,
+        salutation: String?,
+        phoneNumberCountryCode: Int?,
+        phoneNumberWithoutCountryCode: String?
+    ) -> IAUserAddress {
+        var phoneNumber: IAPhoneNumber?
+        if let countryCode = phoneNumberCountryCode,
+           let number = phoneNumberWithoutCountryCode {
+            phoneNumber = IAPhoneNumber(countryCode: countryCode, phoneNumber: number)
+        }
+        return IAUserAddress(
+            firstName: firstName,
+            lastName: lastName,
+            additionalInfo: additionalInfo,
+            street: street,
+            houseNumber: houseNumber,
+            zipCode: zipCode,
+            city: city,
+            salutation: mapSalutation(salutation),
+            phoneNumber: phoneNumber
+        )
+    }
+
+    @objc(
+        setUserBillingAddressIOS:lastName:additionalInfo:street:houseNumber:
+        zipCode:city:salutation:phoneNumberCountryCode:phoneNumberWithoutCountryCode:completionHandler:
+    )
+    public func setUserBillingAddressIOS(
+        firstName: String,
+        lastName: String,
+        additionalInfo: String?,
+        street: String,
+        houseNumber: String,
+        zipCode: String,
+        city: String,
+        salutation: String?,
+        phoneNumberCountryCode: NSNumber?,
+        phoneNumberWithoutCountryCode: String?,
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        let address = buildUserAddress(
+            firstName: firstName, lastName: lastName, additionalInfo: additionalInfo,
+            street: street, houseNumber: houseNumber, zipCode: zipCode, city: city,
+            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode?.intValue,
+            phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode
+        )
+        Task.init {
+            do {
+                try await IASDK.setUserBillingAddress(address)
+                completionHandler(nil)
+            } catch {
+                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @objc(
+        setUserDeliveryAddressIOS:lastName:additionalInfo:street:houseNumber:
+        zipCode:city:salutation:phoneNumberCountryCode:phoneNumberWithoutCountryCode:completionHandler:
+    )
+    public func setUserDeliveryAddressIOS(
+        firstName: String,
+        lastName: String,
+        additionalInfo: String?,
+        street: String,
+        houseNumber: String,
+        zipCode: String,
+        city: String,
+        salutation: String?,
+        phoneNumberCountryCode: NSNumber?,
+        phoneNumberWithoutCountryCode: String?,
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        let address = buildUserAddress(
+            firstName: firstName, lastName: lastName, additionalInfo: additionalInfo,
+            street: street, houseNumber: houseNumber, zipCode: zipCode, city: city,
+            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode?.intValue,
+            phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode
+        )
+        Task.init {
+            do {
+                try await IASDK.setUserDeliveryAddress(address)
+                completionHandler(nil)
+            } catch {
+                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
+            }
+        }
     }
 }
 

@@ -9,21 +9,21 @@ PODS:
   - hermes-engine (0.81.1):
     - hermes-engine/Pre-built (= 0.81.1)
   - hermes-engine/Pre-built (0.81.1)
-  - IACardLink (2.5.0-beta.1):
+  - IACardLink (2.5.0):
     - GematikOpenSSL (= 4.3.1)
-    - IACore (= 2.5.0-beta.1)
-  - IACore (2.5.0-beta.1):
-    - IOSKit (= 2.5.0-beta.1)
-  - IAIntegrations (2.5.0-beta.1):
-    - IACore (= 2.5.0-beta.1)
-  - IAOrdering (2.5.0-beta.1):
-    - IACore (= 2.5.0-beta.1)
-  - IAOverTheCounter (2.5.0-beta.1):
-    - IACore (= 2.5.0-beta.1)
-  - IAPharmacy (2.5.0-beta.1):
-    - IACore (= 2.5.0-beta.1)
-  - IAPrescription (2.5.0-beta.1):
-    - IACore (= 2.5.0-beta.1)
+    - IACore (= 2.5.0)
+  - IACore (2.5.0):
+    - IOSKit (= 2.5.0)
+  - IAIntegrations (2.5.0):
+    - IACore (= 2.5.0)
+  - IAOrdering (2.5.0):
+    - IACore (= 2.5.0)
+  - IAOverTheCounter (2.5.0):
+    - IACore (= 2.5.0)
+  - IAPharmacy (2.5.0):
+    - IACore (= 2.5.0)
+  - IAPrescription (2.5.0):
+    - IACore (= 2.5.0)
   - IaSdkCardLink (1.0.0):
     - boost
     - DoubleConversion
@@ -31,7 +31,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IACardLink (= 2.5.0-beta.1)
+    - IACardLink (= 2.5.0)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -61,12 +61,12 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IACardLink (= 2.5.0-beta.1)
-    - IAIntegrations (= 2.5.0-beta.1)
-    - IAOrdering (= 2.5.0-beta.1)
-    - IAOverTheCounter (= 2.5.0-beta.1)
-    - IAPharmacy (= 2.5.0-beta.1)
-    - IAPrescription (= 2.5.0-beta.1)
+    - IACardLink (= 2.5.0)
+    - IAIntegrations (= 2.5.0)
+    - IAOrdering (= 2.5.0)
+    - IAOverTheCounter (= 2.5.0)
+    - IAPharmacy (= 2.5.0)
+    - IAPrescription (= 2.5.0)
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -95,7 +95,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAOrdering (= 2.5.0-beta.1)
+    - IAOrdering (= 2.5.0)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -125,7 +125,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAOverTheCounter (= 2.5.0-beta.1)
+    - IAOverTheCounter (= 2.5.0)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -155,7 +155,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAPharmacy (= 2.5.0-beta.1)
+    - IAPharmacy (= 2.5.0)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -185,7 +185,7 @@ PODS:
     - fmt
     - glog
     - hermes-engine
-    - IAPrescription (= 2.5.0-beta.1)
+    - IAPrescription (= 2.5.0)
     - IaSdkCore
     - RCT-Folly
     - RCT-Folly/Fabric
@@ -208,7 +208,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - IOSKit (2.5.0-beta.1)
+  - IOSKit (2.5.0)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -1949,6 +1949,93 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - SocketRocket
+  - react-native-safe-area-context (5.8.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - react-native-safe-area-context/common (= 5.8.0)
+    - react-native-safe-area-context/fabric (= 5.8.0)
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - react-native-safe-area-context/common (5.8.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - react-native-safe-area-context/fabric (5.8.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - react-native-safe-area-context/common
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - React-NativeModulesApple (0.81.1):
     - boost
     - DoubleConversion
@@ -2505,6 +2592,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -2646,6 +2734,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-safe-area-context:
+    :path: "../node_modules/react-native-safe-area-context"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -2718,20 +2808,20 @@ SPEC CHECKSUMS:
   GematikOpenSSL: e0c7ed81c689ef7747104e8c22ab8846a1910ba1
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 4f8246b1f6d79f625e0d99472d1f3a71da4d28ca
-  IACardLink: 1f20f3f517e376de6c3b863bb4106903af5f19e4
-  IACore: d64697af36ca3814598c95b1c6c74826ec71dd2d
-  IAIntegrations: 09b2520db8d1b2daacd68931808a79eed22b850f
-  IAOrdering: a9ab56b33ae33c3007ff19641f91e6c90786f278
-  IAOverTheCounter: 3dd760b7107b3fe4f6f0b909b30dbbf703aa3a86
-  IAPharmacy: 363704c0fff5a25a1a1b8f5bc170d2af4fe305b0
-  IAPrescription: c6baaae41b03134a06b257ed0847f0267c03398f
-  IaSdkCardLink: 7b7cb47d92711593568ea7ee9b5aab0893b13a0b
-  IaSdkCore: ee91712da4c94024b293f44d6462819fd6695a94
-  IaSdkOrdering: 51c4a6c7cb7e0993ddd1f0b598915411cd2cf20e
-  IaSdkOtc: a2a4b75e7fa8ee88350600fe7d8ac6f82c9d0e71
-  IaSdkPharmacy: 26566736b41f6fc706428a98fa6c71c36377aba5
-  IaSdkPrescription: ba160628ba512f2188d580dbdbb13d2fb7728318
-  IOSKit: e4e7f956875292186e0a4c2cff0be18d884eb5fb
+  IACardLink: fc9ef335b7a402d00946e324039d2b716d6ed92c
+  IACore: e2787fc8006625020d78a08b410130b9cd0d15b4
+  IAIntegrations: 23a81fde5f723402664003ff5b526c90c677e356
+  IAOrdering: 7cadbb1ed72c574d55a55acc5f0e512f0cd6ab35
+  IAOverTheCounter: d347751eb784d07dc11bee96b704cecfe524c4e6
+  IAPharmacy: 855b2cd8630f8a67b738b5fe2f520e86f30d35b7
+  IAPrescription: ae201c735a6e961c2ef74b4c8f3e89c2d7a6084f
+  IaSdkCardLink: ae52a299db03a981c111344aa1dd8e475f89c732
+  IaSdkCore: df170555eecd2726c7bf5463d81c0c565ffb9cbd
+  IaSdkOrdering: 229f0a9ea003a6196bef4cf4508a4c5e4df15a75
+  IaSdkOtc: 31a66432f4acdd9f222d49ffd29cfd26ee218b2f
+  IaSdkPharmacy: 242f9f6db123cf85ccb311e08487b7d78b5977ac
+  IaSdkPrescription: 0ae0ff9c468d9e5d57b369970646c43b0b3c9f68
+  IOSKit: 913655bd0e45cf14cb7714214f639e19c05b6b3b
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: c4b9e2fd0ab200e3af72b013ed6113187c607077
   RCTRequired: e97dd5dafc1db8094e63bc5031e0371f092ae92a
@@ -2765,6 +2855,7 @@ SPEC CHECKSUMS:
   React-logger: 7aef4d74123e5e3d267e5af1fbf5135b5a0d8381
   React-Mapbuffer: 91e0eab42a6ae7f3e34091a126d70fc53bd3823e
   React-microtasksnativemodule: 1ead4fe154df3b1ba34b5a9e35ef3c4bdfa72ccb
+  react-native-safe-area-context: ebd2c2ece5e6e650a6963184039ec8cfd8960d86
   React-NativeModulesApple: eff2eba56030eb0d107b1642b8f853bc36a833ac
   React-oscompat: b12c633e9c00f1f99467b1e0e0b8038895dae436
   React-perflogger: 58d12c4e5df1403030c97b9c621375c312cca454

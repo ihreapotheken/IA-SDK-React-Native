@@ -15,9 +15,8 @@ public class IaSdkPharmacyImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        #if canImport(IaSdkCore)
-        IaSdkCoreImpl.registerModule("apofinder")
-        #endif
+        // Apofinder (pharmacy selection) is now a mandatory feature registered
+        // by the core module, so the pharmacy module no longer registers it.
     }
 
     @objc(launchPharmacyDetailsIOS)

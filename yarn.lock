@@ -5081,6 +5081,7 @@ __metadata:
     react-native-builder-bob: "npm:^0.40.16"
     react-native-dotenv: "npm:^3.4.11"
     react-native-monorepo-config: "npm:^0.1.9"
+    react-native-safe-area-context: "npm:^5"
   languageName: unknown
   linkType: soft
 
@@ -7011,6 +7012,16 @@ __metadata:
     escape-string-regexp: "npm:^5.0.0"
     fast-glob: "npm:^3.3.3"
   checksum: 10c0/42dd8de1bb976c794fe1124ab08fba4645f189c7bdbdcd24dc0e05b639591e690891f89e5dba33c57691840365af85b48004c29c1c128ff195a95e766bb9752e
+  languageName: node
+  linkType: hard
+
+"react-native-safe-area-context@npm:^5":
+  version: 5.8.0
+  resolution: "react-native-safe-area-context@npm:5.8.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/86d1375ce17d549b541d157148d9d093f9e918de47d3b0a5cbc4cb6afe619aa52e99f07dc62ee0878eaa70e8da3411193b24cfee1b7b271ffd295d0fce83d128
   languageName: node
   linkType: hard
 

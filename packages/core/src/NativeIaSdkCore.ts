@@ -26,6 +26,8 @@ export interface Spec extends TurboModule {
 
   startDashboardActivityIOS?(): void;
 
+  launchApofinderIOS?(): void;
+
   finishAllActivitiesIOS?(): void;
 
   // Android methods (callback-based)
@@ -52,6 +54,8 @@ export interface Spec extends TurboModule {
 
   startDashboardActivityAndroid?(): void;
 
+  launchApofinderAndroid?(): void;
+
   finishAllActivitiesAndroid?(): void;
 
   transferSDKv1UserDataIOS?(): void;
@@ -74,6 +78,36 @@ export interface Spec extends TurboModule {
   cleanCacheIOS?(
     initialization: boolean,
     prerequisites: boolean,
+    completionHandler: (error: string | null) => void
+  ): void;
+
+  // setUserBillingAddress - iOS only
+  setUserBillingAddressIOS?(
+    firstName: string,
+    lastName: string,
+    additionalInfo: string | null,
+    street: string,
+    houseNumber: string,
+    zipCode: string,
+    city: string,
+    salutation: string | null,
+    phoneNumberCountryCode: number | null,
+    phoneNumberWithoutCountryCode: string | null,
+    completionHandler: (error: string | null) => void
+  ): void;
+
+  // setUserDeliveryAddress - iOS only
+  setUserDeliveryAddressIOS?(
+    firstName: string,
+    lastName: string,
+    additionalInfo: string | null,
+    street: string,
+    houseNumber: string,
+    zipCode: string,
+    city: string,
+    salutation: string | null,
+    phoneNumberCountryCode: number | null,
+    phoneNumberWithoutCountryCode: string | null,
     completionHandler: (error: string | null) => void
   ): void;
 }

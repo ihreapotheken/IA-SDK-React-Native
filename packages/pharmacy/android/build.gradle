@@ -81,7 +81,6 @@ dependencies {
   iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
 
   implementation "de.ihreapotheken.sdk:pharmacy:${iaDeSdkVersion}"
-  implementation "de.ihreapotheken.sdk:apofinder:${iaDeSdkVersion}"
   // Need integrations for IaSdkActivity, IaScreen, etc.
   implementation "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
   // Reference core module for IaSdkCoreModule.registerModuleType

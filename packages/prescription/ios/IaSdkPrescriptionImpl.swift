@@ -19,4 +19,11 @@ public class IaSdkPrescriptionImpl: NSObject {
         IaSdkCoreImpl.registerModule("prescription")
         #endif
     }
+
+    @objc(launchRedeemPrescriptionScreenIOS)
+    public func launchRedeemPrescriptionScreenIOS() {
+        DispatchQueue.main.async {
+            IARedeemPrescriptionScreen().present()
+        }
+    }
 }

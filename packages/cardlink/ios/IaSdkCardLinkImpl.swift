@@ -59,14 +59,12 @@ public class IaSdkCardLinkImpl: NSObject {
         finishAction: String?,
         completionHandler: @escaping (String?) -> Void
     ) {
-        // Setup style
-        let style = CardLinkStyle(
-            primaryColor: UIColor(argb: primaryColor?.intValue),
-            buttonsColor: UIColor(argb: buttonsColor?.intValue),
-            textLinkColor: UIColor(argb: textLinkColor?.intValue),
-            bottomNavigationColor: UIColor(argb: bottomNavigationColor?.intValue)
-        )
-        CardLink.legacyStyle = style
+        // Note: As of iOS AppSDK 2.5.0 the per-launch CardLink color styling
+        // (CardLinkStyle / CardLink.legacyStyle) was removed — CardLink styling
+        // is now driven by the pharmacy theme/BEP configuration. The color
+        // parameters remain on the JS API for backwards compatibility and for
+        // Android, but are no longer applied here.
+        _ = (primaryColor, buttonsColor, textLinkColor, bottomNavigationColor)
 
         // Create configuration
         let config = CardLinkConfiguration(
