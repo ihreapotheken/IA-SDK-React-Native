@@ -12,6 +12,8 @@ import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.core.SdkModule
+import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.appointments.AppointmentsModule
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
@@ -53,12 +55,17 @@ class IaSdkCoreModule(
     shouldFetchThemeFromRemote: Boolean,
     completionHandler: Callback,
   ) {
-    // Register SDK with dynamically registered modules
-    sdkModule = if (registeredModuleTypes.isEmpty()) {
-      IaSdk.register()
-    } else {
-      IaSdk.register(*registeredModuleTypes.toTypedArray())
+    // Register SDK with dynamically registered modules.
+    // ApofinderModule and AppointmentsModule are always registered (mandatory,
+    // always-on features), independent of which optional feature modules the
+    // host opted into.
+    val modulesToRegister = registeredModuleTypes.toMutableList()
+    for (mandatory in listOf(ApofinderModule, AppointmentsModule)) {
+      if (!modulesToRegister.contains(mandatory)) {
+        modulesToRegister.add(mandatory)
+      }
     }
+    sdkModule = IaSdk.register(*modulesToRegister.toTypedArray())
 
     val serverEnv = when (serverEnvironmentId.lowercase()) {
       "development" -> EnvironmentType.DEV

@@ -120,4 +120,9 @@ dependencies {
   // Core only depends on integrations module
   // Use api so feature modules can transitively access integrations types
   api "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
+  // Apofinder (pharmacy selection) and appointment booking are mandatory,
+  // always-on features registered by the core module — not tied to any
+  // optional feature module.
+  implementation "de.ihreapotheken.sdk:apofinder:${iaDeSdkVersion}"
+  implementation "de.ihreapotheken.sdk:appointments:${iaDeSdkVersion}"
 }

@@ -22,7 +22,11 @@ public class IaSdkCoreImpl: NSObject {
 
     /// List of registered module type names for dynamic registration.
     /// We store strings to avoid main actor isolation issues with IASDKModule static properties.
-    nonisolated(unsafe) private static var registeredModuleNames: Set<String> = ["integrations"]
+    // Always present: "integrations", plus the mandatory always-on features
+    // "apofinder" (pharmacy selection) and "appointments". These are owned by
+    // the core, not tied to any optional feature module. ("appointments" maps
+    // to no separate IASDKModule on iOS — see buildRegisteredModules.)
+    nonisolated(unsafe) private static var registeredModuleNames: Set<String> = ["integrations", "apofinder", "appointments"]
 
     /// Register additional modules to be initialized with the SDK.
     @objc public static func registerModule(_ moduleType: String) {

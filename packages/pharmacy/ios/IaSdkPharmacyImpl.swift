@@ -15,14 +15,8 @@ public class IaSdkPharmacyImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        #if canImport(IaSdkCore)
-        IaSdkCoreImpl.registerModule("apofinder")
-        // Appointment booking ships with the pharmacy experience. On iOS it is
-        // part of the Integrations module / BEP configuration, so this is a
-        // tracked no-op; on Android the pharmacy module registers the native
-        // AppointmentsModule.
-        IaSdkCoreImpl.registerModule("appointments")
-        #endif
+        // Apofinder (pharmacy selection) is now a mandatory feature registered
+        // by the core module, so the pharmacy module no longer registers it.
     }
 
     @objc(launchPharmacyDetailsIOS)
