@@ -97,7 +97,7 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
                          zipCode:(NSString *)zipCode
                             city:(NSString *)city
                       salutation:(NSString *)salutation
-          phoneNumberCountryCode:(NSString *)phoneNumberCountryCode
+          phoneNumberCountryCode:(NSNumber *)phoneNumberCountryCode
    phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
                completionHandler:(RCTResponseSenderBlock)completion {
   [[IaSdkCoreImpl shared] setUserBillingAddressIOS:firstName
@@ -123,7 +123,7 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
                           zipCode:(NSString *)zipCode
                              city:(NSString *)city
                        salutation:(NSString *)salutation
-           phoneNumberCountryCode:(NSString *)phoneNumberCountryCode
+           phoneNumberCountryCode:(NSNumber *)phoneNumberCountryCode
     phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
                 completionHandler:(RCTResponseSenderBlock)completion {
   [[IaSdkCoreImpl shared] setUserDeliveryAddressIOS:firstName

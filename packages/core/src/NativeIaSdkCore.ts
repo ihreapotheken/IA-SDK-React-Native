@@ -91,7 +91,7 @@ export interface Spec extends TurboModule {
     zipCode: string,
     city: string,
     salutation: string | null,
-    phoneNumberCountryCode: string | null,
+    phoneNumberCountryCode: number | null,
     phoneNumberWithoutCountryCode: string | null,
     completionHandler: (error: string | null) => void
   ): void;
@@ -106,7 +106,7 @@ export interface Spec extends TurboModule {
     zipCode: string,
     city: string,
     salutation: string | null,
-    phoneNumberCountryCode: string | null,
+    phoneNumberCountryCode: number | null,
     phoneNumberWithoutCountryCode: string | null,
     completionHandler: (error: string | null) => void
   ): void;

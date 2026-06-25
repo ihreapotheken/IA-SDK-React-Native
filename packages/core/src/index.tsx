@@ -435,7 +435,7 @@ export class IaSdk {
         address.zipCode,
         address.city,
         address.salutation ?? null,
-        address.phoneNumberCountryCode?.toString() ?? null,
+        address.phoneNumberCountryCode ?? null,
         address.phoneNumberWithoutCountryCode ?? null,
         (error: string | null) => {
           if (error === null) {
@@ -468,7 +468,7 @@ export class IaSdk {
         address.zipCode,
         address.city,
         address.salutation ?? null,
-        address.phoneNumberCountryCode?.toString() ?? null,
+        address.phoneNumberCountryCode ?? null,
         address.phoneNumberWithoutCountryCode ?? null,
         (error: string | null) => {
           if (error === null) {

@@ -310,11 +310,11 @@ public class IaSdkCoreImpl: NSObject {
         zipCode: String,
         city: String,
         salutation: String?,
-        phoneNumberCountryCode: String?,
+        phoneNumberCountryCode: Int?,
         phoneNumberWithoutCountryCode: String?
     ) -> IAUserAddress {
         var phoneNumber: IAPhoneNumber?
-        if let countryCode = phoneNumberCountryCode.flatMap({ Int($0) }),
+        if let countryCode = phoneNumberCountryCode,
            let number = phoneNumberWithoutCountryCode {
             phoneNumber = IAPhoneNumber(countryCode: countryCode, phoneNumber: number)
         }
@@ -344,14 +344,14 @@ public class IaSdkCoreImpl: NSObject {
         zipCode: String,
         city: String,
         salutation: String?,
-        phoneNumberCountryCode: String?,
+        phoneNumberCountryCode: NSNumber?,
         phoneNumberWithoutCountryCode: String?,
         completionHandler: @escaping (String?) -> Void
     ) {
         let address = buildUserAddress(
             firstName: firstName, lastName: lastName, additionalInfo: additionalInfo,
             street: street, houseNumber: houseNumber, zipCode: zipCode, city: city,
-            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode,
+            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode?.intValue,
             phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode
         )
         Task.init {
@@ -377,14 +377,14 @@ public class IaSdkCoreImpl: NSObject {
         zipCode: String,
         city: String,
         salutation: String?,
-        phoneNumberCountryCode: String?,
+        phoneNumberCountryCode: NSNumber?,
         phoneNumberWithoutCountryCode: String?,
         completionHandler: @escaping (String?) -> Void
     ) {
         let address = buildUserAddress(
             firstName: firstName, lastName: lastName, additionalInfo: additionalInfo,
             street: street, houseNumber: houseNumber, zipCode: zipCode, city: city,
-            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode,
+            salutation: salutation, phoneNumberCountryCode: phoneNumberCountryCode?.intValue,
             phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode
         )
         Task.init {
