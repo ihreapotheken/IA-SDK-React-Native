@@ -201,6 +201,34 @@ export interface GuestUserData {
 }
 
 /**
+ * User address used to pre-fill the checkout flow.
+ *
+ * Used by `setUserBillingAddress` and `setUserDeliveryAddress` (iOS only).
+ */
+export interface UserAddress {
+  /** First/personal customer name. */
+  firstName: string;
+  /** Last name or customer surname. */
+  lastName: string;
+  /** Optional additional address line (e.g., c/o, apartment). */
+  additionalInfo?: string;
+  /** Street name. */
+  street: string;
+  /** House number. */
+  houseNumber: string;
+  /** Postal/ZIP code. */
+  zipCode: string;
+  /** City. */
+  city: string;
+  /** Optional customer salutation. */
+  salutation?: Salutation;
+  /** Optional phone number country code (e.g., 49). */
+  phoneNumberCountryCode?: number;
+  /** Optional phone number without country code. */
+  phoneNumberWithoutCountryCode?: string;
+}
+
+/**
  * Insurance type classification for PDF prescriptions.
  */
 export enum PrescriptionInsuranceType {
@@ -454,6 +482,14 @@ export interface IaPharmacyModule extends IaModule {
  */
 export interface IaPrescriptionModule extends IaModule {
   readonly moduleType: IaBaseModule.Prescription;
+  /**
+   * Launches the "redeem prescription" screen on top of the navigation stack.
+   *
+   * The screen lets the user choose how to add a prescription to the cart
+   * (for example by scanning a QR code, photographing a prescription, or via
+   * CardLink), depending on which capabilities are enabled.
+   */
+  launchRedeemPrescriptionScreen(): Promise<void>;
 }
 
 /**

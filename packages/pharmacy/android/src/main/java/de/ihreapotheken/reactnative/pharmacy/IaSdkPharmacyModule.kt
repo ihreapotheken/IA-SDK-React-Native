@@ -7,6 +7,7 @@ import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.appointments.AppointmentsModule
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
@@ -29,6 +30,7 @@ class IaSdkPharmacyModule(
   override fun registerModule() {
     IaSdkCoreModule.registerModuleType(PharmacyModule)
     IaSdkCoreModule.registerModuleType(ApofinderModule)
+    IaSdkCoreModule.registerModuleType(AppointmentsModule)
   }
 
   override fun launchPharmacyDetailsAndroid() {

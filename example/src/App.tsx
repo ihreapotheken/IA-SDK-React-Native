@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
   Platform,
   Alert,
   type GestureResponderEvent,
 } from 'react-native';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { APPSDK_ACCESS_KEY } from '@env';
 import { ANDROID_APPSDK_VERSION, IOS_APPSDK_VERSION } from './generatedEnvConfig';
 import {
@@ -27,6 +29,8 @@ import type {
   IaOrderingModule,
   IaPharmacyModule,
   IaCardLinkModule,
+  IaPrescriptionModule,
+  IaOverTheCounterModule,
 } from '@ihreapotheken/ia-sdk-interface';
 import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
@@ -67,7 +71,8 @@ function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppB
 // Store module instance for CardLink view
 let cardLinkModuleInstance: IaModuleCardLink | null = null;
 
-export default function App() {
+function AppContent() {
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [isRegistered, setIsRegistered] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -173,6 +178,69 @@ export default function App() {
       const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
       await ordering.launchCartScreen();
     });
+
+  const handleLaunchProductSearch = () =>
+    withLoading(async () => {
+      const overTheCounter = iaSdk.getModule<IaOverTheCounterModule>(
+        IaBaseModule.OverTheCounter
+      );
+      await overTheCounter.launchProductSearchRoute();
+    });
+
+  const handleLaunchPharmacyDetails = () =>
+    withLoading(async () => {
+      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
+      await pharmacy.launchPharmacyDetails();
+    });
+
+  const handleLaunchApofinder = () =>
+    withLoading(async () => {
+      await iaSdk.launchApofinder();
+    });
+
+  const handleLaunchRedeemPrescription = () =>
+    withLoading(async () => {
+      const prescription = iaSdk.getModule<IaPrescriptionModule>(
+        IaBaseModule.Prescription
+      );
+      await prescription.launchRedeemPrescriptionScreen();
+    });
+
+  const handleSetBillingAddress = async () => {
+    try {
+      await iaSdk.setUserBillingAddress({
+        salutation: Salutation.Male,
+        firstName: 'First',
+        lastName: 'Last',
+        street: 'Musterstraße',
+        houseNumber: '1',
+        zipCode: '10115',
+        city: 'Berlin',
+        phoneNumberCountryCode: 49,
+        phoneNumberWithoutCountryCode: '24332442',
+      });
+      Alert.alert('Success', 'Billing address set successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
+
+  const handleSetDeliveryAddress = async () => {
+    try {
+      await iaSdk.setUserDeliveryAddress({
+        salutation: Salutation.Male,
+        firstName: 'First',
+        lastName: 'Last',
+        street: 'Musterstraße',
+        houseNumber: '2',
+        zipCode: '10115',
+        city: 'Berlin',
+      });
+      Alert.alert('Success', 'Delivery address set successfully.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
   const handleFinishAllActivities = () =>
     withLoading(async () => {
@@ -337,6 +405,38 @@ export default function App() {
 
       <View style={styles.buttonContainer}>
         <AppButton
+          title="LAUNCH PRODUCT SEARCH"
+          onPress={handleLaunchProductSearch}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="LAUNCH PHARMACY DETAILS"
+          onPress={handleLaunchPharmacyDetails}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="LAUNCH APOFINDER"
+          onPress={handleLaunchApofinder}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="LAUNCH REDEEM PRESCRIPTION"
+          onPress={handleLaunchRedeemPrescription}
+          disabled={!isInitialized}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <AppButton
           title="FINISH ALL ACTIVITIES"
           onPress={handleFinishAllActivities}
         />
@@ -374,6 +474,26 @@ export default function App() {
           <AppButton
             title="CLEAN CACHE"
             onPress={handleCleanCache}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
+
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="SET BILLING ADDRESS"
+            onPress={handleSetBillingAddress}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
+
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title="SET DELIVERY ADDRESS"
+            onPress={handleSetDeliveryAddress}
             disabled={!isInitialized}
           />
         </View>
@@ -440,7 +560,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Tab Content */}
       <View style={styles.contentContainer}>
         {activeTab === 'home' && renderHomeTab()}
@@ -449,7 +569,7 @@ export default function App() {
       </View>
 
       {/* Tab Bar */}
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'home' && styles.tabActive]}
           onPress={() => setActiveTab('home')}
@@ -482,7 +602,15 @@ export default function App() {
           <ActivityIndicator size="large" color="#000000" />
         </View>
       )}
-    </SafeAreaView>
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }
 
@@ -490,7 +618,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : undefined,
   },
   contentContainer: {
     flex: 1,
@@ -537,7 +664,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
-    paddingBottom: 20, // Safe area padding
   },
   tab: {
     flex: 1,

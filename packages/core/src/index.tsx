@@ -3,6 +3,7 @@ import type {
   IaModule,
   InitConfig,
   GuestUserData,
+  UserAddress,
   AnyIaModule,
 } from '@ihreapotheken/ia-sdk-interface';
 import {
@@ -34,6 +35,7 @@ export type {
   IaModule,
   InitConfig,
   GuestUserData,
+  UserAddress,
   TransferPrescriptionsParams,
   PdfPrescription,
   CartState,
@@ -275,6 +277,23 @@ export class IaSdk {
   }
 
   /**
+   * Launches the Apofinder (pharmacy finder) screen on top of the navigation stack.
+   */
+  async launchApofinder(): Promise<void> {
+    return new Promise((resolve) => {
+      if (Platform.OS === 'android') {
+        IaSdkCoreNative.launchApofinderAndroid?.();
+        resolve();
+      }
+
+      if (Platform.OS === 'ios') {
+        IaSdkCoreNative.launchApofinderIOS?.();
+        resolve();
+      }
+    });
+  }
+
+  /**
    * Closes all overlaying ia.de screen contents.
    */
   async finishAllActivities(): Promise<void> {
@@ -385,6 +404,72 @@ export class IaSdk {
       IaSdkCoreNative.cleanCacheIOS?.(
         initialization,
         prerequisites,
+        (error: string | null) => {
+          if (error === null) {
+            resolve();
+          } else {
+            reject(new Error(error));
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Sets the user's billing address, used to pre-fill the checkout flow (iOS only).
+   *
+   * @param address The billing address to set.
+   */
+  async setUserBillingAddress(address: UserAddress): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn('[IaSdk] setUserBillingAddress is only supported on iOS');
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCoreNative.setUserBillingAddressIOS?.(
+        address.firstName,
+        address.lastName,
+        address.additionalInfo ?? null,
+        address.street,
+        address.houseNumber,
+        address.zipCode,
+        address.city,
+        address.salutation ?? null,
+        address.phoneNumberCountryCode?.toString() ?? null,
+        address.phoneNumberWithoutCountryCode ?? null,
+        (error: string | null) => {
+          if (error === null) {
+            resolve();
+          } else {
+            reject(new Error(error));
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Sets the user's delivery address, used to pre-fill the checkout flow (iOS only).
+   *
+   * @param address The delivery address to set.
+   */
+  async setUserDeliveryAddress(address: UserAddress): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn('[IaSdk] setUserDeliveryAddress is only supported on iOS');
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCoreNative.setUserDeliveryAddressIOS?.(
+        address.firstName,
+        address.lastName,
+        address.additionalInfo ?? null,
+        address.street,
+        address.houseNumber,
+        address.zipCode,
+        address.city,
+        address.salutation ?? null,
+        address.phoneNumberCountryCode?.toString() ?? null,
+        address.phoneNumberWithoutCountryCode ?? null,
         (error: string | null) => {
           if (error === null) {
             resolve();

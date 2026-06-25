@@ -82,6 +82,8 @@ dependencies {
 
   implementation "de.ihreapotheken.sdk:pharmacy:${iaDeSdkVersion}"
   implementation "de.ihreapotheken.sdk:apofinder:${iaDeSdkVersion}"
+  // Appointment booking ships with the pharmacy experience.
+  implementation "de.ihreapotheken.sdk:appointments:${iaDeSdkVersion}"
   // Need integrations for IaSdkActivity, IaScreen, etc.
   implementation "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
   // Reference core module for IaSdkCoreModule.registerModuleType

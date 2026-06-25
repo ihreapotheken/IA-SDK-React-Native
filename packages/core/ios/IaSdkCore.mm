@@ -43,6 +43,10 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
   [[IaSdkCoreImpl shared] startDashboardActivityIOS];
 }
 
+- (void)launchApofinderIOS {
+  [[IaSdkCoreImpl shared] launchApofinderIOS];
+}
+
 - (void)logoutIOS:(RCTResponseSenderBlock)completion {
   [[IaSdkCoreImpl shared] logoutIOS:^(NSString *err) {
     completion(@[ err ?: [NSNull null] ]);
@@ -83,6 +87,67 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
                       completionHandler:^(NSString *err) {
     completion(@[ err ?: [NSNull null] ]);
   }];
+}
+
+- (void)setUserBillingAddressIOS:(NSString *)firstName
+                        lastName:(NSString *)lastName
+                  additionalInfo:(NSString *)additionalInfo
+                          street:(NSString *)street
+                     houseNumber:(NSString *)houseNumber
+                         zipCode:(NSString *)zipCode
+                            city:(NSString *)city
+                      salutation:(NSString *)salutation
+          phoneNumberCountryCode:(NSString *)phoneNumberCountryCode
+   phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
+               completionHandler:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] setUserBillingAddressIOS:firstName
+                                          lastName:lastName
+                                    additionalInfo:additionalInfo
+                                            street:street
+                                       houseNumber:houseNumber
+                                           zipCode:zipCode
+                                              city:city
+                                        salutation:salutation
+                            phoneNumberCountryCode:phoneNumberCountryCode
+                     phoneNumberWithoutCountryCode:phoneNumberWithoutCountryCode
+                                 completionHandler:^(NSString *err) {
+                                   completion(@[ err ?: [NSNull null] ]);
+                                 }];
+}
+
+- (void)setUserDeliveryAddressIOS:(NSString *)firstName
+                         lastName:(NSString *)lastName
+                   additionalInfo:(NSString *)additionalInfo
+                           street:(NSString *)street
+                      houseNumber:(NSString *)houseNumber
+                          zipCode:(NSString *)zipCode
+                             city:(NSString *)city
+                       salutation:(NSString *)salutation
+           phoneNumberCountryCode:(NSString *)phoneNumberCountryCode
+    phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
+                completionHandler:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] setUserDeliveryAddressIOS:firstName
+                                           lastName:lastName
+                                     additionalInfo:additionalInfo
+                                             street:street
+                                        houseNumber:houseNumber
+                                            zipCode:zipCode
+                                               city:city
+                                         salutation:salutation
+                             phoneNumberCountryCode:phoneNumberCountryCode
+                      phoneNumberWithoutCountryCode:phoneNumberWithoutCountryCode
+                                  completionHandler:^(NSString *err) {
+                                    completion(@[ err ?: [NSNull null] ]);
+                                  }];
+}
+
+// The ia.de SDK (IACore) APIs are @MainActor-isolated and assert main-thread
+// execution at runtime (SDK 2.5.0+). React Native invokes TurboModule methods
+// on a background queue by default, which trips that assertion and crashes
+// (EXC_BREAKPOINT in _swift_task_checkIsolated). Pin this module's methods to
+// the main queue so all IACore calls run on the main thread.
+- (dispatch_queue_t)methodQueue {
+  return dispatch_get_main_queue();
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

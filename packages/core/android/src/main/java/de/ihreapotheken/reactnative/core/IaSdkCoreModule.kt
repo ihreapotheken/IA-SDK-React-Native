@@ -108,6 +108,19 @@ class IaSdkCoreModule(
     context.startActivity(intent)
   }
 
+  override fun launchApofinderAndroid() {
+    val context: Context = reactApplicationContext.currentActivity ?: reactApplicationContext.applicationContext
+    val intent = Intent(
+      context,
+      IaSdkActivity::class.java,
+    )
+    if (context !is Activity) {
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    intent.putExtra("viewId", IaScreen.ApofinderScreen::class.simpleName!!)
+    context.startActivity(intent)
+  }
+
   override fun logoutAndroid(completionHandler: Callback) {
     val success = sdkModule.clearAllData()
     if (success) {
