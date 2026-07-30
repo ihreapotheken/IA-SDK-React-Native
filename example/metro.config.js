@@ -25,6 +25,9 @@ fs.writeFileSync(generatedPath, [
   '// Auto-generated from .env by metro.config.js — do not edit',
   `export const ANDROID_APPSDK_VERSION = '${envVars.ANDROID_APPSDK_VERSION || 'N/A'}';`,
   `export const IOS_APPSDK_VERSION = '${envVars.IOS_APPSDK_VERSION || 'N/A'}';`,
+  // E2E smoke flag: build/bundle with IA_E2E=true to boot the SDK-init smoke
+  // entry (see index.js + src/e2e/SmokeApp.tsx) instead of the demo app.
+  `export const IA_E2E = ${process.env.IA_E2E === 'true' || envVars.IA_E2E === 'true'};`,
   '',
 ].join('\n'));
 const packagesDir = path.resolve(root, 'packages');
