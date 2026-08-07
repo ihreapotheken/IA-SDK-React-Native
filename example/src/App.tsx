@@ -14,7 +14,12 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { APPSDK_ACCESS_KEY } from '@env';
-import { ANDROID_APPSDK_VERSION, IOS_APPSDK_VERSION } from './generatedEnvConfig';
+import {
+  ANDROID_APPSDK_VERSION,
+  IOS_APPSDK_VERSION,
+  SERVER_ENVIRONMENT,
+  SERVER_ENVIRONMENT_LABEL,
+} from './generatedEnvConfig';
 import {
   iaSdk,
   ServerEnvironment,
@@ -68,6 +73,13 @@ function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppB
   );
 }
 
+// Server environment the SDK is initialized with, taken from the monorepo .env
+// so the app name (DEV/QA/PROD suffix) and the SDK config can never disagree.
+const serverEnvironment =
+  (Object.values(ServerEnvironment) as string[]).includes(SERVER_ENVIRONMENT)
+    ? (SERVER_ENVIRONMENT as ServerEnvironment)
+    : ServerEnvironment.Staging;
+
 // Store module instance for CardLink view
 let cardLinkModuleInstance: IaModuleCardLink | null = null;
 
@@ -78,6 +90,8 @@ function AppContent() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cardLinkModule, setCardLinkModule] = useState<IaModuleCardLink | null>(null);
+  // Mirrors the SDK default (mascot shown) so the button label starts out truthful.
+  const [showMascotIllustrations, setShowMascotIllustrations] = useState(true);
 
   const withLoading = useCallback(async <T,>(callback: () => Promise<T>): Promise<T | undefined> => {
     setIsLoading(true);
@@ -124,7 +138,7 @@ function AppContent() {
       await iaSdk.initialize({
         accessKey: APPSDK_ACCESS_KEY as string,
         clientId: '6001',
-        serverEnvironment: ServerEnvironment.Staging,
+        serverEnvironment,
       });
       console.log('SDK initialized successfully!');
       setIsInitialized(true);
@@ -285,6 +299,22 @@ function AppContent() {
     }
   };
 
+  // The mascot renders on the CardLink FAQ screen, so toggle this and then open
+  // CardLink to see the change. Screens already on screen keep the old value.
+  const handleToggleMascotIllustrations = async () => {
+    const next = !showMascotIllustrations;
+    try {
+      await iaSdk.setShouldShowMascotIllustrations(next);
+      setShowMascotIllustrations(next);
+      Alert.alert(
+        'Mascot illustrations',
+        `${next ? 'Enabled' : 'Disabled'}. Open CardLink → FAQ to see the change.`
+      );
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
+
   const handleSetPharmacy2163 = () =>
     withLoading(async () => {
       const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
@@ -338,6 +368,8 @@ function AppContent() {
       <Text style={styles.subtitle}>
         {Platform.OS === 'ios' ? 'iOS' : 'Android'}{' '}
         {Platform.OS === 'ios' ? IOS_APPSDK_VERSION : ANDROID_APPSDK_VERSION}
+        {' · '}
+        {SERVER_ENVIRONMENT_LABEL} ({SERVER_ENVIRONMENT})
       </Text>
 
       <Text style={styles.status}>
@@ -474,6 +506,20 @@ function AppContent() {
           <AppButton
             title="CLEAN CACHE"
             onPress={handleCleanCache}
+            disabled={!isInitialized}
+          />
+        </View>
+      )}
+
+      {Platform.OS === 'ios' && (
+        <View style={styles.buttonContainer}>
+          <AppButton
+            title={
+              showMascotIllustrations
+                ? 'HIDE MASCOT ILLUSTRATIONS'
+                : 'SHOW MASCOT ILLUSTRATIONS'
+            }
+            onPress={handleToggleMascotIllustrations}
             disabled={!isInitialized}
           />
         </View>

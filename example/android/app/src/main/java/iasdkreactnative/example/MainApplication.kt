@@ -5,14 +5,13 @@ import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
-import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 
 class MainApplication : Application(), ReactApplication {
 
-  override val reactNativeHost: ReactNativeHost =
+  private val defaultReactNativeHost =
       object : DefaultReactNativeHost(this) {
         override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {
@@ -28,8 +27,23 @@ class MainApplication : Application(), ReactApplication {
         override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
       }
 
-  override val reactHost: ReactHost
-    get() = getDefaultReactHost(applicationContext, reactNativeHost)
+  /**
+   * The app runs on the New Architecture (newArchEnabled=true), so React Native starts up through
+   * [ReactHost] built from the configuration above.
+   */
+  override val reactHost: ReactHost by lazy {
+    getDefaultReactHost(applicationContext, defaultReactNativeHost)
+  }
+
+  /**
+   * The legacy bridge host is deprecated in the New Architecture and unused by this app at runtime,
+   * but [ReactApplication] still declares it and RN internals such as HeadlessJsTaskService and
+   * ReactFragment resolve it from the application, so it is served from the same configuration.
+   */
+  @Deprecated("Deprecated in the New Architecture; this app runs off reactHost.")
+  @Suppress("DEPRECATION")
+  override val reactNativeHost: com.facebook.react.ReactNativeHost
+    get() = defaultReactNativeHost
 
   override fun onCreate() {
     super.onCreate()

@@ -10,12 +10,12 @@ import de.ihreapotheken.sdk.core.data.EnvironmentType
 import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
-import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.core.SdkModule
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.appointments.AppointmentsModule
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
+import de.ihreapotheken.sdk.integrations.api.IaUserData
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import android.util.Log
@@ -146,7 +146,7 @@ class IaSdkCoreModule(
     phoneNumberWithoutCountryCode: String?,
     completionHandler: Callback,
   ) {
-    val guestUserData = GuestUser(
+    val guestUserData = IaUserData(
       salutation,
       firstName,
       lastName,

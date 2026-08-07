@@ -72,6 +72,11 @@ repositories {
   maven {
       url uri("https://nexus.link4.health/repository/link4health-anonymous/")
   }
+  // The link4health SDK releases the CardLink dependencies here; the
+  // anonymous repo above no longer serves current versions.
+  maven {
+      url uri("https://nexus.link4.health/repository/link4health-releases/")
+  }
   maven {
       url uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
       credentials {

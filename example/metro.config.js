@@ -20,6 +20,17 @@ if (fs.existsSync(envPath)) {
     }
   });
 }
+// Short labels for the server environments, matching the native demo apps
+// (staging is the QA backend). Kept in sync with android/app/build.gradle and
+// scripts/sync-app-label.sh, which derive the app name from the same value.
+const SERVER_ENVIRONMENT_LABELS = {
+  development: 'DEV',
+  staging: 'QA',
+  production: 'PROD',
+};
+const serverEnvironment = envVars.SERVER_ENVIRONMENT || 'staging';
+const serverEnvironmentLabel = SERVER_ENVIRONMENT_LABELS[serverEnvironment] || 'QA';
+
 const generatedPath = path.resolve(__dirname, 'src', 'generatedEnvConfig.ts');
 fs.writeFileSync(generatedPath, [
   '// Auto-generated from .env by metro.config.js — do not edit',
@@ -28,6 +39,8 @@ fs.writeFileSync(generatedPath, [
   // E2E smoke flag: build/bundle with IA_E2E=true to boot the SDK-init smoke
   // entry (see index.js + src/e2e/SmokeApp.tsx) instead of the demo app.
   `export const IA_E2E = ${process.env.IA_E2E === 'true' || envVars.IA_E2E === 'true'};`,
+  `export const SERVER_ENVIRONMENT = '${serverEnvironment}';`,
+  `export const SERVER_ENVIRONMENT_LABEL = '${serverEnvironmentLabel}';`,
   '',
 ].join('\n'));
 const packagesDir = path.resolve(root, 'packages');

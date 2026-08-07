@@ -285,6 +285,15 @@ public class IaSdkCoreImpl: NSObject {
         completionHandler(nil)
     }
 
+    @objc(setShouldShowMascotIllustrationsIOS:completionHandler:)
+    public func setShouldShowMascotIllustrationsIOS(
+        shouldShowMascotIllustrations: Bool,
+        completionHandler: @escaping (String?) -> Void
+    ) {
+        IASDK.configuration.uiConfiguration.shouldShowMascotIllustrations = shouldShowMascotIllustrations
+        completionHandler(nil)
+    }
+
     /// Maps a German salutation string to the SDK salutation, or nil if unrecognised.
     private func mapSalutation(_ salutation: String?) -> IAUserSalutation? {
         switch salutation?.lowercased() {

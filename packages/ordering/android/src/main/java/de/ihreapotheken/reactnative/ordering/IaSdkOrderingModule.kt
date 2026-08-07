@@ -14,9 +14,9 @@ import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
-import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
-import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
-import de.ihreapotheken.sdk.core.data.model.prescription.PrescriptionInsuranceType
+import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
+import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity

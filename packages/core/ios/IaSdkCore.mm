@@ -141,6 +141,14 @@ shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
                                   }];
 }
 
+- (void)setShouldShowMascotIllustrationsIOS:(BOOL)shouldShowMascotIllustrations
+                          completionHandler:(RCTResponseSenderBlock)completion {
+  [[IaSdkCoreImpl shared] setShouldShowMascotIllustrationsIOS:shouldShowMascotIllustrations
+                                            completionHandler:^(NSString *err) {
+    completion(@[ err ?: [NSNull null] ]);
+  }];
+}
+
 // The ia.de SDK (IACore) APIs are @MainActor-isolated and assert main-thread
 // execution at runtime (SDK 2.5.0+). React Native invokes TurboModule methods
 // on a background queue by default, which trips that assertion and crashes

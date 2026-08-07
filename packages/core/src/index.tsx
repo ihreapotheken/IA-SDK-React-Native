@@ -416,6 +416,41 @@ export class IaSdk {
   }
 
   /**
+   * Toggles the Pharmi mascot illustrations (iOS only).
+   *
+   * Set to `false` in white-label apps that should not carry Ihre Apotheken
+   * character branding. Takes effect on screens rendered after the call, so
+   * screens already on screen keep the value they were built with.
+   *
+   * Requires the iOS AppSDK 2.7.0 or newer. The Android AppSDK has no
+   * equivalent API yet, so the call is a no-op there.
+   *
+   * @param shouldShowMascotIllustrations Whether the mascot is rendered.
+   */
+  async setShouldShowMascotIllustrations(
+    shouldShowMascotIllustrations: boolean
+  ): Promise<void> {
+    if (Platform.OS !== 'ios') {
+      console.warn(
+        '[IaSdk] setShouldShowMascotIllustrations is only supported on iOS'
+      );
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      IaSdkCoreNative.setShouldShowMascotIllustrationsIOS?.(
+        shouldShowMascotIllustrations,
+        (error: string | null) => {
+          if (error === null) {
+            resolve();
+          } else {
+            reject(new Error(error));
+          }
+        }
+      );
+    });
+  }
+
+  /**
    * Sets the user's billing address, used to pre-fill the checkout flow (iOS only).
    *
    * @param address The billing address to set.

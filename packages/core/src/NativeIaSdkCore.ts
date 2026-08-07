@@ -96,6 +96,12 @@ export interface Spec extends TurboModule {
     completionHandler: (error: string | null) => void
   ): void;
 
+  // setShouldShowMascotIllustrations - iOS only
+  setShouldShowMascotIllustrationsIOS?(
+    shouldShowMascotIllustrations: boolean,
+    completionHandler: (error: string | null) => void
+  ): void;
+
   // setUserDeliveryAddress - iOS only
   setUserDeliveryAddressIOS?(
     firstName: string,

@@ -23,7 +23,7 @@ watchman watch-del-all
 rm -rf node_modules
 rm -rf $TMPDIR/react-*
 rm -rf $TMPDIR/metro-*
-yarn install
+yarn install || exit 1
 
 # Move to native project location.
 cd "$PROJECT_DIR/example/android"
@@ -32,10 +32,14 @@ cd "$PROJECT_DIR/example/android"
 # of assembleRelease using the signingConfigs.release config in build.gradle,
 # which reads credentials from app/key.properties (written by CI from a
 # GitHub secret) and falls back to local defaults otherwise.
-./gradlew assembleRelease
+#
+# Abort on failure. Without this the upload below distributes whatever APK is
+# left in the output directory from an earlier build, and the script still
+# reports a successful deploy.
+./gradlew assembleRelease || exit 1
 
 # Upload the APK to the Firebase app distribution service.
-./gradlew appDistributionUploadRelease
+./gradlew appDistributionUploadRelease || exit 1
 
 # Display an informative message.
 set -a # Automatically export all variables
