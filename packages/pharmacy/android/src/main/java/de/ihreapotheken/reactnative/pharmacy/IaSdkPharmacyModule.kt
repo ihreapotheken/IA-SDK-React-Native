@@ -1,19 +1,21 @@
 package de.ihreapotheken.reactnative.pharmacy
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
-import de.ihreapotheken.sdk.integrations.api.IaSdk
-import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
-import de.ihreapotheken.sdk.integrations.api.view.IaScreen
-import de.ihreapotheken.sdk.pharmacy.PharmacyModule
+import de.ihreapotheken.reactnative.core.IaSdkCallbacks
 import de.ihreapotheken.reactnative.core.IaSdkCoreModule
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import de.ihreapotheken.reactnative.core.IaSdkRuntime
+import de.ihreapotheken.reactnative.core.rejectMethod
+import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
+import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
+import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.pharmacy.PharmacyModule
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @ReactModule(name = IaSdkPharmacyModule.NAME)
 class IaSdkPharmacyModule(
@@ -23,34 +25,74 @@ class IaSdkPharmacyModule(
     const val NAME = "IaSdkPharmacy"
   }
 
+  private val scope = MainScope()
+
   override fun getName(): String = NAME
+
+  override fun invalidate() {
+    scope.cancel()
+    super.invalidate()
+  }
 
   override fun registerModule() {
     IaSdkCoreModule.registerModuleType(PharmacyModule)
   }
 
-  override fun launchPharmacyDetailsAndroid() {
-    val context: Context = reactApplicationContext.currentActivity ?: reactApplicationContext.applicationContext
-    val intent = Intent(context, IaSdkActivity::class.java)
-    if (context !is Activity) {
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+  override fun setPharmacyId(pharmacyId: String, promise: Promise) {
+    val trimmedId = pharmacyId.trim()
+    if (trimmedId.toIntOrNull() == null) {
+      promise.reject("ARG_ERROR", "Invalid pharmacyId \"$pharmacyId\". Expected a numeric pharmacy identifier.")
+      return
     }
-    intent.putExtra("viewId", IaScreen.PharmacyScreen::class.simpleName!!)
-    context.startActivity(intent)
+    if (!IaSdkRuntime.requireInitialized(promise)) return
+    val hasReplied = AtomicBoolean(false)
+    reactApplicationContext.runOnUiQueueThread {
+      IaSdk.pharmacy.setPharmacyId(
+        trimmedId,
+        object : PharmacyConfigListener {
+          override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
+            if (hasReplied.getAndSet(true)) return
+            if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized ||
+              pharmacyConfigResult is PharmacyConfigResult.ValidationFailed
+            ) {
+              promise.reject(
+                "SET_PHARMACY_ERROR",
+                "Setting pharmacy ID failed: ${pharmacyConfigResult::class.simpleName}",
+              )
+            } else {
+              promise.resolve(null)
+            }
+          }
+        },
+      )
+    }
   }
 
-  override fun setPharmacyIdAndroid(pharmacyId: String) {
-    // Set pharmacy ID in the SDK
-    // Implementation depends on the Android SDK API
-  }
-
-  override fun getPharmacyIdAndroid(completionHandler: Callback) {
-    CoroutineScope(Dispatchers.Main).launch {
+  override fun getPharmacyId(promise: Promise) {
+    if (!IaSdkRuntime.requireInitialized(promise)) return
+    scope.launch {
       try {
-        val pharmacyId = IaSdk.pharmacy.getPharmacyId()
-        completionHandler.invoke(pharmacyId)
+        promise.resolve(IaSdk.pharmacy.getPharmacyId().ifEmpty { null })
+      } catch (e: CancellationException) {
+        throw e
       } catch (e: Exception) {
-        completionHandler.invoke(null)
+        promise.rejectMethod("getPharmacyId", e.message, e)
+      }
+    }
+  }
+
+  override fun clearPharmacyId(promise: Promise) {
+    if (!IaSdkRuntime.requireInitialized(promise)) return
+    scope.launch {
+      try {
+        // The SDK empties the cart of the cleared pharmacy too.
+        IaSdk.pharmacy.clearPharmacyId()
+        IaSdkCallbacks.reportEmptyCart()
+        promise.resolve(null)
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        promise.rejectMethod("clearPharmacyId", e.message, e)
       }
     }
   }

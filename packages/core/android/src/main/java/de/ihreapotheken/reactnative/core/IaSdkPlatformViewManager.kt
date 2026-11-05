@@ -19,7 +19,11 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.RCTEventEmitter
+import android.util.Log
 import de.ihreapotheken.sdk.core.api.featureproviders.ProductType
+import de.ihreapotheken.sdk.integrations.api.view.IaScreen
+import de.ihreapotheken.sdk.integrations.api.view.IaSdkView
+import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
 import de.ihreapotheken.sdk.integrations.api.view.components.IaCartButton
 import de.ihreapotheken.sdk.integrations.api.view.components.IaProductGrid
 
@@ -33,6 +37,20 @@ internal enum class IaComponentIdentifier(val viewTypeId: String) {
       return entries.firstOrNull { it.viewTypeId == id }
     }
   }
+}
+
+/**
+ * SDK screens the platform view embeds, by their JS view id
+ * (`IaSdkScreenViewId`).
+ */
+internal fun screenEntryPoint(viewId: String?): SdkEntryPoint<*>? = when (viewId) {
+  "startScreen" -> IaScreen.StartScreen
+  "searchScreen" -> IaScreen.SearchScreen
+  "cartScreen" -> IaScreen.CartScreen
+  "pharmacyScreen" -> IaScreen.PharmacyScreen
+  "apofinderScreen" -> IaScreen.ApofinderScreen
+  "redeemPrescription" -> IaScreen.RedeemPrescription
+  else -> null
 }
 
 class IaSdkPlatformViewManager(
@@ -58,6 +76,11 @@ class IaSdkPlatformViewManager(
     return MapBuilder.of(
       "onSizeChange",
       MapBuilder.of("registrationName", "onSizeChange"),
+      "onComponentTap",
+      MapBuilder.of("registrationName", "onComponentTap"),
+      // Only reported on iOS, where embedded screens can show a back or close button.
+      "onScreenDismiss",
+      MapBuilder.of("registrationName", "onScreenDismiss"),
     )
   }
 
@@ -71,6 +94,8 @@ class IaSdkPlatformViewManager(
   }
 }
 
+private const val NAME_TAG = "IaSdkPlatformView"
+
 class IaSdkPlatformHostView(
   context: Context,
   private val reactContext: ReactApplicationContext,
@@ -83,9 +108,32 @@ class IaSdkPlatformHostView(
   private var lastReportedWidth = -1
   private var lastReportedHeight = -1
 
+  /** The embedded SDK screen, shown instead of [composeView] for screen view ids. */
+  private var screenView: View? = null
+  private var screenViewId: String? = null
+
   private val preDrawListener = ViewTreeObserver.OnPreDrawListener {
     measureAndReport()
     true
+  }
+
+  private val layoutScreen = Runnable {
+    measure(
+      MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+      MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY),
+    )
+    layout(left, top, right, bottom)
+  }
+
+  /**
+   * React Native positions its views itself and ignores layout requests from
+   * native children, so an embedded screen would keep its first layout. This
+   * lays it out again. (FrameLayout's constructor calls this before the
+   * properties are set, while [screenView] is still null.)
+   */
+  override fun requestLayout() {
+    super.requestLayout()
+    if (screenView != null) post(layoutScreen)
   }
 
   init {
@@ -114,8 +162,42 @@ class IaSdkPlatformHostView(
   }
 
   fun updateViewId(viewId: String?) {
+    val entryPoint = screenEntryPoint(viewId)
+    if (viewId != null && entryPoint != null) {
+      identifierState.value = null
+      showScreen(viewId, entryPoint)
+      return
+    }
+    removeScreen()
     identifierState.value = IaComponentIdentifier.fromViewTypeId(viewId)
     composeView.post { measureAndReport() }
+  }
+
+  private fun showScreen(viewId: String, entryPoint: SdkEntryPoint<*>) {
+    if (viewId == screenViewId) return
+    removeScreen()
+    // The SDK builds the screen with the activity, and fails without one.
+    val view = try {
+      IaSdkView.createView(
+        reactContext.currentActivity ?: context,
+        entryPoint,
+        onNavigateToTarget = { target -> IaSdkRuntime.handleNavigationTarget(target) },
+      )
+    } catch (e: IllegalStateException) {
+      Log.w(NAME_TAG, "Couldn't embed $viewId: ${e.message}")
+      return
+    }
+    composeView.visibility = GONE
+    screenView = view
+    screenViewId = viewId
+    addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+  }
+
+  private fun removeScreen() {
+    screenView?.let { removeView(it) }
+    screenView = null
+    screenViewId = null
+    composeView.visibility = VISIBLE
   }
 
   fun updateComponentParams(params: ReadableMap?) {
@@ -130,6 +212,8 @@ class IaSdkPlatformHostView(
   }
 
   private fun measureAndReport() {
+    // Embedded screens fill the size the app gives them.
+    if (screenView != null) return
     val parentWidth = composeView.width
     if (parentWidth <= 0) return
 
@@ -160,16 +244,42 @@ class IaSdkPlatformHostView(
     }
   }
 
+  private fun reportTap() {
+    mainHandler.post {
+      reactContext
+        .getJSModule(RCTEventEmitter::class.java)
+        .receiveEvent(id, "onComponentTap", Arguments.createMap())
+    }
+  }
+
   @Composable
   private fun Render(identifier: IaComponentIdentifier, params: Map<String, Any?>) {
     when (identifier) {
-      IaComponentIdentifier.CartButton -> IaCartButton(Modifier)
+      IaComponentIdentifier.CartButton -> {
+        val hasTapHandler = params["hasTapHandler"] == true
+        IaCartButton(
+          Modifier,
+          onClick = {
+            if (hasTapHandler) {
+              reportTap()
+            } else {
+              // The SDK's own click opens the cart without asking the
+              // navigation handler.
+              IaSdkRuntime.openCartFromCartButton(context)
+            }
+          },
+        )
+      }
       IaComponentIdentifier.ProductGrid -> {
         val pzn = params["pzn"] as? String
         val productType: ProductType = when (params["type"] as? String) {
           "productsOfTheMonth" -> ProductType.ProductOfTheMonths
           "productRecommendations" -> ProductType.ProductRecommendations(pzn ?: "")
           "customersAlsoBought" -> ProductType.CustomersAlsoBought(pzn ?: "")
+          "custom" -> ProductType.Custom(
+            title = params["title"] as? String ?: "",
+            pzns = (params["pzns"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+          )
           else -> ProductType.CurrentOffers
         }
         val showLoading = params["shouldShowLoading"] as? Boolean ?: true

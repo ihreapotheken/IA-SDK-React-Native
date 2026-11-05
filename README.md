@@ -173,7 +173,7 @@ await iaSdk.setGuestUserData({
 if (iaSdk.hasModule(IaBaseModule.Pharmacy)) {
   const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
   await pharmacy.launchPharmacyDetails();
-  await pharmacy.setPharmacyId('pharmacy-123');
+  await pharmacy.setPharmacyId('2163'); // numeric pharmacy ID
 }
 ```
 

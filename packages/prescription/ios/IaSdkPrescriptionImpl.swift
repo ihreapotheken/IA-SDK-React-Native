@@ -1,10 +1,10 @@
 import Foundation
 import IACore
 import IAPrescription
-#if canImport(IaSdkCore)
 import IaSdkCore
-#endif
 
+/// Registers the prescription module. Its screens, scan callbacks and scanner camera go through the core module,
+/// which owns the SDK delegate and screen presentation.
 @MainActor
 @objc(IaSdkPrescriptionImpl)
 public class IaSdkPrescriptionImpl: NSObject {
@@ -15,15 +15,6 @@ public class IaSdkPrescriptionImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        #if canImport(IaSdkCore)
         IaSdkCoreImpl.registerModule("prescription")
-        #endif
-    }
-
-    @objc(launchRedeemPrescriptionScreenIOS)
-    public func launchRedeemPrescriptionScreenIOS() {
-        DispatchQueue.main.async {
-            IARedeemPrescriptionScreen().present()
-        }
     }
 }

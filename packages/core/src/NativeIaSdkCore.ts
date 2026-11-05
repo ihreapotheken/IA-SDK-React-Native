@@ -1,121 +1,67 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
+/**
+ * Native spec of the core module. Internal to this package; the public API is
+ * the `IaSdk` class in `index.tsx`.
+ *
+ * Optional methods are only implemented on one platform (see the comments),
+ * and the JS side only calls them there.
+ */
 export interface Spec extends TurboModule {
-  // iOS methods (callback-based)
-  initIaSdkIOS?(
-    accessKey: string,
-    clientId: string,
-    serverEnvironmentId: string,
-    channelId: number | null,
-    shouldFetchThemeFromRemote: boolean,
-    completionHandler: (error: string | null) => void
-  ): void;
+  // Event emitter plumbing (RCTEventEmitter on iOS, no-op on Android).
+  addListener(eventName: string): void;
+  removeListeners(count: number): void;
 
-  logoutIOS?(completionHandler: (error: string | null) => void): void;
+  // Native-to-JS requests, see `IaSdkEvents.REQUEST`. Native only sends a
+  // request type while JS has a handler enabled for it.
+  setRequestHandlerEnabled(type: string, enabled: boolean): void;
+  respondToRequest(requestId: string, response: Object | null): void;
 
-  setGuestUserDataIOS?(
-    salutation: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    phoneNumberCountryCode: string,
-    phoneNumberWithoutCountryCode: string,
-    completionHandler: (error: string | null) => void
-  ): void;
+  initialize(config: Object): Promise<void>;
+  logout(): Promise<void>;
+  setGuestUserData(data: Object): Promise<void>;
+  setUserBillingAddress(address: Object): Promise<void>;
+  setUserDeliveryAddress(address: Object): Promise<void>;
+  clearUserBillingAddress(): Promise<void>;
+  clearUserDeliveryAddress(): Promise<void>;
+  /**
+   * Presents an SDK screen. `screen` is one of `IaSdkScreens`; `options` may
+   * carry `isCancellable` (apofinder) and `focusesOnAppear` (search).
+   */
+  launchScreen(screen: string, options: Object | null): Promise<void>;
+  finishAllActivities(): Promise<void>;
+  transferSDKv1UserData(): Promise<void>;
+  isInitialized(): Promise<boolean>;
+  getInitializationState(): Promise<string>;
+  getEnvironment(): Promise<string>;
+  resetPrerequisites(): Promise<void>;
+  resetAnalyticsConsent(): Promise<void>;
+  isPrerequisiteFlowCompleted(): Promise<boolean>;
+  /** Resolves with `{ isCancelled: boolean }`. */
+  launchPrerequisiteFlow(): Promise<Object>;
+  presentLogs(): Promise<void>;
+  /** Only has an effect on iOS; resolves right away on Android. */
+  legacySetupAsCoreApp(): Promise<void>;
 
-  startDashboardActivityIOS?(): void;
+  // iOS only
+  deleteUser?(): Promise<void>;
+  cleanCache?(initialization: boolean, prerequisites: boolean): Promise<void>;
+  setShouldShowMascotIllustrations?(value: boolean): Promise<void>;
+  resetLegalDisclaimer?(): Promise<void>;
+  setIsOnboardingShown?(value: boolean): Promise<void>;
+  getUserId?(): Promise<string | null>;
+  removeAllCachedResponses?(): Promise<void>;
+  setLogMessageForwardingEnabled?(enabled: boolean): void;
+  /**
+   * Camera state of the scanner `launchScreen` opened: `{ isOn?,
+   * isFlashlightOn?, isPreviewPaused? }`. Unset values stay unchanged.
+   */
+  setPrescriptionScannerCameraState?(state: Object): Promise<void>;
 
-  launchApofinderIOS?(): void;
-
-  finishAllActivitiesIOS?(): void;
-
-  // Android methods (callback-based)
-  initIaSdkAndroid?(
-    accessKey: string,
-    clientId: string,
-    serverEnvironmentId: string,
-    channelId: number | null,
-    shouldFetchThemeFromRemote: boolean,
-    completionHandler: (error: string | null) => void
-  ): void;
-
-  logoutAndroid?(completionHandler: (error: string | null) => void): void;
-
-  setGuestUserDataAndroid?(
-    salutation: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    phoneNumberCountryCode: string,
-    phoneNumberWithoutCountryCode: string,
-    completionHandler: (error: string | null) => void
-  ): void;
-
-  startDashboardActivityAndroid?(): void;
-
-  launchApofinderAndroid?(): void;
-
-  finishAllActivitiesAndroid?(): void;
-
-  transferSDKv1UserDataIOS?(): void;
-
-  transferSDKv1UserDataAndroid?(): void;
-
-  // isInitialized - both platforms
-  isInitializedIOS?(completionHandler: (result: boolean) => void): void;
-  isInitializedAndroid?(completionHandler: (result: boolean) => void): void;
-
-  // deleteUser - iOS only
-  deleteUserIOS?(completionHandler: (error: string | null) => void): void;
-
-  // getEnvironment - iOS only
-  getEnvironmentIOS?(
-    completionHandler: (result: string | null) => void
-  ): void;
-
-  // cleanCache - iOS only
-  cleanCacheIOS?(
-    initialization: boolean,
-    prerequisites: boolean,
-    completionHandler: (error: string | null) => void
-  ): void;
-
-  // setUserBillingAddress - iOS only
-  setUserBillingAddressIOS?(
-    firstName: string,
-    lastName: string,
-    additionalInfo: string | null,
-    street: string,
-    houseNumber: string,
-    zipCode: string,
-    city: string,
-    salutation: string | null,
-    phoneNumberCountryCode: number | null,
-    phoneNumberWithoutCountryCode: string | null,
-    completionHandler: (error: string | null) => void
-  ): void;
-
-  // setShouldShowMascotIllustrations - iOS only
-  setShouldShowMascotIllustrationsIOS?(
-    shouldShowMascotIllustrations: boolean,
-    completionHandler: (error: string | null) => void
-  ): void;
-
-  // setUserDeliveryAddress - iOS only
-  setUserDeliveryAddressIOS?(
-    firstName: string,
-    lastName: string,
-    additionalInfo: string | null,
-    street: string,
-    houseNumber: string,
-    zipCode: string,
-    city: string,
-    salutation: string | null,
-    phoneNumberCountryCode: number | null,
-    phoneNumberWithoutCountryCode: string | null,
-    completionHandler: (error: string | null) => void
-  ): void;
+  // Android only
+  setHapticFeedbackEnabled?(enabled: boolean): Promise<void>;
+  exportLogs?(): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkCore');

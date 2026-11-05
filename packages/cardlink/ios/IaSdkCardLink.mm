@@ -1,10 +1,11 @@
 #import "IaSdkCardLink.h"
 #import "IaSdkCardLink-Swift.h"
 
-@interface IaSdkCardLink ()
-@property (nonatomic, assign) BOOL hasListeners;
-@property (nonatomic, assign) NSInteger listenerCount;
-@end
+static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
+  return ^(NSString *code, NSString *message) {
+    reject(code, message, nil);
+  };
+}
 
 @implementation IaSdkCardLink
 
@@ -13,40 +14,26 @@ RCT_EXPORT_MODULE()
 - (instancetype)init {
   self = [super init];
   if (self) {
-    NSLog(@"[CardLink iOS] Initializing IaSdkCardLink");
     __weak IaSdkCardLink *weakSelf = self;
-    [[IaSdkCardLinkImpl shared] setEventEmitter:^(NSString *eventName, id body) {
-      __strong IaSdkCardLink *strongSelf = weakSelf;
-      NSLog(@"[CardLink iOS] Event emitter called: %@, hasListeners: %d", eventName, strongSelf.hasListeners);
-      if (strongSelf && strongSelf.hasListeners) {
-        NSLog(@"[CardLink iOS] Sending event to JS: %@", eventName);
-        [strongSelf sendEventWithName:eventName body:body];
-      } else {
-        NSLog(@"[CardLink iOS] Event NOT sent (no listeners): %@", eventName);
-      }
-    }];
+    void (^attach)(void) = ^{
+      [[IaSdkCardLinkImpl shared] setEventEmitter:^(NSString *eventName, id body) {
+        [weakSelf sendEventWithName:eventName body:body];
+      }];
+    };
+    // IaSdkCardLinkImpl is main-actor isolated, like the SDK it calls.
+    if ([NSThread isMainThread]) {
+      attach();
+    } else {
+      dispatch_async(dispatch_get_main_queue(), attach);
+    }
   }
   return self;
 }
 
+// addListener:/removeListeners: come from RCTEventEmitter, which only sends
+// events while its listener count is above zero.
 - (NSArray<NSString *> *)supportedEvents {
-  return @[
-    @"CARDLINK_CONSENT_EVENT",
-    @"CARDLINK_SESSION_CREATED",
-    @"CARDLINK_PRESCRIPTIONS_REDEEMED",
-    @"CARDLINK_EVENT",
-    @"CARDLINK_ANALYTICS_EVENT"
-  ];
-}
-
-- (void)startObserving {
-  NSLog(@"[CardLink iOS] startObserving called");
-  self.hasListeners = YES;
-}
-
-- (void)stopObserving {
-  NSLog(@"[CardLink iOS] stopObserving called");
-  self.hasListeners = NO;
+  return [IaSdkCardLinkImpl supportedEvents];
 }
 
 + (BOOL)requiresMainQueueSetup {
@@ -61,121 +48,68 @@ RCT_EXPORT_MODULE()
 
 // MARK: - Launch
 
-- (void)launchIOS:(NSString *)sdkApiKey
-         flowType:(NSString *)flowType
-       pharmacyId:(NSString *)pharmacyId
-    consentStatus:(NSString *)consentStatus
-      phoneNumber:(NSString *)phoneNumber
-           userId:(NSString *)userId
-          canCode:(NSString *)canCode
-         cardName:(NSString *)cardName
-     primaryColor:(NSNumber *)primaryColor
-     buttonsColor:(NSNumber *)buttonsColor
-    textLinkColor:(NSNumber *)textLinkColor
-bottomNavigationColor:(NSNumber *)bottomNavigationColor
-      environment:(NSString *)environment
-  saveCardEnabled:(NSNumber *)saveCardEnabled
-     finishAction:(NSString *)finishAction
-completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] launchIOSWithSdkApiKey:sdkApiKey
-                                            flowType:flowType
-                                          pharmacyId:pharmacyId
-                                       consentStatus:consentStatus
-                                         phoneNumber:phoneNumber
-                                              userId:userId
-                                             canCode:canCode
-                                            cardName:cardName
-                                        primaryColor:primaryColor
-                                        buttonsColor:buttonsColor
-                                       textLinkColor:textLinkColor
-                               bottomNavigationColor:bottomNavigationColor
-                                         environment:environment
-                                     saveCardEnabled:saveCardEnabled
-                                        finishAction:finishAction
-                                   completionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)launch:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] launch:options resolve:resolve reject:IaReject(reject)];
 }
 
 // MARK: - Getters
 
-- (void)getVersionIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] getVersionIOSWithCompletionHandler:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
+- (void)getVersion:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] getVersionWithResolve:resolve reject:IaReject(reject)];
 }
 
-- (void)getEnvironmentIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] getEnvironmentIOSWithCompletionHandler:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
+- (void)getEnvironment:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] getEnvironmentWithResolve:resolve reject:IaReject(reject)];
 }
 
-- (void)getLogFilePathIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] getLogFilePathIOSWithCompletionHandler:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
+- (void)getLogFilePath:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] getLogFilePathWithResolve:resolve reject:IaReject(reject)];
 }
 
 // MARK: - Card Management
 
-- (void)getSavedCardsIOS:(NSString *)userId completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] getSavedCardsIOSWithUserId:userId completionHandler:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
+- (void)getSavedCards:(NSString *)userId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] getSavedCards:userId resolve:resolve reject:IaReject(reject)];
 }
 
-- (void)deleteCardIOS:(NSString *)userId
-             cardName:(NSString *)cardName
-    completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] deleteCardIOSWithUserId:userId
-                                             cardName:cardName
-                                    completionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)deleteCard:(NSString *)userId
+          cardName:(NSString *)cardName
+           resolve:(RCTPromiseResolveBlock)resolve
+            reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] deleteCard:userId cardName:cardName resolve:resolve reject:IaReject(reject)];
 }
 
-- (void)deleteAllCardsIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] deleteAllCardsIOSWithCompletionHandler:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
+- (void)deleteAllCards:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] deleteAllCardsWithResolve:resolve reject:IaReject(reject)];
 }
 
-- (void)deleteAllUserRelatedDataIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] deleteAllUserRelatedDataIOSWithCompletionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)deleteAllUserRelatedData:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] deleteAllUserRelatedDataWithResolve:resolve reject:IaReject(reject)];
 }
 
-- (void)finishIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCardLinkImpl shared] finishIOSWithCompletionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)updateCard:(NSDictionary *)params resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  reject(@"NOT_SUPPORTED", @"updateCard is only supported on Android.", nil);
 }
 
-// MARK: - Event Listener Management
-
-- (void)addListener:(NSString *)eventType {
-  NSLog(@"[CardLink iOS] addListener called for: %@", eventType);
-  self.listenerCount++;
-  NSLog(@"[CardLink iOS] Listener count: %ld", (long)self.listenerCount);
-  if (self.listenerCount == 1 && !self.hasListeners) {
-    NSLog(@"[CardLink iOS] First listener added, calling startObserving");
-    [self startObserving];
-  }
+- (void)reorderSavedCards:(NSString *)userId
+          orderedCanCodes:(NSArray *)orderedCanCodes
+                  resolve:(RCTPromiseResolveBlock)resolve
+                   reject:(RCTPromiseRejectBlock)reject {
+  reject(@"NOT_SUPPORTED", @"reorderSavedCards is only supported on Android.", nil);
 }
 
-- (void)removeListeners:(double)count {
-  NSLog(@"[CardLink iOS] removeListeners called, count: %.0f", count);
-  self.listenerCount -= (NSInteger)count;
-  if (self.listenerCount < 0) {
-    self.listenerCount = 0;
-  }
-  NSLog(@"[CardLink iOS] Listener count: %ld", (long)self.listenerCount);
-  if (self.listenerCount == 0 && self.hasListeners) {
-    NSLog(@"[CardLink iOS] No more listeners, calling stopObserving");
-    [self stopObserving];
-  }
+// MARK: - Other
+
+- (void)setHostAppLogFilePath:(NSString *)path resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] setHostAppLogFilePath:path resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setMocks:(NSDictionary *)mocks resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] setMocks:mocks resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)finish:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCardLinkImpl shared] finishWithResolve:resolve reject:IaReject(reject)];
 }
 
 // MARK: - TurboModule

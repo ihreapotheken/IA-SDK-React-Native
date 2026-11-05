@@ -1,9 +1,7 @@
 import Foundation
 import IACore
 import IAOrdering
-#if canImport(IaSdkCore)
 import IaSdkCore
-#endif
 
 @MainActor
 @objc(IaSdkOrderingImpl)
@@ -14,175 +12,87 @@ public class IaSdkOrderingImpl: NSObject {
         super.init()
     }
 
-    /// Decodes a base64 string to Data, adding padding if necessary.
-    /// Swift's Data(base64Encoded:) requires proper padding (length divisible by 4).
-    private func decodeBase64(_ string: String) -> Data? {
+    /// Register the ordering module with the core SDK, before its initialization.
+    @objc public func registerModule() {
+        IaSdkCoreImpl.registerModule("ordering")
+    }
+
+    @objc(clearCartWithResolve:reject:)
+    public func clearCart(resolve: @escaping IaResolveBlock, reject: @escaping IaRejectBlock) {
+        IaSdkPromise.run("clearCart", resolve: resolve, reject: reject) {
+            try await IASDK.ordering.deleteCart()
+            return nil
+        }
+    }
+
+    @objc(transferPrescriptions:resolve:reject:)
+    public func transferPrescriptions(_ params: NSDictionary, resolve: @escaping IaResolveBlock, reject: @escaping IaRejectBlock) {
+        IaSdkPromise.run("transferPrescriptions", resolve: resolve, reject: reject) {
+            let images = try (params["images"] as? [String] ?? []).map { try Self.decodeBase64($0, field: "images") }
+            let pdfs = try (params["pdfs"] as? [[String: Any]] ?? []).map { pdf in
+                guard let base64 = pdf["data"] as? String else {
+                    throw IaArgumentError(message: "Each PDF needs base64 data.")
+                }
+                let insuranceType: PrescriptionInsuranceType =
+                    pdf["insuranceType"] as? String == "privateInsurance" ? .privateInsurance : .publicHealthcare
+                return PDFPrescription(data: try Self.decodeBase64(base64, field: "pdfs"), insuranceType: insuranceType)
+            }
+            let finishAction: TransferPrescriptionsFinishAction = switch params["finishAction"] as? String {
+            case "showBottomSheet": .showBottomSheet
+            case "noAction": .noAction
+            default: .openCart
+            }
+            try await IASDK.ordering.transferPrescriptions(
+                images: images,
+                pdfs: pdfs,
+                codes: params["codes"] as? [String] ?? [],
+                orderID: params["orderId"] as? String,
+                showActivityIndicator: params["showActivityIndicator"] as? Bool ?? true,
+                finishAction: finishAction
+            )
+            return nil
+        }
+    }
+
+    @objc(getCartDetails:shouldEmitCartUpdate:resolve:reject:)
+    public func getCartDetails(
+        _ allowCached: Bool,
+        shouldEmitCartUpdate: Bool,
+        resolve: @escaping IaResolveBlock,
+        reject: @escaping IaRejectBlock
+    ) {
+        IaSdkPromise.run("getCartDetails", resolve: resolve, reject: reject) {
+            let cartDetails = try await IASDK.ordering.getCartDetails(
+                allowCached: allowCached,
+                throwIfNil: false,
+                shouldEmit: shouldEmitCartUpdate
+            )
+            guard let cartDetails else { return nil }
+            return [
+                "totalAmountInCart": cartDetails.totalAmountInCart,
+                "products": cartDetails.products.map { ["pzn": $0.pzn, "amount": $0.amount] as [String: Any] },
+            ] as [String: Any]
+        }
+    }
+
+    @objc(deleteOrderHistoryWithResolve:reject:)
+    public func deleteOrderHistory(resolve: @escaping IaResolveBlock, reject: @escaping IaRejectBlock) {
+        IaSdkPromise.run("deleteOrderHistory", resolve: resolve, reject: reject) {
+            try await IASDK.ordering.deleteOrderHistory()
+            return nil
+        }
+    }
+
+    /// Decodes base64, adding the padding JS encoders may leave out.
+    private static func decodeBase64(_ string: String, field: String) throws -> Data {
         var base64 = string
-        // Add padding if needed
         let remainder = base64.count % 4
         if remainder > 0 {
             base64 += String(repeating: "=", count: 4 - remainder)
         }
-        return Data(base64Encoded: base64)
-    }
-
-    /// Register the ordering module with the core SDK.
-    @objc public func registerModule() {
-        print("[IaSdkOrdering] registerModule called")
-        // Register ordering module type with the core package
-        // This is called before SDK initialization
-        #if canImport(IaSdkCore)
-        print("[IaSdkOrdering] Calling IaSdkCoreImpl.registerModule('ordering')")
-        IaSdkCoreImpl.registerModule("ordering")
-        #else
-        print("[IaSdkOrdering] WARNING: Cannot import IaSdkCore")
-        #endif
-    }
-
-    @objc(clearCartIOS:)
-    public func clearCartIOS(
-        completionHandler: @escaping (String?) -> Void
-    ) {
-        Task.init {
-            do {
-                try await IASDK.ordering.deleteCart()
-                completionHandler(nil)
-            } catch {
-                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
-            }
+        guard let data = Data(base64Encoded: base64, options: .ignoreUnknownCharacters) else {
+            throw IaArgumentError(message: "\(field) must contain base64 strings.")
         }
-    }
-
-    @objc(transferPrescriptionsIOS:pdfs:codes:orderId:completionHandler:)
-    public func transferPrescriptionsIOS(
-        images: [String]? = nil,
-        pdfs: [[String: Any]]? = nil,
-        codes: [String]? = nil,
-        orderId: String? = nil,
-        completionHandler: @escaping (String?) -> Void
-    ) {
-        print("[IaSdkOrdering] transferPrescriptionsIOS called")
-        print("[IaSdkOrdering] images count: \(images?.count ?? 0)")
-        print("[IaSdkOrdering] pdfs count: \(pdfs?.count ?? 0)")
-        print("[IaSdkOrdering] codes count: \(codes?.count ?? 0)")
-        print("[IaSdkOrdering] orderId: \(orderId ?? "nil")")
-
-        if let imgs = images {
-            for (i, img) in imgs.enumerated() {
-                print("[IaSdkOrdering] image[\(i)] length: \(img.count) chars")
-            }
-        }
-        if let pdfArr = pdfs {
-            for (i, pdf) in pdfArr.enumerated() {
-                let dataStr = pdf["data"] as? String
-                let insuranceType = pdf["insuranceType"] as? String
-                print("[IaSdkOrdering] pdf[\(i)] length: \(dataStr?.count ?? 0) chars, insuranceType: \(insuranceType ?? "nil")")
-            }
-        }
-        if let codesArr = codes {
-            for (i, code) in codesArr.enumerated() {
-                print("[IaSdkOrdering] code[\(i)]: \(code)")
-            }
-        }
-
-        Task.init {
-            do {
-                // Convert base64 strings to Data arrays (empty array if nil)
-                // Using decodeBase64 to handle potentially unpadded base64 strings
-                let imageData: [Data] = images?.compactMap { str in
-                    let data = self.decodeBase64(str)
-                    print("[IaSdkOrdering] Decoded image: \(data?.count ?? 0) bytes")
-                    return data
-                } ?? []
-                let pdfData: [PDFPrescription] = pdfs?.compactMap { pdfDict in
-                    guard let base64 = pdfDict["data"] as? String,
-                          let data = self.decodeBase64(base64) else {
-                        print("[IaSdkOrdering] Failed to decode PDF")
-                        return nil
-                    }
-                    let insuranceType: PrescriptionInsuranceType
-                    switch pdfDict["insuranceType"] as? String {
-                    case "privateInsurance":
-                        insuranceType = .privateInsurance
-                    case "publicHealthcare":
-                        insuranceType = .publicHealthcare
-                    default:
-                        insuranceType = .publicHealthcare
-                    }
-                    print("[IaSdkOrdering] Decoded PDF: \(data.count) bytes, insuranceType: \(insuranceType)")
-                    return PDFPrescription(data: data, insuranceType: insuranceType)
-                } ?? []
-                let codeData: [String] = codes ?? []
-
-                print("[IaSdkOrdering] Final imageData count: \(imageData.count)")
-                print("[IaSdkOrdering] Final pdfData count: \(pdfData.count)")
-                print("[IaSdkOrdering] Final codeData count: \(codeData.count)")
-
-                try await IASDK.ordering.transferPrescriptions(
-                    images: imageData,
-                    pdfs: pdfData,
-                    codes: codeData,
-                    orderID: orderId,
-                    showActivityIndicator: true,
-                    finishAction: .openCart
-                )
-                print("[IaSdkOrdering] Transfer completed successfully")
-                completionHandler(nil)
-            } catch {
-                print("[IaSdkOrdering] Transfer error: \(error)")
-                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
-            }
-        }
-    }
-
-    @objc(launchCartScreenIOS)
-    public func launchCartScreenIOS() {
-        DispatchQueue.main.async {
-            IACartScreen().present()
-        }
-    }
-
-    @objc(getCartDetailsIOS:)
-    public func getCartDetailsIOS(
-        completionHandler: @escaping (String?) -> Void
-    ) {
-        Task.init {
-            do {
-                let cartDetails = try await IASDK.ordering.getCartDetails(
-                    allowCached: true,
-                    throwIfNil: false,
-                    shouldEmit: false
-                )
-                if let details = cartDetails {
-                    let products = details.products.map { product in
-                        ["pzn": product.pzn, "amount": product.amount] as [String: Any]
-                    }
-                    let dict: [String: Any] = [
-                        "totalAmountInCart": details.totalAmountInCart,
-                        "products": products,
-                    ]
-                    let jsonData = try JSONSerialization.data(withJSONObject: dict)
-                    completionHandler(String(data: jsonData, encoding: .utf8))
-                } else {
-                    completionHandler(nil)
-                }
-            } catch {
-                completionHandler(nil)
-            }
-        }
-    }
-
-    @objc(deleteOrderHistoryIOS:)
-    public func deleteOrderHistoryIOS(
-        completionHandler: @escaping (String?) -> Void
-    ) {
-        Task.init {
-            do {
-                try await IASDK.ordering.deleteOrderHistory()
-                completionHandler(nil)
-            } catch {
-                completionHandler("\(String(describing: error)) \(error.localizedDescription)")
-            }
-        }
+        return data
     }
 }

@@ -1,5 +1,6 @@
 #import <IaSdkCoreSpec/IaSdkCoreSpec.h>
+#import <React/RCTEventEmitter.h>
 
-@interface IaSdkCore : NSObject <NativeIaSdkCoreSpec>
+@interface IaSdkCore : RCTEventEmitter <NativeIaSdkCoreSpec>
 
 @end

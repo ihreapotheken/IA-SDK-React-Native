@@ -1,162 +1,202 @@
 #import "IaSdkCore.h"
 #import "IaSdkCore-Swift.h"
 
+/// Adapts an RCTPromiseRejectBlock to the (code, message) block the Swift
+/// implementation takes.
+static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
+  return ^(NSString *code, NSString *message) {
+    reject(code, message, nil);
+  };
+}
+
 @implementation IaSdkCore
 
-- (void)initIaSdkIOS:(NSString *)accessKey
-            clientId:(NSString *)clientId
- serverEnvironmentId:(NSString *)serverEnvironmentId
-           channelId:(NSNumber *)channelId
-shouldFetchThemeFromRemote:(BOOL)shouldFetchThemeFromRemote
-   completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] initIaSdkIOS:accessKey
-                             clientId:clientId
-                  serverEnvironmentId:serverEnvironmentId
-                            channelId:channelId
-           shouldFetchThemeFromRemote:shouldFetchThemeFromRemote
-                     completionHandler:^(NSString *err) {
-                       completion(@[ err ?: [NSNull null] ]);
-                     }];
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    __weak IaSdkCore *weakSelf = self;
+    void (^attach)(void) = ^{
+      [[IaSdkCoreImpl shared] attachWithEmitter:^(NSString *eventName, id body) {
+        [weakSelf sendEventWithName:eventName body:body];
+      }];
+    };
+    // IaSdkCoreImpl is main-actor isolated, like the SDK it calls.
+    if ([NSThread isMainThread]) {
+      attach();
+    } else {
+      dispatch_async(dispatch_get_main_queue(), attach);
+    }
+  }
+  return self;
 }
 
-- (void)setGuestUserDataIOS:(NSString *)salutation
-                      firstName:(NSString *)firstName
-                       lastName:(NSString *)lastName
-                          email:(NSString *)email
-         phoneNumberCountryCode:(NSNumber *)phoneNumberCountryCode
-  phoneNumberWithoutCountryCode:(NSNumber *)phoneNumberWithoutCountryCode
-              completionHandler:(RCTResponseSenderBlock)completion {
-  NSInteger countryCode = [phoneNumberCountryCode integerValue];
-  NSInteger number = [phoneNumberWithoutCountryCode integerValue];
-  [[IaSdkCoreImpl shared] setGuestUserDataIOS:salutation
-                                    firstName:firstName
-                                     lastName:lastName
-                                        email:email
-                       phoneNumberCountryCode:countryCode
-                phoneNumberWithoutCountryCode:number
-                            completionHandler:^(NSString *err) {
-                              completion(@[ err ?: [NSNull null] ]);
-                            }];
+- (NSArray<NSString *> *)supportedEvents {
+  return [IaSdkCoreImpl supportedEvents];
 }
 
-- (void)startDashboardActivityIOS {
-  [[IaSdkCoreImpl shared] startDashboardActivityIOS];
-}
-
-- (void)launchApofinderIOS {
-  [[IaSdkCoreImpl shared] launchApofinderIOS];
-}
-
-- (void)logoutIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] logoutIOS:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
-}
-
-- (void)finishAllActivitiesIOS {
-  [[IaSdkCoreImpl shared] finishAllActivitiesIOS];
-}
-
-- (void)transferSDKv1UserDataIOS {
-  [[IaSdkCoreImpl shared] transferSDKv1UserDataIOS];
-}
-
-- (void)isInitializedIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] isInitializedIOS:^(BOOL result) {
-    completion(@[ @(result) ]);
-  }];
-}
-
-- (void)deleteUserIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] deleteUserIOS:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
-}
-
-- (void)getEnvironmentIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] getEnvironmentIOS:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
-}
-
-- (void)cleanCacheIOS:(BOOL)initialization
-        prerequisites:(BOOL)prerequisites
-    completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] cleanCacheIOS:initialization
-                          prerequisites:prerequisites
-                      completionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
-}
-
-- (void)setUserBillingAddressIOS:(NSString *)firstName
-                        lastName:(NSString *)lastName
-                  additionalInfo:(NSString *)additionalInfo
-                          street:(NSString *)street
-                     houseNumber:(NSString *)houseNumber
-                         zipCode:(NSString *)zipCode
-                            city:(NSString *)city
-                      salutation:(NSString *)salutation
-          phoneNumberCountryCode:(NSNumber *)phoneNumberCountryCode
-   phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
-               completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] setUserBillingAddressIOS:firstName
-                                          lastName:lastName
-                                    additionalInfo:additionalInfo
-                                            street:street
-                                       houseNumber:houseNumber
-                                           zipCode:zipCode
-                                              city:city
-                                        salutation:salutation
-                            phoneNumberCountryCode:phoneNumberCountryCode
-                     phoneNumberWithoutCountryCode:phoneNumberWithoutCountryCode
-                                 completionHandler:^(NSString *err) {
-                                   completion(@[ err ?: [NSNull null] ]);
-                                 }];
-}
-
-- (void)setUserDeliveryAddressIOS:(NSString *)firstName
-                         lastName:(NSString *)lastName
-                   additionalInfo:(NSString *)additionalInfo
-                           street:(NSString *)street
-                      houseNumber:(NSString *)houseNumber
-                          zipCode:(NSString *)zipCode
-                             city:(NSString *)city
-                       salutation:(NSString *)salutation
-           phoneNumberCountryCode:(NSNumber *)phoneNumberCountryCode
-    phoneNumberWithoutCountryCode:(NSString *)phoneNumberWithoutCountryCode
-                completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] setUserDeliveryAddressIOS:firstName
-                                           lastName:lastName
-                                     additionalInfo:additionalInfo
-                                             street:street
-                                        houseNumber:houseNumber
-                                            zipCode:zipCode
-                                               city:city
-                                         salutation:salutation
-                             phoneNumberCountryCode:phoneNumberCountryCode
-                      phoneNumberWithoutCountryCode:phoneNumberWithoutCountryCode
-                                  completionHandler:^(NSString *err) {
-                                    completion(@[ err ?: [NSNull null] ]);
-                                  }];
-}
-
-- (void)setShouldShowMascotIllustrationsIOS:(BOOL)shouldShowMascotIllustrations
-                          completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkCoreImpl shared] setShouldShowMascotIllustrationsIOS:shouldShowMascotIllustrations
-                                            completionHandler:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
++ (BOOL)requiresMainQueueSetup {
+  return YES;
 }
 
 // The ia.de SDK (IACore) APIs are @MainActor-isolated and assert main-thread
 // execution at runtime (SDK 2.5.0+). React Native invokes TurboModule methods
-// on a background queue by default, which trips that assertion and crashes
-// (EXC_BREAKPOINT in _swift_task_checkIsolated). Pin this module's methods to
-// the main queue so all IACore calls run on the main thread.
+// on a background queue by default, so this module's methods run on the main
+// queue.
 - (dispatch_queue_t)methodQueue {
   return dispatch_get_main_queue();
 }
+
+// MARK: - Native-to-JS requests
+
+- (void)setRequestHandlerEnabled:(NSString *)type enabled:(BOOL)enabled {
+  [[IaSdkCoreImpl shared] setRequestHandlerEnabled:type enabled:enabled];
+}
+
+- (void)respondToRequest:(NSString *)requestId response:(NSDictionary *)response {
+  [[IaSdkCoreImpl shared] respondToRequest:requestId response:response];
+}
+
+// MARK: - Initialization and user data
+
+- (void)initialize:(NSDictionary *)config resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] initialize:config resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] logoutWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setGuestUserData:(NSDictionary *)data resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setGuestUserData:data resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setUserBillingAddress:(NSDictionary *)address resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setUserBillingAddress:address resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setUserDeliveryAddress:(NSDictionary *)address resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setUserDeliveryAddress:address resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)clearUserBillingAddress:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] clearUserBillingAddressWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)clearUserDeliveryAddress:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] clearUserDeliveryAddressWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)deleteUser:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] deleteUserWithResolve:resolve reject:IaReject(reject)];
+}
+
+// MARK: - Screens
+
+- (void)launchScreen:(NSString *)screen
+             options:(NSDictionary *)options
+             resolve:(RCTPromiseResolveBlock)resolve
+              reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] launchScreen:screen options:options resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)finishAllActivities:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] finishAllActivitiesWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setPrescriptionScannerCameraState:(NSDictionary *)state
+                                  resolve:(RCTPromiseResolveBlock)resolve
+                                   reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setPrescriptionScannerCameraState:state resolve:resolve reject:IaReject(reject)];
+}
+
+// MARK: - State
+
+- (void)transferSDKv1UserData:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] transferSDKv1UserDataWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)isInitialized:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] isInitializedWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)getInitializationState:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] getInitializationStateWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)getEnvironment:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] getEnvironmentWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)cleanCache:(BOOL)initialization
+     prerequisites:(BOOL)prerequisites
+           resolve:(RCTPromiseResolveBlock)resolve
+            reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] cleanCache:initialization prerequisites:prerequisites resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setShouldShowMascotIllustrations:(BOOL)value resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setShouldShowMascotIllustrations:value resolve:resolve reject:IaReject(reject)];
+}
+
+// MARK: - Prerequisites
+
+- (void)resetPrerequisites:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] resetPrerequisitesWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)resetLegalDisclaimer:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] resetLegalDisclaimerWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)resetAnalyticsConsent:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] resetAnalyticsConsentWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setIsOnboardingShown:(BOOL)value resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] setIsOnboardingShown:value resolve:resolve reject:IaReject(reject)];
+}
+
+- (void)isPrerequisiteFlowCompleted:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] isPrerequisiteFlowCompletedWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)launchPrerequisiteFlow:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] launchPrerequisiteFlowWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)legacySetupAsCoreApp:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] legacySetupAsCoreAppWithResolve:resolve reject:IaReject(reject)];
+}
+
+// MARK: - Debugging
+
+- (void)presentLogs:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] presentLogsWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)getUserId:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] getUserIdWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)removeAllCachedResponses:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkCoreImpl shared] removeAllCachedResponsesWithResolve:resolve reject:IaReject(reject)];
+}
+
+- (void)setLogMessageForwardingEnabled:(BOOL)enabled {
+  [[IaSdkCoreImpl shared] setLogMessageForwardingEnabled:enabled];
+}
+
+// MARK: - Android only
+
+- (void)setHapticFeedbackEnabled:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  reject(@"NOT_SUPPORTED", @"setHapticFeedbackEnabled is only supported on Android.", nil);
+}
+
+- (void)exportLogs:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  reject(@"NOT_SUPPORTED", @"exportLogs is only supported on Android.", nil);
+}
+
+// MARK: - TurboModule
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params {
