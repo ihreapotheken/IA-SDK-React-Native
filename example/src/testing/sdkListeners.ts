@@ -7,11 +7,16 @@ import {
 } from '@ihreapotheken/ia-sdk-core';
 import { analyticsLog, describe, eventLog } from './eventLog';
 
+let isAttached = false;
+
 /**
- * Adds every SDK listener to the event log. Called once after registration;
- * the listeners live as long as the app.
+ * Adds every SDK listener to the event log, once. Called after registration;
+ * the listeners live as long as the app. Fast Refresh re-runs the effect that
+ * calls this, which would otherwise log every event again per edit.
  */
 export function attachSdkListeners() {
+  if (isAttached) return;
+  isAttached = true;
   iaSdk.addInitializationStateListener((state) =>
     eventLog.add('Initialization state', state)
   );

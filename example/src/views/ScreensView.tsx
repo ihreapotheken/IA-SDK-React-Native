@@ -12,7 +12,7 @@ import {
   type IaPrescriptionModule,
 } from '@ihreapotheken/ia-sdk-core';
 import type { EmbeddedScreenRequest } from './EmbeddedScreen';
-import { ActionButton, runAction, Section, styles, SwitchRow } from './ui';
+import { ActionButton, runAction, runLaunch, Section, styles, SwitchRow } from './ui';
 
 function prescription() {
   return iaSdk.getModule<IaPrescriptionModule>(IaBaseModule.Prescription);
@@ -50,7 +50,7 @@ export function ScreensView({
     setIsCameraOn(true);
     setIsFlashlightOn(false);
     setIsPreviewPaused(false);
-    runAction('Scanner', () => prescription().launchPrescriptionScanner(type));
+    runLaunch('Scanner', () => prescription().launchPrescriptionScanner(type));
   };
 
   return (
@@ -63,7 +63,7 @@ export function ScreensView({
         <ActionButton
           title="Start Screen (Dashboard)"
           disabled={!isInitialized}
-          onPress={() => runAction('Start Screen', () => iaSdk.startDashboardActivity())}
+          onPress={() => runLaunch('Start Screen', () => iaSdk.startDashboardActivity())}
         />
         <SwitchRow
           title="Apofinder can be closed without a pharmacy"
@@ -76,7 +76,7 @@ export function ScreensView({
           description="The selection is reported in the Events tab"
           disabled={!isInitialized}
           onPress={() =>
-            runAction('Apofinder', () =>
+            runLaunch('Apofinder', () =>
               iaSdk.launchApofinder({ isCancellable: isApofinderCancellable })
             )
           }
@@ -93,7 +93,7 @@ export function ScreensView({
           title="Cart"
           disabled={!isInitialized}
           onPress={() =>
-            runAction('Cart', () =>
+            runLaunch('Cart', () =>
               iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering).launchCartScreen()
             )
           }
@@ -108,7 +108,7 @@ export function ScreensView({
           title="Product Search"
           disabled={!isInitialized}
           onPress={() =>
-            runAction('Product Search', () =>
+            runLaunch('Product Search', () =>
               iaSdk
                 .getModule<IaOverTheCounterModule>(IaBaseModule.OverTheCounter)
                 .launchProductSearchRoute({ focusesOnAppear: focusesSearch })
@@ -119,7 +119,7 @@ export function ScreensView({
           title="Pharmacy Details"
           disabled={!isInitialized}
           onPress={() =>
-            runAction('Pharmacy Details', () =>
+            runLaunch('Pharmacy Details', () =>
               iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy).launchPharmacyDetails()
             )
           }
@@ -129,7 +129,7 @@ export function ScreensView({
           description="Scans go through the scan callbacks, see the Events tab"
           disabled={!isInitialized}
           onPress={() =>
-            runAction('Redeem Prescription', () =>
+            runLaunch('Redeem Prescription', () =>
               prescription().launchRedeemPrescriptionScreen()
             )
           }

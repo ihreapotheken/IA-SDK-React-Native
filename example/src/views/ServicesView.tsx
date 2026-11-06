@@ -16,7 +16,7 @@ import {
   mockPdfPrescription,
   mockPngPrescription,
 } from '../testData';
-import { ActionButton, runAction, Section, styles } from './ui';
+import { ActionButton, runAction, runLaunch, Section, styles } from './ui';
 
 const TEST_PHARMACY_ID = '2163';
 
@@ -53,12 +53,25 @@ const TRANSFER_VARIANTS: {
 ];
 
 /**
+ * The SDK keeps these settings while the app runs, so they're kept here
+ * rather than in the view, which the tab bar remounts. They start out as the
+ * SDK defaults.
+ */
+const appearance = { isHapticFeedbackEnabled: true, showsMascot: true };
+
+/** Takes the mascot setting of the initialization options. */
+export function setInitialMascotVisibility(showsMascot: boolean) {
+  appearance.showsMascot = showsMascot;
+}
+
+/**
  * Calls the SDK's non-screen APIs, grouped like the native demo apps.
  */
 export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
-  // Mirrors the SDK defaults so the labels start out truthful.
-  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(true);
-  const [showsMascot, setShowsMascot] = useState(true);
+  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(
+    appearance.isHapticFeedbackEnabled
+  );
+  const [showsMascot, setShowsMascot] = useState(appearance.showsMascot);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -274,6 +287,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
           onPress={() =>
             runAction('Haptic Feedback', async () => {
               await iaSdk.setHapticFeedbackEnabled(!isHapticFeedbackEnabled);
+              appearance.isHapticFeedbackEnabled = !isHapticFeedbackEnabled;
               setIsHapticFeedbackEnabled(!isHapticFeedbackEnabled);
             })
           }
@@ -285,6 +299,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
           onPress={() =>
             runAction('Mascot Illustrations', async () => {
               await iaSdk.setShouldShowMascotIllustrations(!showsMascot);
+              appearance.showsMascot = !showsMascot;
               setShowsMascot(!showsMascot);
             })
           }
@@ -299,7 +314,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
       <Section title="Debugging">
         <ActionButton
           title="Present Logs"
-          onPress={() => runAction('Present Logs', () => iaSdk.presentLogs())}
+          onPress={() => runLaunch('Present Logs', () => iaSdk.presentLogs())}
         />
         <ActionButton
           title="Export Logs"

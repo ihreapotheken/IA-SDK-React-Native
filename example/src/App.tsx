@@ -38,6 +38,7 @@ import {
   EventsView,
   ScreensView,
   ServicesView,
+  setInitialMascotVisibility,
   type EmbeddedScreenRequest,
 } from './views';
 import { ActionButton, runAction, Section, SwitchRow, styles as ui } from './views/ui';
@@ -122,12 +123,16 @@ function AppContent() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [isRegistered, setIsRegistered] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [didInitialize, setDidInitialize] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cardLinkModule, setCardLinkModule] = useState<IaModuleCardLink | null>(null);
   const [initState, setInitState] = useState<IaSdkInitializationState>(
     IaSdkInitializationState.Uninitialized
   );
+  // The SDK's own state too, so a remounted app (e.g. after Fast Refresh) keeps
+  // its buttons enabled.
+  const isInitialized =
+    didInitialize || initState === IaSdkInitializationState.Initialized;
   const [embeddedScreen, setEmbeddedScreen] = useState<EmbeddedScreenRequest | null>(null);
   const closeEmbeddedScreen = useCallback(() => setEmbeddedScreen(null), []);
   const [initOptions, setInitOptions] = useState<InitOptions>({
@@ -173,7 +178,8 @@ function AppContent() {
     setIsLoading(true);
     try {
       await iaSdk.initialize(buildInitConfig(initOptions));
-      setIsInitialized(true);
+      setInitialMascotVisibility(!initOptions.hideMascotIllustrations);
+      setDidInitialize(true);
       eventLog.add('App', 'SDK initialized');
     } catch (e) {
       await runAction('Initialize', () => Promise.reject(e));
@@ -318,6 +324,8 @@ function AppContent() {
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.name}
+            // UI tests select tabs by it; "Home" alone also matches the system navigation bar.
+            testID={`tab-${tab.name}`}
             style={[styles.tab, activeTab === tab.name && styles.tabActive]}
             onPress={() => setActiveTab(tab.name)}
           >
