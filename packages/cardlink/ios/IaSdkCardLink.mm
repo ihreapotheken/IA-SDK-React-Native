@@ -7,7 +7,11 @@ static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
   };
 }
 
-@implementation IaSdkCardLink
+@implementation IaSdkCardLink {
+  // Whether JS listens to any event. RCTEventEmitter drops events sent without
+  // listeners and warns about each one in debug builds.
+  _Atomic BOOL _hasListeners;
+}
 
 RCT_EXPORT_MODULE()
 
@@ -17,7 +21,10 @@ RCT_EXPORT_MODULE()
     __weak IaSdkCardLink *weakSelf = self;
     void (^attach)(void) = ^{
       [[IaSdkCardLinkImpl shared] setEventEmitter:^(NSString *eventName, id body) {
-        [weakSelf sendEventWithName:eventName body:body];
+        IaSdkCardLink *strongSelf = weakSelf;
+        if (strongSelf && strongSelf->_hasListeners) {
+          [strongSelf sendEventWithName:eventName body:body];
+        }
       }];
     };
     // IaSdkCardLinkImpl is main-actor isolated, like the SDK it calls.
@@ -30,10 +37,18 @@ RCT_EXPORT_MODULE()
   return self;
 }
 
-// addListener:/removeListeners: come from RCTEventEmitter, which only sends
-// events while its listener count is above zero.
+// addListener:/removeListeners: come from RCTEventEmitter, which calls these
+// when JS adds its first listener and removes its last one.
 - (NSArray<NSString *> *)supportedEvents {
   return [IaSdkCardLinkImpl supportedEvents];
+}
+
+- (void)startObserving {
+  _hasListeners = YES;
+}
+
+- (void)stopObserving {
+  _hasListeners = NO;
 }
 
 + (BOOL)requiresMainQueueSetup {

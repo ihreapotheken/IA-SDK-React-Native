@@ -9,7 +9,12 @@ static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
   };
 }
 
-@implementation IaSdkCore
+@implementation IaSdkCore {
+  // Whether JS listens to any event. RCTEventEmitter drops events sent without
+  // listeners and warns about each one in debug builds; the initialization
+  // state, for example, is reported before the app subscribes.
+  _Atomic BOOL _hasListeners;
+}
 
 - (instancetype)init {
   self = [super init];
@@ -17,7 +22,10 @@ static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
     __weak IaSdkCore *weakSelf = self;
     void (^attach)(void) = ^{
       [[IaSdkCoreImpl shared] attachWithEmitter:^(NSString *eventName, id body) {
-        [weakSelf sendEventWithName:eventName body:body];
+        IaSdkCore *strongSelf = weakSelf;
+        if (strongSelf && strongSelf->_hasListeners) {
+          [strongSelf sendEventWithName:eventName body:body];
+        }
       }];
     };
     // IaSdkCoreImpl is main-actor isolated, like the SDK it calls.
@@ -32,6 +40,16 @@ static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
 
 - (NSArray<NSString *> *)supportedEvents {
   return [IaSdkCoreImpl supportedEvents];
+}
+
+// RCTEventEmitter calls these when JS adds its first listener and removes its
+// last one.
+- (void)startObserving {
+  _hasListeners = YES;
+}
+
+- (void)stopObserving {
+  _hasListeners = NO;
 }
 
 + (BOOL)requiresMainQueueSetup {
