@@ -118,6 +118,10 @@ class IaSdkPlatformHostView(
   }
 
   private val layoutScreen = Runnable {
+    // Measuring the screen outside a window composes it without the
+    // activity's lifecycle and view model owners, which the SDK screen
+    // crashes on, for example right after the app removed this view.
+    if (!isAttachedToWindow || width == 0 || height == 0) return@Runnable
     measure(
       MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
       MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY),
@@ -128,12 +132,12 @@ class IaSdkPlatformHostView(
   /**
    * React Native positions its views itself and ignores layout requests from
    * native children, so an embedded screen would keep its first layout. This
-   * lays it out again. (FrameLayout's constructor calls this before the
-   * properties are set, while [screenView] is still null.)
+   * lays it out again while in a window. (FrameLayout's constructor calls this
+   * before the properties are set, while [screenView] is still null.)
    */
   override fun requestLayout() {
     super.requestLayout()
-    if (screenView != null) post(layoutScreen)
+    if (screenView != null && isAttachedToWindow) post(layoutScreen)
   }
 
   init {
@@ -144,6 +148,11 @@ class IaSdkPlatformHostView(
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     applyContent()
+  }
+
+  override fun onDetachedFromWindow() {
+    removeCallbacks(layoutScreen)
+    super.onDetachedFromWindow()
   }
 
   override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -206,6 +215,7 @@ class IaSdkPlatformHostView(
   }
 
   fun dispose() {
+    removeCallbacks(layoutScreen)
     if (composeView.viewTreeObserver.isAlive) {
       composeView.viewTreeObserver.removeOnPreDrawListener(preDrawListener)
     }

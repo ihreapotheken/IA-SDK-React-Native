@@ -44,6 +44,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalIaAnalyticsApi::class)
@@ -55,6 +56,8 @@ class IaSdkCoreModule(
     const val NAME = "IaSdkCore"
     private const val TAG = "IaSdkCoreModule"
     const val REQUEST_CODE_PREREQUISITES = 7301
+    private const val PREREQUISITE_CHECK_TIMEOUT_MS = 30_000L
+    private const val PREREQUISITE_LAUNCH_CHECK_TIMEOUT_MS = 10_000L
 
     // Track registered modules for dynamic registration
     private val registeredModuleTypes = mutableListOf<SdkModule>()
@@ -426,7 +429,13 @@ class IaSdkCoreModule(
   override fun isPrerequisiteFlowCompleted(promise: Promise) {
     if (!IaSdkRuntime.requireInitialized(promise)) return
     runSdkCall("isPrerequisiteFlowCompleted", promise) {
-      IaSdk.isPrerequisiteFlowCompleted()
+      // The SDK's check waits for the remote configuration and the pharmacy,
+      // and was seen to never answer once, around a network change. Its
+      // caller gets an error instead of waiting forever.
+      withTimeoutOrNull(PREREQUISITE_CHECK_TIMEOUT_MS) { IaSdk.isPrerequisiteFlowCompleted() }
+        ?: throw IllegalStateException(
+          "The SDK didn't answer within ${PREREQUISITE_CHECK_TIMEOUT_MS / 1000} s.",
+        )
     }
   }
 
@@ -438,19 +447,27 @@ class IaSdkCoreModule(
       promise.reject("PREREQUISITE_FLOW_IN_PROGRESS", "The prerequisites flow is already running.")
       return
     }
+    // Set before the check below, so a call made meanwhile is rejected too.
+    prerequisiteFlowPromise = promise
     scope.launch {
       try {
-        // With completed prerequisites the activity would only open and close again.
-        if (IaSdk.isPrerequisiteFlowCompleted()) {
+        // With completed prerequisites the activity would only open and close
+        // again. Without an answer from the SDK, the activity opens and checks
+        // the prerequisites itself.
+        val isCompleted = withTimeoutOrNull(PREREQUISITE_LAUNCH_CHECK_TIMEOUT_MS) {
+          IaSdk.isPrerequisiteFlowCompleted()
+        } ?: false
+        if (isCompleted) {
+          prerequisiteFlowPromise = null
           promise.resolve(Arguments.createMap().apply { putBoolean("isCancelled", false) })
           return@launch
         }
         val activity = IaSdkRuntime.currentActivity()
         if (activity == null) {
+          prerequisiteFlowPromise = null
           promise.reject("NO_ACTIVITY", "Launching the prerequisites flow needs an activity.")
           return@launch
         }
-        prerequisiteFlowPromise = promise
         activity.startActivityForResult(
           IaPrerequisiteActivity.createIntent(activity),
           REQUEST_CODE_PREREQUISITES,
