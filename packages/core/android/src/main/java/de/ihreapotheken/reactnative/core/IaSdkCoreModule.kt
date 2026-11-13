@@ -6,10 +6,10 @@ import android.content.Intent
 import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
-import de.ihreapotheken.sdk.core.data.EnvironmentType
-import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.api.listener.SdkEventListener
+import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
+import de.ihreapotheken.sdk.core.domain.model.sdk.SdkEvent
+import de.ihreapotheken.sdk.core.domain.session.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.SdkModule
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.appointments.AppointmentsModule
