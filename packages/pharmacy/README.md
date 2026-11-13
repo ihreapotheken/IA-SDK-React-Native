@@ -51,11 +51,16 @@ Access the module after initialization:
 ```typescript
 const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
 
-// Launch pharmacy details screen
 await pharmacy.launchPharmacyDetails();
 
-// Set a specific pharmacy by ID
-await pharmacy.setPharmacyId('pharmacy-123');
+// Select a pharmacy by its numeric ID; other values reject with ARG_ERROR
+await pharmacy.setPharmacyId('2163');
+const pharmacyId = await pharmacy.getPharmacyId(); // null without a pharmacy
+await pharmacy.clearPharmacyId();                  // also empties its cart
+
+// iOS only
+await pharmacy.savePharmacyId('2163');             // without validation, before initialize
+const details = await pharmacy.getPharmacy();      // IaPharmacy or null
 ```
 
 ## Related

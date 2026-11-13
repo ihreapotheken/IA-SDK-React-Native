@@ -55,3 +55,24 @@ await iaSdk.startDashboardActivity();
 ## Related
 
 - [Flutter SDK Prescription](https://github.com/ihreapotheken/IA-SDK-Flutter) - `ia_prescription` module
+
+## Available Methods
+
+```typescript
+const prescription = iaSdk.getModule<IaPrescriptionModule>(IaBaseModule.Prescription);
+
+await prescription.launchRedeemPrescriptionScreen();
+
+// Take over scanned prescriptions. Without a handler, or after 2 minutes without an
+// answer, the SDK continues with its built-in handling.
+prescription.onPrescriptionPhotoScanned = async (imageBase64) => {
+  await upload(imageBase64);
+  return { decision: 'handled' }; // or { decision: 'performDefault' } / { decision: 'error', message }
+};
+prescription.onEPrescriptionScanned = async ({ rawCode, urls }) => ({ decision: 'performDefault' });
+
+// iOS only
+await prescription.launchPrescriptionScanner(IaPrescriptionScannerType.EPrescription);
+await prescription.setScannerCameraState({ isFlashlightOn: true });
+prescription.addScannerCameraErrorListener((message) => {});
+```

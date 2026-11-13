@@ -51,19 +51,36 @@ Access the module after initialization:
 ```typescript
 const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
 
-// Transfer prescriptions for checkout
+// Transfer prescriptions for checkout; resolves once they're in the cart
 await ordering.transferPrescriptions({
   images: ['base64-encoded-image...'],  // JPG/PNG images
-  pdfs: ['base64-encoded-pdf...'],       // PDF files
-  codes: ['{"code": "..."}'],            // eRezept JSON codes
+  pdfs: [{ data: 'base64-encoded-pdf...', insuranceType: PrescriptionInsuranceType.PublicHealthcare }],
+  codes: ['{"urls": ["..."]}'],          // eRezept JSON codes
   orderId: 'client-order-123',           // Optional client order ID
+  finishAction: IaTransferPrescriptionsFinishAction.ShowBottomSheet, // openCart (default), showBottomSheet, noAction
+  showActivityIndicator: true,           // iOS
 });
 
-// Clear the shopping cart
 await ordering.clearCart();
-
-// Launch the cart screen
 await ordering.launchCartScreen();
+
+// iOS only
+const details = await ordering.getCartDetails({ allowCached: false });  // JSON string or null
+const cart = await ordering.getCartState({ shouldEmitCartUpdate: true }); // CartState or null
+await ordering.deleteOrderHistory();
+
+// Listeners
+ordering.addCartUpdatedListener((state) => {});
+ordering.addOrderFinishedListener(({ orderCode, orderCodes, clientOrderIDs }) => {});
+```
+
+## Components
+
+```tsx
+import { IaCartButton } from '@ihreapotheken/ia-sdk-ordering';
+
+<IaCartButton />                              // opens the SDK cart
+<IaCartButton onPress={() => openMyCart()} /> // the host app handles the tap
 ```
 
 ## Related

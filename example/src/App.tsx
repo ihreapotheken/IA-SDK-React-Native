@@ -1,13 +1,12 @@
+import { useCallback, useEffect, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  Platform,
-  Alert,
-  type GestureResponderEvent,
+  View,
 } from 'react-native';
 import {
   SafeAreaProvider,
@@ -22,56 +21,45 @@ import {
 } from './generatedEnvConfig';
 import {
   iaSdk,
+  IaHeaderStyle,
+  IaSdkInitializationState,
   ServerEnvironment,
-  Salutation,
-  IaBaseModule,
+  type InitConfig,
 } from '@ihreapotheken/ia-sdk-core';
-
-if (!APPSDK_ACCESS_KEY) {
-  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
-}
-import type {
-  IaOrderingModule,
-  IaPharmacyModule,
-  IaCardLinkModule,
-  IaPrescriptionModule,
-  IaOverTheCounterModule,
-} from '@ihreapotheken/ia-sdk-interface';
 import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
 import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
 import { IaModulePrescription } from '@ihreapotheken/ia-sdk-prescription';
 import { IaModuleCardLink } from '@ihreapotheken/ia-sdk-cardlink';
-import { useCallback, useEffect, useState } from 'react';
 import {
-  mockPngPrescription,
-  mockJpgPrescription,
-  mockPdfPrescription,
-  mockEPrescriptionCode,
-} from './testData';
-import { CardLinkView, ComponentsView } from './views';
+  CardLinkView,
+  ComponentsView,
+  EmbeddedScreen,
+  EventsView,
+  ScreensView,
+  ServicesView,
+  setInitialMascotVisibility,
+  type EmbeddedScreenRequest,
+} from './views';
+import { ActionButton, runAction, Section, SwitchRow, styles as ui } from './views/ui';
+import { attachSdkListeners } from './testing/sdkListeners';
+import { installHostCallbacks } from './testing/testSettings';
+import { eventLog } from './testing/eventLog';
 
-type TabName = 'home' | 'cardlink' | 'components';
-
-interface AppButtonProps {
-  title: string;
-  onPress: (event: GestureResponderEvent) => void;
-  disabled?: boolean;
-  color?: string;
+if (!APPSDK_ACCESS_KEY) {
+  throw new Error('APPSDK_ACCESS_KEY is missing. Please add it to your .secrets file.');
 }
 
-function AppButton({ title, onPress, disabled = false, color = '#000000' }: AppButtonProps) {
-  const textColor = disabled ? '#888888' : color;
-  return (
-    <TouchableOpacity
-      style={styles.button}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
-    </TouchableOpacity>
-  );
-}
+type TabName = 'home' | 'screens' | 'services' | 'components' | 'cardlink' | 'events';
+
+const TABS: { name: TabName; label: string }[] = [
+  { name: 'home', label: 'Home' },
+  { name: 'screens', label: 'Screens' },
+  { name: 'services', label: 'Services' },
+  { name: 'components', label: 'Views' },
+  { name: 'cardlink', label: 'CardLink' },
+  { name: 'events', label: 'Events' },
+];
 
 // Server environment the SDK is initialized with, taken from the monorepo .env
 // so the app name (DEV/QA/PROD suffix) and the SDK config can never disagree.
@@ -80,290 +68,131 @@ const serverEnvironment =
     ? (SERVER_ENVIRONMENT as ServerEnvironment)
     : ServerEnvironment.Staging;
 
-// Store module instance for CardLink view
-let cardLinkModuleInstance: IaModuleCardLink | null = null;
+/** Initialization options the Home tab switches, to test the configuration. */
+interface InitOptions {
+  shouldFetchThemeFromRemote: boolean;
+  isImprintHandledByHostApp: boolean;
+  runOnboardingIfNeeded: boolean;
+  showTestPharmaciesInApofinder: boolean;
+  customUiColors: boolean;
+  hideMascotIllustrations: boolean;
+  cardLinkSaveCardEnabled: boolean;
+}
+
+function buildInitConfig(options: InitOptions): InitConfig {
+  return {
+    accessKey: APPSDK_ACCESS_KEY as string,
+    clientId: '6001',
+    serverEnvironment,
+    shouldFetchThemeFromRemote: options.shouldFetchThemeFromRemote,
+    footer: { isImprintHandledByHostApp: options.isImprintHandledByHostApp },
+    initialization: {
+      prerequisites: { runOnboardingIfNeeded: options.runOnboardingIfNeeded },
+    },
+    uiConfiguration: {
+      shouldShowMascotIllustrations: !options.hideMascotIllustrations,
+      ...(options.customUiColors
+        ? {
+            header: {
+              style: IaHeaderStyle.Monotone,
+              primaryColor: 0xff6a1b9a,
+              secondaryColor: 0xffce93d8,
+            },
+            primaryButton: {
+              backgroundColor: 0xff6a1b9a,
+              textColor: 0xffffffff,
+              borderRadius: 24,
+            },
+            secondaryButton: {
+              borderColor: 0xff6a1b9a,
+              textColor: 0xff6a1b9a,
+              borderWidth: 2,
+              borderRadius: 24,
+            },
+          }
+        : {}),
+    },
+    qaConfiguration: options.showTestPharmaciesInApofinder
+      ? { showTestPharmaciesInApofinder: true }
+      : undefined,
+    cardLink: { isSaveCardEnabled: options.cardLinkSaveCardEnabled },
+  };
+}
 
 function AppContent() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [isRegistered, setIsRegistered] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [didInitialize, setDidInitialize] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cardLinkModule, setCardLinkModule] = useState<IaModuleCardLink | null>(null);
-  // Mirrors the SDK default (mascot shown) so the button label starts out truthful.
-  const [showMascotIllustrations, setShowMascotIllustrations] = useState(true);
-
-  const withLoading = useCallback(async <T,>(callback: () => Promise<T>): Promise<T | undefined> => {
-    setIsLoading(true);
-    try {
-      return await callback();
-    } catch (e) {
-      console.error(e);
-      return undefined;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [initState, setInitState] = useState<IaSdkInitializationState>(
+    IaSdkInitializationState.Uninitialized
+  );
+  // The SDK's own state too, so a remounted app (e.g. after Fast Refresh) keeps
+  // its buttons enabled.
+  const isInitialized =
+    didInitialize || initState === IaSdkInitializationState.Initialized;
+  const [embeddedScreen, setEmbeddedScreen] = useState<EmbeddedScreenRequest | null>(null);
+  const closeEmbeddedScreen = useCallback(() => setEmbeddedScreen(null), []);
+  const [initOptions, setInitOptions] = useState<InitOptions>({
+    shouldFetchThemeFromRemote: false,
+    isImprintHandledByHostApp: false,
+    runOnboardingIfNeeded: false,
+    showTestPharmaciesInApofinder: false,
+    customUiColors: false,
+    hideMascotIllustrations: false,
+    cardLinkSaveCardEnabled: true,
+  });
 
   // Register modules on mount
   useEffect(() => {
+    const subscription = iaSdk.addInitializationStateListener(setInitState);
+    iaSdk.getInitializationState().then(setInitState).catch(() => undefined);
+
     const registerModules = async () => {
       try {
-        console.log('Registering SDK modules...');
-        cardLinkModuleInstance = new IaModuleCardLink();
+        const cardLink = new IaModuleCardLink();
         await iaSdk.register([
           new IaModuleOrdering(),
           new IaModuleOverTheCounter(),
           new IaModulePharmacy(),
           new IaModulePrescription(),
-          cardLinkModuleInstance,
+          cardLink,
         ]);
-        console.log('SDK modules registered successfully.');
-        setCardLinkModule(cardLinkModuleInstance);
-        setTimeout(() => {
-          setIsRegistered(true);
-          console.log('isRegistered set to true');
-        }, 100);
+        attachSdkListeners();
+        installHostCallbacks();
+        setCardLinkModule(cardLink);
+        setIsRegistered(true);
+        eventLog.add('App', 'Modules registered');
       } catch (e) {
         console.error('Module registration error:', e);
+        eventLog.add('App', `Module registration failed: ${String(e)}`);
       }
     };
     registerModules();
+    return () => subscription.remove();
   }, []);
 
-  const handleInitialize = () =>
-    withLoading(async () => {
-      console.log('Running SDK init...');
-      console.log('isRegistered:', isRegistered, 'isInitialized:', isInitialized);
-      await iaSdk.initialize({
-        accessKey: APPSDK_ACCESS_KEY as string,
-        clientId: '6001',
-        serverEnvironment,
-      });
-      console.log('SDK initialized successfully!');
-      setIsInitialized(true);
-    });
-
-  const handleStartDashboard = () =>
-    withLoading(async () => {
-      await iaSdk.startDashboardActivity();
-    });
-
-  const handleLogout = () =>
-    withLoading(async () => {
-      await iaSdk.logout();
-      console.log('Logout successful.');
-    });
-
-  const handleSetGuestUserData = () =>
-    withLoading(async () => {
-      await iaSdk.setGuestUserData({
-        salutation: Salutation.NotDisclosed,
-        firstName: 'First',
-        lastName: 'Last',
-        email: 'Email@email.com',
-        phoneNumberCountryCode: 49,
-        phoneNumberWithoutCountryCode: 24332442,
-      });
-      console.log('Guest user data set successfully.');
-    });
-
-  const handleClearCart = () =>
-    withLoading(async () => {
-      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-      await ordering.clearCart();
-      console.log('Cart cleared successfully.');
-    });
-
-  const handleTransferPrescriptions = () =>
-    withLoading(async () => {
-      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-      await ordering.transferPrescriptions({
-        images: [mockPngPrescription, mockJpgPrescription],
-        pdfs: [mockPdfPrescription],
-        codes: [mockEPrescriptionCode],
-        orderId: 'test-order-123',
-      });
-      console.log('Prescriptions transferred successfully.');
-    });
-
-  const handleLaunchCartScreen = () =>
-    withLoading(async () => {
-      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-      await ordering.launchCartScreen();
-    });
-
-  const handleLaunchProductSearch = () =>
-    withLoading(async () => {
-      const overTheCounter = iaSdk.getModule<IaOverTheCounterModule>(
-        IaBaseModule.OverTheCounter
-      );
-      await overTheCounter.launchProductSearchRoute();
-    });
-
-  const handleLaunchPharmacyDetails = () =>
-    withLoading(async () => {
-      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
-      await pharmacy.launchPharmacyDetails();
-    });
-
-  const handleLaunchApofinder = () =>
-    withLoading(async () => {
-      await iaSdk.launchApofinder();
-    });
-
-  const handleLaunchRedeemPrescription = () =>
-    withLoading(async () => {
-      const prescription = iaSdk.getModule<IaPrescriptionModule>(
-        IaBaseModule.Prescription
-      );
-      await prescription.launchRedeemPrescriptionScreen();
-    });
-
-  const handleSetBillingAddress = async () => {
+  const handleInitialize = useCallback(async () => {
+    setIsLoading(true);
     try {
-      await iaSdk.setUserBillingAddress({
-        salutation: Salutation.Male,
-        firstName: 'First',
-        lastName: 'Last',
-        street: 'Musterstraße',
-        houseNumber: '1',
-        zipCode: '10115',
-        city: 'Berlin',
-        phoneNumberCountryCode: 49,
-        phoneNumberWithoutCountryCode: '24332442',
-      });
-      Alert.alert('Success', 'Billing address set successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
+      await iaSdk.initialize(buildInitConfig(initOptions));
+      setInitialMascotVisibility(!initOptions.hideMascotIllustrations);
+      setDidInitialize(true);
+      eventLog.add('App', 'SDK initialized');
+    } catch (e) {
+      await runAction('Initialize', () => Promise.reject(e));
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [initOptions]);
 
-  const handleSetDeliveryAddress = async () => {
-    try {
-      await iaSdk.setUserDeliveryAddress({
-        salutation: Salutation.Male,
-        firstName: 'First',
-        lastName: 'Last',
-        street: 'Musterstraße',
-        houseNumber: '2',
-        zipCode: '10115',
-        city: 'Berlin',
-      });
-      Alert.alert('Success', 'Delivery address set successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleFinishAllActivities = () =>
-    withLoading(async () => {
-      await iaSdk.finishAllActivities();
-    });
-
-  // --- New API test handlers ---
-
-  const handleIsInitialized = async () => {
-    try {
-      const result = await iaSdk.isInitialized();
-      Alert.alert('isInitialized', `${result}`);
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleDeleteUser = async () => {
-    try {
-      await iaSdk.deleteUser();
-      Alert.alert('Success', 'User deleted successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleGetEnvironment = async () => {
-    try {
-      const env = await iaSdk.getEnvironment();
-      Alert.alert('Environment', `${env}`);
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleCleanCache = async () => {
-    try {
-      await iaSdk.cleanCache(true, true);
-      Alert.alert('Success', 'Cache cleaned successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  // The mascot renders on the CardLink FAQ screen, so toggle this and then open
-  // CardLink to see the change. Screens already on screen keep the old value.
-  const handleToggleMascotIllustrations = async () => {
-    const next = !showMascotIllustrations;
-    try {
-      await iaSdk.setShouldShowMascotIllustrations(next);
-      setShowMascotIllustrations(next);
-      Alert.alert(
-        'Mascot illustrations',
-        `${next ? 'Enabled' : 'Disabled'}. Open CardLink → FAQ to see the change.`
-      );
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleSetPharmacy2163 = () =>
-    withLoading(async () => {
-      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
-      await pharmacy.setPharmacyId('2163');
-      console.log('Pharmacy ID set to 2163.');
-    });
-
-  const handleGetPharmacyId = async () => {
-    try {
-      const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
-      const pharmacyId = await pharmacy.getPharmacyId();
-      Alert.alert('Pharmacy ID', `${pharmacyId ?? 'null'}`);
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleGetCartDetails = async () => {
-    try {
-      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-      const details = await ordering.getCartDetails();
-      Alert.alert('Cart Details', `${details ?? 'null'}`);
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleDeleteOrderHistory = async () => {
-    try {
-      const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
-      await ordering.deleteOrderHistory();
-      Alert.alert('Success', 'Order history deleted successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
-  const handleCardLinkFinish = async () => {
-    try {
-      const cl = iaSdk.getModule<IaCardLinkModule>(IaBaseModule.CardLink);
-      await cl.finish();
-      Alert.alert('Success', 'CardLink finished successfully.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
+  const setInitOption = (key: keyof InitOptions) => (value: boolean) =>
+    setInitOptions((previous) => ({ ...previous, [key]: value }));
 
   const renderHomeTab = () => (
-    <ScrollView style={styles.tabContent} contentContainerStyle={styles.scrollContent}>
+    <ScrollView contentContainerStyle={ui.scrollContent}>
       <Text style={styles.title}>IA SDK React Native Example</Text>
       <Text style={styles.subtitle}>
         {Platform.OS === 'ios' ? 'iOS' : 'Android'}{' '}
@@ -371,225 +200,98 @@ function AppContent() {
         {' · '}
         {SERVER_ENVIRONMENT_LABEL} ({SERVER_ENVIRONMENT})
       </Text>
-
       <Text style={styles.status}>
-        Modules: {isRegistered ? 'Registered' : 'Not Registered'}
-      </Text>
-      <Text style={styles.status}>
-        SDK: {isInitialized ? 'Initialized' : 'Not Initialized'}
+        Modules: {isRegistered ? 'Registered' : 'Not Registered'} · State:{' '}
+        {initState}
       </Text>
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title={`INITIALIZE (${isRegistered ? 'Ready' : 'Wait'})`}
+      <Section title="Initialization">
+        <Text style={ui.hint}>
+          Options apply to the first successful initialize call.
+        </Text>
+        <SwitchRow
+          title="Fetch theme from remote"
+          value={initOptions.shouldFetchThemeFromRemote}
+          onValueChange={setInitOption('shouldFetchThemeFromRemote')}
+        />
+        <SwitchRow
+          title="Host handles imprint"
+          description="The imprint button reports the imprint navigation target"
+          value={initOptions.isImprintHandledByHostApp}
+          onValueChange={setInitOption('isImprintHandledByHostApp')}
+        />
+        <SwitchRow
+          title="Run onboarding in prerequisites"
+          value={initOptions.runOnboardingIfNeeded}
+          onValueChange={setInitOption('runOnboardingIfNeeded')}
+        />
+        <SwitchRow
+          title="Show test pharmacies in Apofinder (QA)"
+          value={initOptions.showTestPharmaciesInApofinder}
+          onValueChange={setInitOption('showTestPharmaciesInApofinder')}
+        />
+        <SwitchRow
+          title="Custom UI colors"
+          description="Purple monotone header and rounded buttons"
+          value={initOptions.customUiColors}
+          onValueChange={setInitOption('customUiColors')}
+        />
+        <SwitchRow
+          title="Hide mascot illustrations"
+          value={initOptions.hideMascotIllustrations}
+          onValueChange={setInitOption('hideMascotIllustrations')}
+        />
+        <SwitchRow
+          title="CardLink saves cards (SDK-started flows)"
+          value={initOptions.cardLinkSaveCardEnabled}
+          onValueChange={setInitOption('cardLinkSaveCardEnabled')}
+        />
+        <ActionButton
+          title={`Initialize (${isRegistered ? 'Ready' : 'Wait'})`}
           onPress={handleInitialize}
-          disabled={!isRegistered || isInitialized}
+          // cleanCache(initialization) uninitializes the SDK, so it can be initialized again.
+          disabled={
+            !isRegistered ||
+            isLoading ||
+            (isInitialized && initState === IaSdkInitializationState.Initialized)
+          }
         />
-      </View>
+      </Section>
 
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="START DASHBOARD ACTIVITY"
-          onPress={handleStartDashboard}
+      <Section title="State">
+        <ActionButton
+          title="Is Initialized"
+          onPress={() => runAction('Is Initialized', () => iaSdk.isInitialized(), String)}
+        />
+        <ActionButton
+          title="Get Initialization State"
+          onPress={() => runAction('Initialization State', () => iaSdk.getInitializationState())}
+        />
+        <ActionButton
+          title="Get Environment"
+          onPress={() => runAction('Environment', () => iaSdk.getEnvironment())}
+        />
+      </Section>
+
+      <Section title="Prerequisites">
+        <ActionButton
+          title="Launch Prerequisite Flow"
+          description="Legal documents, onboarding and pharmacy selection"
           disabled={!isInitialized}
+          onPress={() =>
+            runAction('Prerequisite Flow', () => iaSdk.launchPrerequisiteFlow(), (result) =>
+              result.isCancelled ? 'Cancelled' : 'Completed'
+            )
+          }
         />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LOGOUT"
-          onPress={handleLogout}
+        <ActionButton
+          title="Is Prerequisite Flow Completed"
           disabled={!isInitialized}
+          onPress={() =>
+            runAction('Prerequisite Flow Completed', () => iaSdk.isPrerequisiteFlowCompleted(), String)
+          }
         />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="SET GUEST USER DATA"
-          onPress={handleSetGuestUserData}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="CLEAR CART"
-          onPress={handleClearCart}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="TRANSFER PRESCRIPTIONS"
-          onPress={handleTransferPrescriptions}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LAUNCH CART SCREEN"
-          onPress={handleLaunchCartScreen}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LAUNCH PRODUCT SEARCH"
-          onPress={handleLaunchProductSearch}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LAUNCH PHARMACY DETAILS"
-          onPress={handleLaunchPharmacyDetails}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LAUNCH APOFINDER"
-          onPress={handleLaunchApofinder}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="LAUNCH REDEEM PRESCRIPTION"
-          onPress={handleLaunchRedeemPrescription}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="FINISH ALL ACTIVITIES"
-          onPress={handleFinishAllActivities}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="IS INITIALIZED"
-          onPress={handleIsInitialized}
-        />
-      </View>
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="DELETE USER"
-            onPress={handleDeleteUser}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="GET ENVIRONMENT"
-            onPress={handleGetEnvironment}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="CLEAN CACHE"
-            onPress={handleCleanCache}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title={
-              showMascotIllustrations
-                ? 'HIDE MASCOT ILLUSTRATIONS'
-                : 'SHOW MASCOT ILLUSTRATIONS'
-            }
-            onPress={handleToggleMascotIllustrations}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="SET BILLING ADDRESS"
-            onPress={handleSetBillingAddress}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="SET DELIVERY ADDRESS"
-            onPress={handleSetDeliveryAddress}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="SET PHARMACY 2163"
-          onPress={handleSetPharmacy2163}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="GET PHARMACY ID"
-          onPress={handleGetPharmacyId}
-          disabled={!isInitialized}
-        />
-      </View>
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="GET CART DETAILS"
-            onPress={handleGetCartDetails}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="DELETE ORDER HISTORY"
-            onPress={handleDeleteOrderHistory}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
-
-      {Platform.OS === 'ios' && (
-        <View style={styles.buttonContainer}>
-          <AppButton
-            title="CARDLINK FINISH"
-            onPress={handleCardLinkFinish}
-            disabled={!isInitialized}
-          />
-        </View>
-      )}
+      </Section>
     </ScrollView>
   );
 
@@ -607,43 +309,41 @@ function AppContent() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Tab Content */}
       <View style={styles.contentContainer}>
         {activeTab === 'home' && renderHomeTab()}
-        {activeTab === 'cardlink' && renderCardLinkTab()}
+        {activeTab === 'screens' && (
+          <ScreensView isInitialized={isInitialized} onEmbedScreen={setEmbeddedScreen} />
+        )}
+        {activeTab === 'services' && <ServicesView isInitialized={isInitialized} />}
         {activeTab === 'components' && <ComponentsView />}
+        {activeTab === 'cardlink' && renderCardLinkTab()}
+        {activeTab === 'events' && <EventsView />}
       </View>
 
-      {/* Tab Bar */}
       <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'home' && styles.tabActive]}
-          onPress={() => setActiveTab('home')}
-        >
-          <Text style={[styles.tabText, activeTab === 'home' && styles.tabTextActive]}>
-            Home
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'cardlink' && styles.tabActive]}
-          onPress={() => setActiveTab('cardlink')}
-        >
-          <Text style={[styles.tabText, activeTab === 'cardlink' && styles.tabTextActive]}>
-            CardLink
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'components' && styles.tabActive]}
-          onPress={() => setActiveTab('components')}
-        >
-          <Text style={[styles.tabText, activeTab === 'components' && styles.tabTextActive]}>
-            Components
-          </Text>
-        </TouchableOpacity>
+        {TABS.map((tab) => (
+          <TouchableOpacity
+            key={tab.name}
+            // UI tests select tabs by it; "Home" alone also matches the system navigation bar.
+            testID={`tab-${tab.name}`}
+            style={[styles.tab, activeTab === tab.name && styles.tabActive]}
+            onPress={() => setActiveTab(tab.name)}
+          >
+            <Text
+              style={[styles.tabText, activeTab === tab.name && styles.tabTextActive]}
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Loading Overlay (Home tab only) */}
-      {isLoading && activeTab === 'home' && (
+      {embeddedScreen && (
+        <EmbeddedScreen request={embeddedScreen} onClose={closeEmbeddedScreen} />
+      )}
+
+      {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#000000" />
         </View>
@@ -668,42 +368,23 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
-  tabContent: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 20,
-    alignItems: 'center',
-  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 20,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   status: {
     fontSize: 12,
     color: '#333',
-    marginBottom: 5,
-  },
-  buttonContainer: {
-    marginTop: 10,
-    width: '100%',
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontWeight: 'bold',
-    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   tabBar: {
     flexDirection: 'row',
@@ -721,7 +402,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#007AFF',
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
   },
   tabTextActive: {

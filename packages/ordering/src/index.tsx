@@ -1,9 +1,17 @@
-import { DeviceEventEmitter, Platform } from 'react-native';
 import type {
+  CartDetails,
+  CartDetailsOptions,
+  CartState,
   IaOrderingModule,
+  IaSdkSubscription,
+  TransactionSignatures,
   TransferPrescriptionsParams,
 } from '@ihreapotheken/ia-sdk-interface';
-import { IaBaseModule } from '@ihreapotheken/ia-sdk-interface';
+import {
+  IaBaseModule,
+  IaTransferPrescriptionsFinishAction,
+} from '@ihreapotheken/ia-sdk-interface';
+import { IaSdkInternal, warnUnsupported } from '@ihreapotheken/ia-sdk-core';
 import IaSdkOrderingNative from './NativeIaSdkOrdering';
 
 /**
@@ -17,76 +25,30 @@ export class IaModuleOrdering implements IaOrderingModule {
    * Register the ordering module with the native SDK.
    */
   async register(): Promise<void> {
-    IaSdkOrderingNative.registerModule?.();
-    return Promise.resolve();
+    IaSdkOrderingNative.registerModule();
   }
 
   /**
    * Transfers prescription entries to the ia.de backend for checkout.
+   *
+   * Resolves once the prescriptions are in the cart. On Android the SDK
+   * reports that through the updated cart with `openCart` and `noAction`, and
+   * only once the user closed the confirmation with `showBottomSheet`.
+   * Closing the transfer screen during the upload rejects there.
    *
    * @param params Transfer prescription parameters
    */
   async transferPrescriptions(
     params: TransferPrescriptionsParams
   ): Promise<void> {
-    console.log('[IaModuleOrdering] transferPrescriptions called');
-    console.log('[IaModuleOrdering] images count:', params.images?.length ?? 0);
-    console.log('[IaModuleOrdering] pdfs count:', params.pdfs?.length ?? 0);
-    console.log('[IaModuleOrdering] codes count:', params.codes?.length ?? 0);
-    console.log('[IaModuleOrdering] orderId:', params.orderId);
-    if (params.images) {
-      params.images.forEach((img, i) => {
-        console.log(`[IaModuleOrdering] image[${i}] length: ${img.length} chars`);
-      });
-    }
-    if (params.pdfs) {
-      params.pdfs.forEach((pdf, i) => {
-        console.log(`[IaModuleOrdering] pdf[${i}] length: ${pdf.data.length} chars, insuranceType: ${pdf.insuranceType}`);
-      });
-    }
-    if (params.codes) {
-      params.codes.forEach((code, i) => {
-        console.log(`[IaModuleOrdering] code[${i}]: ${code}`);
-      });
-    }
-
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        const subscription = DeviceEventEmitter.addListener(
-          'TRANSFER_PRESCRIPTIONS_EVENT',
-          (data) => {
-            if (data === 'success') {
-              resolve();
-            } else {
-              reject(new Error(data));
-            }
-            subscription.remove();
-          }
-        );
-        IaSdkOrderingNative.transferPrescriptionsAndroid?.(
-          params.images ?? null,
-          params.pdfs ?? null,
-          params.codes ?? null,
-          params.orderId ?? null
-        );
-      }
-
-      if (Platform.OS === 'ios') {
-        IaSdkOrderingNative.transferPrescriptionsIOS?.(
-          params.images ?? null,
-          params.pdfs ?? null,
-          params.codes ?? null,
-          params.orderId ?? null,
-          (error: string | null) => {
-            console.log('[IaModuleOrdering] iOS callback, error:', error);
-            if (error === null) {
-              resolve();
-            } else {
-              reject(new Error(error));
-            }
-          }
-        );
-      }
+    return IaSdkOrderingNative.transferPrescriptions({
+      images: params.images ?? [],
+      pdfs: params.pdfs ?? [],
+      codes: params.codes ?? [],
+      orderId: params.orderId ?? null,
+      finishAction:
+        params.finishAction ?? IaTransferPrescriptionsFinishAction.OpenCart,
+      showActivityIndicator: params.showActivityIndicator ?? true,
     });
   }
 
@@ -94,89 +56,100 @@ export class IaModuleOrdering implements IaOrderingModule {
    * Resets the state of user cart, clearing any added products or prescriptions.
    */
   async clearCart(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        const subscription = DeviceEventEmitter.addListener(
-          'CLEAR_CART_EVENT',
-          (data) => {
-            if (data === 'success') {
-              resolve();
-            } else {
-              reject(new Error(data));
-            }
-            subscription.remove();
-          }
-        );
-        IaSdkOrderingNative.clearCartAndroid?.();
-      }
-
-      if (Platform.OS === 'ios') {
-        IaSdkOrderingNative.clearCartIOS?.((error: string | null) => {
-          if (error === null) {
-            resolve();
-          } else {
-            reject(new Error(error));
-          }
-        });
-      }
-    });
+    return IaSdkOrderingNative.clearCart();
   }
 
   /**
    * Launches the cart screen experience on top of the navigation stack.
    */
   async launchCartScreen(): Promise<void> {
-    return new Promise((resolve) => {
-      if (Platform.OS === 'android') {
-        IaSdkOrderingNative.launchCartScreenAndroid?.();
-        resolve();
-      }
-
-      if (Platform.OS === 'ios') {
-        IaSdkOrderingNative.launchCartScreenIOS?.();
-        resolve();
-      }
-    });
+    return IaSdkInternal.launchScreen(IaSdkInternal.screens.CART);
   }
 
   /**
    * Gets the current cart details (iOS only).
    *
-   * @returns JSON-encoded cart details, or null if empty/unavailable.
+   * Fails until the SDK has run its prerequisites in the current app session.
+   *
+   * @returns JSON-encoded `CartDetails`, or null if there's no cart.
    */
-  async getCartDetails(): Promise<string | null> {
-    if (Platform.OS !== 'ios') {
-      console.warn(
-        '[IaModuleOrdering] getCartDetails is only supported on iOS'
-      );
+  async getCartDetails(options?: CartDetailsOptions): Promise<string | null> {
+    const details = await this.loadCartDetails('getCartDetails', options);
+    return details ? JSON.stringify(details) : null;
+  }
+
+  /**
+   * Gets the current cart as the cart listeners report it (iOS only).
+   * `clientOrderIDs` is always empty, as the cart details don't include them.
+   */
+  async getCartState(options?: CartDetailsOptions): Promise<CartState | null> {
+    const details = await this.loadCartDetails('getCartState', options);
+    if (!details) {
       return null;
     }
-    return new Promise((resolve) => {
-      IaSdkOrderingNative.getCartDetailsIOS?.((result: string | null) => {
-        resolve(result);
-      });
-    });
+    return {
+      totalAmountInCart: details.totalAmountInCart,
+      clientOrderIDs: [],
+      products: details.products,
+    };
+  }
+
+  private async loadCartDetails(
+    method: string,
+    options?: CartDetailsOptions
+  ): Promise<CartDetails | null> {
+    if (warnUnsupported('IaModuleOrdering', method, 'ios')) return null;
+    const details = await IaSdkOrderingNative.getCartDetails!(
+      options?.allowCached ?? true,
+      options?.shouldEmitCartUpdate ?? false
+    );
+    return (details as CartDetails | null) ?? null;
   }
 
   /**
    * Deletes the order history (iOS only).
    */
   async deleteOrderHistory(): Promise<void> {
-    if (Platform.OS !== 'ios') {
-      console.warn(
-        '[IaModuleOrdering] deleteOrderHistory is only supported on iOS'
-      );
+    if (warnUnsupported('IaModuleOrdering', 'deleteOrderHistory', 'ios')) {
       return;
     }
-    return new Promise((resolve, reject) => {
-      IaSdkOrderingNative.deleteOrderHistoryIOS?.((error: string | null) => {
-        if (error === null) {
-          resolve();
-        } else {
-          reject(new Error(error));
-        }
-      });
-    });
+    return IaSdkOrderingNative.deleteOrderHistory!();
+  }
+
+  /**
+   * Adds a listener for cart changes.
+   *
+   * On Android, where updates only carry the counts, an update with the same
+   * counts as the previous one isn't sent.
+   */
+  addCartUpdatedListener(
+    callback: (state: CartState) => void
+  ): IaSdkSubscription {
+    return IaSdkInternal.addEventListener<CartState>(
+      IaSdkInternal.events.CART_UPDATED,
+      (state) =>
+        callback({
+          ...state,
+          clientOrderIDs: state.clientOrderIDs ?? [],
+        })
+    );
+  }
+
+  /**
+   * Adds a listener for completed orders.
+   */
+  addOrderFinishedListener(
+    callback: (signatures: TransactionSignatures) => void
+  ): IaSdkSubscription {
+    return IaSdkInternal.addEventListener<TransactionSignatures>(
+      IaSdkInternal.events.ORDER_FINISHED,
+      (signatures) =>
+        callback({
+          orderCode: signatures.orderCode,
+          orderCodes: signatures.orderCodes ?? [signatures.orderCode],
+          clientOrderIDs: signatures.clientOrderIDs ?? [],
+        })
+    );
   }
 }
 
@@ -184,3 +157,4 @@ export default IaModuleOrdering;
 
 export { IaCartButton } from './IaCartButton';
 export type { IaCartButtonProps } from './IaCartButton';
+export { IaTransferPrescriptionsFinishAction } from '@ihreapotheken/ia-sdk-interface';

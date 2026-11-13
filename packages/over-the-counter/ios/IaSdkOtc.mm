@@ -7,8 +7,11 @@
   [[IaSdkOtcImpl shared] registerModule];
 }
 
-- (void)launchProductSearchRouteIOS {
-  [[IaSdkOtcImpl shared] launchProductSearchRouteIOS];
+- (void)clearProductGridCache:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkOtcImpl shared] clearProductGridCacheWithResolve:resolve
+                                                   reject:^(NSString *code, NSString *message) {
+    reject(code, message, nil);
+  }];
 }
 
 // Run on the main thread: IACore (SDK 2.5.0+) asserts MainActor isolation.

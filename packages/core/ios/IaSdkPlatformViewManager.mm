@@ -15,5 +15,7 @@ RCT_EXPORT_MODULE(IaSdkPlatformView)
 RCT_EXPORT_VIEW_PROPERTY(viewId, NSString)
 RCT_EXPORT_VIEW_PROPERTY(componentParams, NSDictionary)
 RCT_EXPORT_VIEW_PROPERTY(onSizeChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onComponentTap, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onScreenDismiss, RCTDirectEventBlock)
 
 @end
