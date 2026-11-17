@@ -84,7 +84,8 @@ dependencies {
   }
   iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
 
-  // Prescription module - functionality may be part of ordering module in Android SDK
+  // The SDK's prescription (Rx) module, registered as RxModule.
+  implementation "de.ihreapotheken.sdk:rx:${iaDeSdkVersion}"
   // Need integrations for IaSdkActivity, IaScreen, etc.
   implementation "de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}"
   // Reference core module for IaSdkCoreModule.registerModuleType

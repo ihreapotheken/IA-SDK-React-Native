@@ -1,48 +1,29 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
-export interface NativePdfPrescription {
-  data: string;
-  insuranceType: string;
-}
-
+/**
+ * Native spec of the ordering module. Internal to this package.
+ */
 export interface Spec extends TurboModule {
-  // Registration (renamed from 'register' to avoid C++ reserved keyword)
-  registerModule?(): void;
+  // Renamed from 'register' to avoid a C++ reserved keyword.
+  registerModule(): void;
 
-  // iOS methods (callback-based)
-  clearCartIOS?(completionHandler: (error: string | null) => void): void;
+  clearCart(): Promise<void>;
 
-  transferPrescriptionsIOS?(
-    images: string[] | null,
-    pdfs: NativePdfPrescription[] | null,
-    codes: string[] | null,
-    orderId: string | null,
-    completionHandler: (error: string | null) => void
-  ): void;
+  /**
+   * `params`: `{ images: string[] (base64), pdfs: { data (base64),
+   * insuranceType }[], codes: string[], orderId: string | null,
+   * finishAction: string, showActivityIndicator: boolean }`.
+   */
+  transferPrescriptions(params: Object): Promise<void>;
 
-  launchCartScreenIOS?(): void;
-
-  // Android methods (event-based)
-  clearCartAndroid?(): void;
-
-  transferPrescriptionsAndroid?(
-    images: string[] | null,
-    pdfs: NativePdfPrescription[] | null,
-    codes: string[] | null,
-    orderId: string | null
-  ): void;
-
-  launchCartScreenAndroid?(): void;
-
-  // iOS-only methods
-  getCartDetailsIOS?(
-    completionHandler: (result: string | null) => void
-  ): void;
-
-  deleteOrderHistoryIOS?(
-    completionHandler: (error: string | null) => void
-  ): void;
+  // iOS only
+  /** Resolves with `{ totalAmountInCart, products: { pzn, amount }[] }` or null. */
+  getCartDetails?(
+    allowCached: boolean,
+    shouldEmitCartUpdate: boolean
+  ): Promise<Object | null>;
+  deleteOrderHistory?(): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('IaSdkOrdering');

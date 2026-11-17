@@ -1,9 +1,7 @@
 import Foundation
 import IACore
 import IAOverTheCounter
-#if canImport(IaSdkCore)
 import IaSdkCore
-#endif
 
 @MainActor
 @objc(IaSdkOtcImpl)
@@ -15,15 +13,15 @@ public class IaSdkOtcImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        #if canImport(IaSdkCore)
         IaSdkCoreImpl.registerModule("overTheCounter")
-        #endif
     }
 
-    @objc(launchProductSearchRouteIOS)
-    public func launchProductSearchRouteIOS() {
-        DispatchQueue.main.async {
-            IAProductSearchScreen().present()
+    @objc(clearProductGridCacheWithResolve:reject:)
+    public func clearProductGridCache(resolve: @escaping IaResolveBlock, reject: @escaping IaRejectBlock) {
+        IaSdkPromise.run("clearProductGridCache", resolve: resolve, reject: reject) {
+            let overTheCounter = try IASDK.overTheCounter
+            await overTheCounter.clearProductGridCache()
+            return nil
         }
     }
 }

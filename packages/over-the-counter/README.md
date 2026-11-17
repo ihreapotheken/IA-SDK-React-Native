@@ -51,8 +51,18 @@ Access the module after initialization:
 ```typescript
 const otc = iaSdk.getModule<IaOverTheCounterModule>(IaBaseModule.OverTheCounter);
 
-// Launch product search screen
-await otc.launchProductSearchRoute();
+await otc.launchProductSearchRoute({ focusesOnAppear: true }); // focusesOnAppear: iOS
+await otc.clearProductGridCache();                             // iOS
+```
+
+## Components
+
+```tsx
+import { IaProductGrid, IaProductDisplayType } from '@ihreapotheken/ia-sdk-over-the-counter';
+
+<IaProductGrid type={IaProductDisplayType.CurrentOffers} />
+<IaProductGrid type={IaProductDisplayType.ProductRecommendations} pzn="01234567" />
+<IaProductGrid type={IaProductDisplayType.Custom} title="Selected for you" pzns={['01234567', '07654321']} />
 ```
 
 ## Related

@@ -1,46 +1,40 @@
 #import "IaSdkOrdering.h"
 #import "IaSdkOrdering-Swift.h"
 
+static void (^IaReject(RCTPromiseRejectBlock reject))(NSString *, NSString *) {
+  return ^(NSString *code, NSString *message) {
+    reject(code, message, nil);
+  };
+}
+
 @implementation IaSdkOrdering
 
 - (void)registerModule {
   [[IaSdkOrderingImpl shared] registerModule];
 }
 
-- (void)clearCartIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkOrderingImpl shared] clearCartIOS:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)clearCart:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkOrderingImpl shared] clearCartWithResolve:resolve reject:IaReject(reject)];
 }
 
-- (void)transferPrescriptionsIOS:(NSArray<NSString *> *)images
-                            pdfs:(NSArray<NSDictionary *> *)pdfs
-                           codes:(NSArray<NSString *> *)codes
-                         orderId:(NSString *)orderId
-               completionHandler:(RCTResponseSenderBlock)completion {
-  [[IaSdkOrderingImpl shared] transferPrescriptionsIOS:images
-                                                   pdfs:pdfs
-                                                  codes:codes
-                                                orderId:orderId
-                                      completionHandler:^(NSString *err) {
-                                        completion(@[ err ?: [NSNull null] ]);
-                                      }];
+- (void)transferPrescriptions:(NSDictionary *)params
+                      resolve:(RCTPromiseResolveBlock)resolve
+                       reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkOrderingImpl shared] transferPrescriptions:params resolve:resolve reject:IaReject(reject)];
 }
 
-- (void)launchCartScreenIOS {
-  [[IaSdkOrderingImpl shared] launchCartScreenIOS];
+- (void)getCartDetails:(BOOL)allowCached
+  shouldEmitCartUpdate:(BOOL)shouldEmitCartUpdate
+               resolve:(RCTPromiseResolveBlock)resolve
+                reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkOrderingImpl shared] getCartDetails:allowCached
+                        shouldEmitCartUpdate:shouldEmitCartUpdate
+                                     resolve:resolve
+                                      reject:IaReject(reject)];
 }
 
-- (void)getCartDetailsIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkOrderingImpl shared] getCartDetailsIOS:^(NSString *result) {
-    completion(@[ result ?: [NSNull null] ]);
-  }];
-}
-
-- (void)deleteOrderHistoryIOS:(RCTResponseSenderBlock)completion {
-  [[IaSdkOrderingImpl shared] deleteOrderHistoryIOS:^(NSString *err) {
-    completion(@[ err ?: [NSNull null] ]);
-  }];
+- (void)deleteOrderHistory:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [[IaSdkOrderingImpl shared] deleteOrderHistoryWithResolve:resolve reject:IaReject(reject)];
 }
 
 // Run on the main thread: IACore (SDK 2.5.0+) asserts MainActor isolation.

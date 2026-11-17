@@ -55,3 +55,39 @@ await iaSdk.startDashboardActivity();
 ## Related
 
 - [Flutter SDK CardLink](https://github.com/ihreapotheken/IA-SDK-Flutter) - `ia_cardlink` module
+
+## Available Methods
+
+```typescript
+await cardLinkModule.launch({
+  sdkApiKey, flowType: IaCardLinkFlowType.CardLink, pharmacyId, consentStatus, phoneNumber, userId,
+  environment: IaCardLinkEnvironment.Debug,          // default: the SDK environment
+  illustrationColor: IaCardLinkIllustrationColor.Blue, // Android
+  supportsLiquidGlass: true,                          // iOS
+});
+
+await cardLinkModule.getVersion();
+await cardLinkModule.getEnvironment();
+await cardLinkModule.getLogFilePath();
+await cardLinkModule.setHostAppLogFilePath('/path/to/host.log');
+
+const cards = await cardLinkModule.getSavedCardList(userId); // or getSavedCards(userId) as JSON
+await cardLinkModule.deleteCard(userId, 'My card');
+await cardLinkModule.deleteAllCards();
+await cardLinkModule.deleteAllUserRelatedData();
+await cardLinkModule.updateCard({ userId, originalName, name, phoneNumber, canCode }); // Android
+await cardLinkModule.reorderSavedCards(userId, orderedCanCodes);                      // Android
+await cardLinkModule.setMocks({ isMockingEnabled: true });                             // iOS
+await cardLinkModule.finish();                                                         // iOS
+
+// Listeners
+cardLinkModule.addEventListener((event) => {}); // willExit, cardSaved, failedToInitialize, ...
+cardLinkModule.addConsentEventListener((event) => {});
+cardLinkModule.addConsentPhoneNumberListener((phoneNumber) => {}); // iOS
+cardLinkModule.addSessionCreatedListener((session) => {});
+cardLinkModule.addPrescriptionsRedeemedListener((json) => {});
+cardLinkModule.addSavedCardsListener((cards) => {});
+cardLinkModule.addInitializationErrorListener((message) => {}); // iOS
+cardLinkModule.addResultListener((result) => {});               // Android
+cardLinkModule.addAnalyticsEventListener((eventName) => {});
+```

@@ -1,117 +1,108 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { IaProductDisplayType } from '@ihreapotheken/ia-sdk-core';
 import { IaCartButton } from '@ihreapotheken/ia-sdk-ordering';
 import { IaProductGrid } from '@ihreapotheken/ia-sdk-over-the-counter';
+import { eventLog } from '../testing/eventLog';
+import { ChoiceChips, Section, styles as ui } from './ui';
 
-const productDisplayTypes: { value: IaProductDisplayType; label: string }[] = [
+const productDisplayTypes = [
   { value: IaProductDisplayType.CurrentOffers, label: 'currentOffers' },
   { value: IaProductDisplayType.ProductsOfTheMonth, label: 'productsOfTheMonth' },
-  {
-    value: IaProductDisplayType.ProductRecommendations,
-    label: 'productRecommendations',
-  },
+  { value: IaProductDisplayType.ProductRecommendations, label: 'productRecommendations' },
   { value: IaProductDisplayType.CustomersAlsoBought, label: 'customersAlsoBought' },
+  { value: IaProductDisplayType.Custom, label: 'custom' },
+] as const;
+
+const NEEDS_PZN: IaProductDisplayType[] = [
+  IaProductDisplayType.ProductRecommendations,
+  IaProductDisplayType.CustomersAlsoBought,
 ];
 
-interface SectionHeaderProps {
-  title: string;
-}
-
-function SectionHeader({ title }: SectionHeaderProps) {
-  return <Text style={styles.sectionHeader}>{title}</Text>;
-}
-
-interface ChoiceChipProps {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}
-
-function ChoiceChip({ label, selected, onPress }: ChoiceChipProps) {
-  return (
-    <TouchableOpacity
-      style={[styles.chip, selected && styles.chipSelected]}
-      onPress={onPress}
-    >
-      <Text style={[styles.chipLabel, selected && styles.chipLabelSelected]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
+/**
+ * Inline SDK components.
+ */
 export function ComponentsView() {
   const [selectedGridType, setSelectedGridType] = useState<IaProductDisplayType>(
     IaProductDisplayType.CurrentOffers
   );
+  const [pzn, setPzn] = useState('');
+  const [customPzns, setCustomPzns] = useState('');
+  const [hostCartTaps, setHostCartTaps] = useState(0);
+
+  const pzns = customPzns
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  const gridKey = [selectedGridType, pzn, pzns.join(',')].join('|');
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <SectionHeader title="Cart Button" />
-      <IaCartButton />
+    <ScrollView contentContainerStyle={ui.scrollContent}>
+      <Section title="Cart Button">
+        <Text style={ui.hint}>
+          SDK default: opens the cart, asking the navigation handler first.
+        </Text>
+        <IaCartButton />
+        <View style={styles.gap} />
+        <Text style={ui.hint}>
+          With onPress: the host handles the tap ({hostCartTaps} taps).
+        </Text>
+        <IaCartButton
+          onPress={() => {
+            setHostCartTaps((count) => count + 1);
+            eventLog.add('Cart button', 'tapped (host onPress)');
+          }}
+        />
+      </Section>
 
-      <View style={styles.gap} />
-
-      <SectionHeader title="Product Grid" />
-      <Text style={styles.label}>Display Type</Text>
-      <View style={styles.chipRow}>
-        {productDisplayTypes.map((option) => (
-          <ChoiceChip
-            key={option.value}
-            label={option.label}
-            selected={selectedGridType === option.value}
-            onPress={() => setSelectedGridType(option.value)}
+      <Section title="Product Grid">
+        <Text style={ui.hint}>Display type</Text>
+        <ChoiceChips
+          options={productDisplayTypes}
+          selected={selectedGridType}
+          onSelect={setSelectedGridType}
+        />
+        {NEEDS_PZN.includes(selectedGridType) && (
+          <TextInput
+            style={styles.input}
+            value={pzn}
+            onChangeText={setPzn}
+            placeholder="PZN the recommendations are based on"
+            keyboardType="number-pad"
           />
-        ))}
-      </View>
+        )}
+        {selectedGridType === IaProductDisplayType.Custom && (
+          <TextInput
+            style={styles.input}
+            value={customPzns}
+            onChangeText={setCustomPzns}
+            placeholder="Comma-separated PZNs"
+          />
+        )}
+      </Section>
 
-      <View style={styles.gap} />
-
-      <IaProductGrid key={selectedGridType} type={selectedGridType} />
+      <IaProductGrid
+        key={gridKey}
+        type={selectedGridType}
+        pzn={NEEDS_PZN.includes(selectedGridType) ? pzn : undefined}
+        title={selectedGridType === IaProductDisplayType.Custom ? 'Selected for you' : undefined}
+        pzns={selectedGridType === IaProductDisplayType.Custom ? pzns : undefined}
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  sectionHeader: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 6,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    borderWidth: 1,
-    borderColor: '#bbb',
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  chipLabel: {
-    fontSize: 12,
-    color: '#333',
-  },
-  chipLabelSelected: {
-    color: '#fff',
-  },
   gap: {
-    height: 20,
+    height: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 14,
+    backgroundColor: '#fafafa',
+    marginTop: 4,
   },
 });
