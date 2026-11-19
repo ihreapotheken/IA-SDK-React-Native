@@ -102,27 +102,32 @@ The deploy scripts ([scripts/deploy-demo-android.sh](../scripts/deploy-demo-andr
 
 ## How the flavors work
 
+Each flavor has its own JS entry file: [index.js](index.js) for the demo, [index.showcase.js](index.showcase.js) for
+the showcase. So each flavor's JS bundle holds only its app.
+
 | | Android | iOS |
 |---|---|---|
 | Flavor | A product flavor, from `appFlavors` in [android/app/build.gradle](android/app/build.gradle) | A scheme with `Debug-<flavor>` and `Release-<flavor>` configurations; the demo uses `Debug` and `Release` |
-| App name | `appFlavors` | The `IA_DISPLAY_NAME` build setting |
-| App the flavor launches | `BuildConfig.FLAVOR` ([MainActivity.kt](android/app/src/main/java/iasdkreactnative/example/MainActivity.kt)) | The `IA_FLAVOR` build setting, read from Info.plist ([AppDelegate.swift](ios/IaSdkReactNativeExample/AppDelegate.swift)) |
+| App name | `appName` in `appFlavors` | The `IA_DISPLAY_NAME` build setting |
+| JS entry, debug (from Metro) | `BuildConfig.JS_MAIN_MODULE`, from `entryFile` in `appFlavors` | The `IA_JS_ENTRY` build setting, read from Info.plist ([AppDelegate.swift](ios/IaSdkReactNativeExample/AppDelegate.swift)) |
+| JS entry, release (bundled) | The flavor's bundle task, set from `entryFile` | The `ENTRY_FILE` build setting |
 
-[index.js](index.js) registers one component per flavor, named after it, and the native app launches the one of its
-flavor. React Native loads only the modules of the component it launches.
-
-The showcase's Android build also leaves out the native SDK libraries of over-the-counter and CardLink (see
-`configurations` in [android/app/build.gradle](android/app/build.gradle)), so its size is that of an app integrating
-only its modules. Two things still differ from a standalone app:
-- On iOS, the core pod depends on every module's pod, so both flavors link all modules.
-- Both flavors' JS bundles hold both apps.
+The showcase leaves out the over-the-counter and CardLink modules entirely, so its size is that of an app integrating
+only its modules:
+- **Android:** its build excludes those SDK libraries (`configurations` in
+  [android/app/build.gradle](android/app/build.gradle)). Their thin React Native wrappers stay linked, as autolinking
+  links every package into every variant, but the showcase's JavaScript never loads them.
+- **iOS:** [react-native.config.js](react-native.config.js) links their React Native packages only into the demo's
+  configurations, and the [Podfile](ios/Podfile) does the same for the SDK pods they bring.
 
 **Adding a flavor**
-1. Register its component in [index.js](index.js).
+1. Add its entry file, `index.<flavor>.js`, registering its app as `IaSdkReactNativeExample`.
 2. Add it to `appFlavors` in [android/app/build.gradle](android/app/build.gradle).
 3. Add its iOS configurations and scheme: from the repository root,
    `ruby scripts/add-example-ios-flavor.rb <flavor> '<display name>'`, then `bundle exec pod install` in
    `example/ios`.
+4. If it leaves out modules, exclude them as the showcase does (Android `configurations`, iOS
+   `react-native.config.js` and Podfile).
 
 Run the script again for an existing flavor after changing the Debug or Release configuration; it copies them afresh.
 
@@ -140,9 +145,8 @@ Run the script again for an existing flavor after changing the Debug or Release 
 
 - **`Task 'installDebug' is ambiguous`** on Android: the build has flavors, so pass one (`--mode demoDebug`) or use the
   yarn scripts.
-- **"… has not been registered"**: the native app launches the component named after its flavor (`demo` or
-  `showcase`). Check that [index.js](index.js) registers it, and on iOS that the scheme's configuration sets
-  `IA_FLAVOR`.
+- **"… has not been registered"**: each entry file registers its app as `IaSdkReactNativeExample`. Check that the
+  flavor loads its entry: `entryFile` in `appFlavors` on Android, the `IA_JS_ENTRY` build setting on iOS.
 - **"Couldn't connect to ia.de"** or initialization never finishes: the QA backend needs the VPN.
 - **Pods out of date after adding a flavor or changing the Podfile**: run `bundle exec pod install` in `example/ios`.
 - **Stale JavaScript**: `yarn start --reset-cache`.

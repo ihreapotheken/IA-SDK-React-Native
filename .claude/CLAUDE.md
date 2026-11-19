@@ -77,7 +77,7 @@ Use `^1.0.0` version specifiers and add `.npmrc`:
 - Key files:
   - `android/app/build.gradle` - App configuration
   - `android/settings.gradle` - Project settings
-  - `android/app/src/main/java/iasdkreactnative/example/MainActivity.kt` - Launches the flavor's component
+  - `android/app/src/main/java/iasdkreactnative/example/MainActivity.kt` - Main component name
 
 ### iOS
 - Bundle ID: `de.ihreapotheken.reactnative`
@@ -130,10 +130,10 @@ await iaSdk.initialize({
 ## Troubleshooting
 
 ### "Module not registered" error
-The example registers one component per flavor in `example/index.js`, named after the flavor (`demo`, `showcase`).
-The native app launches the one of its flavor:
-- Android: `MainActivity.kt` → `getMainComponentName()` returns `BuildConfig.FLAVOR`
-- iOS: `AppDelegate.swift` reads the `IAFlavor` Info.plist key, the scheme configuration's `IA_FLAVOR` build setting
+Each flavor of the example has its own entry file (`example/index.js` for the demo, `example/index.<flavor>.js`),
+which registers its app under the name in `app.json`, `IaSdkReactNativeExample`. The native app loads its flavor's entry:
+- Android: `BuildConfig.JS_MAIN_MODULE` (debug) and the bundle task's entry file (release), from `appFlavors` in `android/app/build.gradle`
+- iOS: the `IA_JS_ENTRY` build setting via the `IAJSEntry` Info.plist key (debug) and `ENTRY_FILE` (release)
 
 ### Metro bundler issues
 ```bash

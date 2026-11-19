@@ -14,7 +14,7 @@ public class IaSdkOrderingImpl: NSObject {
 
     /// Register the ordering module with the core SDK, before its initialization.
     @objc public func registerModule() {
-        IaSdkCoreImpl.registerModule("ordering")
+        IaSdkCoreImpl.registerModule(.ordering)
     }
 
     @objc(clearCartWithResolve:reject:)

@@ -24,8 +24,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(APP_SDK_BUILD_NUMBER:1)</string>
-	<key>IAFlavor</key>
-	<string>$(IA_FLAVOR)</string>
+	<key>IAJSEntry</key>
+	<string>$(IA_JS_ENTRY)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>

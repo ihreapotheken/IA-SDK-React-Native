@@ -259,44 +259,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0983F34B9D03C2CA6788E75D /* Release-showcase */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1A189F7680E802FA5CD64D5A /* Pods-IaSdkReactNativeExample.release-showcase.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = IaSdkReactNativeExample/IaSdkReactNativeExample.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QB8H6S7PA4;
-				IA_DISPLAY_NAME = "Rx Showcase";
-				IA_FLAVOR = showcase;
-				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0.0;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = de.ihreapotheken.reactnative;
-				PRODUCT_NAME = IaSdkReactNativeExample;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = "Release-showcase";
-		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-IaSdkReactNativeExample.debug.xcconfig */;
@@ -309,7 +271,7 @@
 				DEVELOPMENT_TEAM = QB8H6S7PA4;
 				ENABLE_BITCODE = NO;
 				IA_DISPLAY_NAME = "AppSDK React Native Demo QA";
-				IA_FLAVOR = demo;
+				IA_JS_ENTRY = index;
 				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
@@ -348,7 +310,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QB8H6S7PA4;
 				IA_DISPLAY_NAME = "AppSDK React Native Demo QA";
-				IA_FLAVOR = demo;
+				IA_JS_ENTRY = index;
 				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
@@ -375,7 +337,46 @@
 			};
 			name = Release;
 		};
-		4A5A2FDA484808F75F27F450 /* Release-showcase */ = {
+		341D1C4E7019B2C972D1115B /* Release-showcase */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1A189F7680E802FA5CD64D5A /* Pods-IaSdkReactNativeExample.release-showcase.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = IaSdkReactNativeExample/IaSdkReactNativeExample.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QB8H6S7PA4;
+				ENTRY_FILE = index.showcase.js;
+				IA_DISPLAY_NAME = "Rx Showcase";
+				IA_JS_ENTRY = index.showcase;
+				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = de.ihreapotheken.reactnative;
+				PRODUCT_NAME = IaSdkReactNativeExample;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-showcase";
+		};
+		81133A3F36919F2165F5A9E9 /* Debug-showcase */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -405,12 +406,19 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				ENABLE_NS_ASSERTIONS = NO;
+				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -440,7 +448,8 @@
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
 				);
-				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -451,10 +460,10 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				USE_HERMES = true;
-				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-showcase";
+			name = "Debug-showcase";
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -626,47 +635,7 @@
 			};
 			name = Release;
 		};
-		8DEC8563AFB922038B602BA9 /* Debug-showcase */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55D024178103FC4FA0E64EAB /* Pods-IaSdkReactNativeExample.debug-showcase.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = IaSdkReactNativeExample/IaSdkReactNativeExample.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QB8H6S7PA4;
-				ENABLE_BITCODE = NO;
-				IA_DISPLAY_NAME = "Rx Showcase";
-				IA_FLAVOR = showcase;
-				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0.0;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = de.ihreapotheken.reactnative;
-				PRODUCT_NAME = IaSdkReactNativeExample;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = "Debug-showcase";
-		};
-		D0684F56D386909494A1ACD5 /* Debug-showcase */ = {
+		B52E534F3EEE8B7FD96A2210 /* Release-showcase */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -696,19 +665,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -738,8 +700,7 @@
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
 				);
-				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -750,8 +711,49 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				USE_HERMES = true;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release-showcase";
+		};
+		E9EA49888BBE73FA7F0A1190 /* Debug-showcase */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 55D024178103FC4FA0E64EAB /* Pods-IaSdkReactNativeExample.debug-showcase.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = IaSdkReactNativeExample/IaSdkReactNativeExample.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QB8H6S7PA4;
+				ENABLE_BITCODE = NO;
+				ENTRY_FILE = index.showcase.js;
+				IA_DISPLAY_NAME = "Rx Showcase";
+				IA_JS_ENTRY = index.showcase;
+				INFOPLIST_FILE = IaSdkReactNativeExample/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "AppSDK React Native";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = de.ihreapotheken.reactnative;
+				PRODUCT_NAME = IaSdkReactNativeExample;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = "Debug-showcase";
 		};
@@ -763,8 +765,8 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
-				8DEC8563AFB922038B602BA9 /* Debug-showcase */,
-				0983F34B9D03C2CA6788E75D /* Release-showcase */,
+				E9EA49888BBE73FA7F0A1190 /* Debug-showcase */,
+				341D1C4E7019B2C972D1115B /* Release-showcase */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -774,8 +776,8 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
-				D0684F56D386909494A1ACD5 /* Debug-showcase */,
-				4A5A2FDA484808F75F27F450 /* Release-showcase */,
+				81133A3F36919F2165F5A9E9 /* Debug-showcase */,
+				B52E534F3EEE8B7FD96A2210 /* Release-showcase */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -2,11 +2,6 @@ import Combine
 import Foundation
 import IACore
 import IAIntegrations
-import IAOrdering
-import IAOverTheCounter
-import IAPharmacy
-import IAPrescription
-import IACardLink
 
 public typealias IaResolveBlock = (Any?) -> Void
 public typealias IaRejectBlock = (String, String) -> Void
@@ -118,10 +113,10 @@ public class IaSdkCoreImpl: NSObject {
     /// Tracks whether modules have been registered with the SDK.
     static var isRegistered: Bool = false
 
-    /// Names of the registered modules. Always present: "integrations", plus the mandatory always-on features
-    /// "apofinder" (pharmacy selection) and "appointments", which the core owns. ("appointments" maps to no separate
-    /// IASDKModule on iOS — see buildRegisteredModules.)
-    nonisolated(unsafe) private static var registeredModuleNames: Set<String> = ["integrations", "apofinder", "appointments"]
+    /// The modules registered with the SDK when it initializes: Integrations and Apofinder (pharmacy selection), which
+    /// the core owns, plus the feature modules their packages registered. Appointment booking is part of Integrations
+    /// on iOS. Each feature package passes its own module, so the core doesn't link the feature modules.
+    private static var registeredModules: [IASDKModule] = [.integrations, .apofinder]
 
     @objc private override init() {
         super.init()
@@ -132,28 +127,10 @@ public class IaSdkCoreImpl: NSObject {
         }
     }
 
-    /// Register additional modules to be initialized with the SDK.
-    @objc public static func registerModule(_ moduleType: String) {
-        let validModules = ["ordering", "overTheCounter", "apofinder", "prescription", "cardLink", "pharmacyDetails", "appointments"]
-        if validModules.contains(moduleType) {
-            registeredModuleNames.insert(moduleType)
-        }
-    }
-
-    /// Builds the IASDKModule list from the registered module names.
-    private static func buildRegisteredModules() -> [IASDKModule] {
-        registeredModuleNames.compactMap { name in
-            switch name {
-            case "integrations": .integrations
-            case "apofinder": .apofinder
-            case "ordering": .ordering
-            case "overTheCounter": .overTheCounter
-            case "prescription": .prescription
-            case "cardLink": .cardLink
-            case "pharmacyDetails": .pharmacy
-            // Appointment booking is part of the Integrations module on iOS.
-            default: nil
-            }
+    /// Adds a feature module to be registered with the SDK when it initializes. Called by the feature packages.
+    public static func registerModule(_ module: IASDKModule) {
+        if !registeredModules.contains(where: { $0.id == module.id }) {
+            registeredModules.append(module)
         }
     }
 
@@ -270,7 +247,7 @@ public class IaSdkCoreImpl: NSObject {
             }
 
             if !Self.isRegistered {
-                IASDK.register(Self.buildRegisteredModules())
+                IASDK.register(Self.registeredModules)
                 Self.isRegistered = true
             }
             IASDK.setDelegate(self.delegate)

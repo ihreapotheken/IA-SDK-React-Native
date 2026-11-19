@@ -5,14 +5,14 @@
 # it copies the flavor's configurations afresh.
 #
 # Every flavor keeps the app's bundle ID and signing, which the access key is bound to, so it's delivered like the
-# demo, with no further App IDs or provisioning profiles. Only the display name differs.
+# demo, with no further App IDs or provisioning profiles. Only the display name and the JS entry file differ.
 #
 # Usage:
 #   ruby scripts/add-example-ios-flavor.rb <flavor> <display name>
 #   ruby scripts/add-example-ios-flavor.rb showcase 'Rx Showcase'
 #
 # Uses the xcodeproj gem, which comes with CocoaPods. Run `bundle exec pod install` in example/ios afterwards. The
-# flavor also needs an Android product flavor and a component in example/index.js, see example/README.md.
+# flavor also needs an entry file, example/index.<flavor>.js, and an Android product flavor, see example/README.md.
 
 require 'xcodeproj'
 
@@ -25,8 +25,9 @@ app = project.targets.find { |target| target.name == 'IaSdkReactNativeExample' }
 configuration_lists = [project.build_configuration_list] + project.targets.map(&:build_configuration_list)
 
 %w[Debug Release].each do |mode|
-  # The demo's own configurations, which name the component it launches (example/index.js).
-  app.build_configuration_list[mode].build_settings['IA_FLAVOR'] ||= 'demo'
+  # The demo's own configurations, whose entry file is example/index.js.
+  demo_settings = app.build_configuration_list[mode].build_settings
+  demo_settings['IA_JS_ENTRY'] ||= 'index'
 
   name = "#{mode}-#{flavor}"
   configuration_lists.each do |list|
@@ -44,8 +45,10 @@ configuration_lists = [project.build_configuration_list] + project.targets.map(&
   end
 
   settings = app.build_configuration_list[name].build_settings
-  settings['IA_FLAVOR'] = flavor
   settings['IA_DISPLAY_NAME'] = display_name
+  # The flavor's entry file: the debug build loads it from Metro, the release build bundles it.
+  settings['IA_JS_ENTRY'] = "index.#{flavor}"
+  settings['ENTRY_FILE'] = "index.#{flavor}.js"
 end
 project.save
 

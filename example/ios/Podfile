@@ -27,6 +27,13 @@ end
 target 'IaSdkReactNativeExample' do
   config = use_native_modules!
 
+  # Over-the-counter and CardLink link only into the demo's configurations, Debug and Release: react-native.config.js
+  # restricts their React Native packages. CocoaPods doesn't apply that to a pod's dependencies, so the SDK pods they
+  # bring are restricted here too.
+  %w[IAOverTheCounter IACardLink GematikOpenSSL].each do |demo_only_pod|
+    pod demo_only_pod, :configurations => %w[Debug Release]
+  end
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.

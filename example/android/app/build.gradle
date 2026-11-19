@@ -108,20 +108,35 @@ def serverEnvironmentLabel = {
 }()
 
 /**
- * The apps this example builds, one product flavor each with its launcher
- * name. A flavor is named like the component example/index.js registers for
- * it, which MainActivity launches, and like its iOS scheme. They share the
- * application ID the access key is bound to, and the signing, so each is
- * delivered like the demo; only the name differs.
+ * The apps this example builds, one product flavor each, named like its iOS
+ * scheme: its launcher name and its JS entry file (in example/), so each
+ * flavor's bundle holds only its app. They share the application ID the access
+ * key is bound to, and the signing, so each is delivered like the demo; only
+ * the name differs.
  */
 def appFlavors = [
-    demo: "AppSDK React Native Demo ${serverEnvironmentLabel}",
-    showcase: "Rx Showcase",
+    demo: [appName: "AppSDK React Native Demo ${serverEnvironmentLabel}", entryFile: "index.js"],
+    showcase: [appName: "Rx Showcase", entryFile: "index.showcase.js"],
 ]
 
 react {
     // The debug variants are named after the flavors.
     debuggableVariants = appFlavors.keySet().collect { "${it}Debug" }
+}
+
+// The React Native plugin bundles one entry file for every variant; a flavor's
+// release build bundles its own instead. This callback runs after the plugin's,
+// which registers the bundle task. Debug builds load the entry from Metro, see
+// JS_MAIN_MODULE.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def bundleTask = "createBundle${variant.name.capitalize()}JsAndAssets"
+        // Debuggable variants have none.
+        if (tasks.names.contains(bundleTask)) {
+            def entryFile = rootProject.file("../${appFlavors[variant.flavorName].entryFile}")
+            tasks.named(bundleTask) { it.entryFile.set(entryFile) }
+        }
+    }
 }
 
 android {
@@ -143,10 +158,11 @@ android {
 
     flavorDimensions "app"
     productFlavors {
-        appFlavors.each { flavorName, appName ->
+        appFlavors.each { flavorName, flavor ->
             create(flavorName) {
                 dimension "app"
-                resValue "string", "app_name", appName
+                resValue "string", "app_name", flavor.appName
+                buildConfigField "String", "JS_MAIN_MODULE", "\"${flavor.entryFile - ~/\.js$/}\""
             }
         }
         all { flavor ->
