@@ -38,8 +38,7 @@ The library is supported on both of the major mobile operating systems, with con
 ### iOS
 
 - Minimum iOS Version: `15`
-- Xcode: `16.0`
-- Swift `5.9`
+- Xcode: `26.2`
 
 ## 4. Client Setup
 
@@ -83,55 +82,8 @@ The `VERSION` value can be referenced from the
 
 ### 4.3. iOS Project Setup
 
-Add the following keys to your `Info.plist` file. Location and camera are always required, NFC only with `ia_cardlink`:
+See [iOS Project Setup](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/iOSProjectSetup.md).
 
-```xml
-<!-- Location permission - always required, used by Apofinder (part of the core package) -->
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>Used to show pharmacies nearby.</string>
-
-<!-- Camera permission - always required, used by the Apofinder pharmacy code scanner, product scanner and prescription scanner -->
-<key>NSCameraUsageDescription</key>
-<string>Camera access is needed to scan pharmacy codes, products and prescriptions.</string>
-
-<!-- NFC permission - required for CardLink module -->
-<key>NFCReaderUsageDescription</key>
-<string>NFC is used to read your health insurance card for prescription redemption.</string>
-<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
-<array>
-    <string>D2760001448000</string>
-    <string>D27600014601</string>
-    <string>D27600014606</string>
-    <string>D27600000102</string>
-    <string>A000000167455349474E</string>
-    <string>D27600006601</string>
-    <string>D27600014602</string>
-    <string>E828BD080FA000000167455349474E</string>
-    <string>E828BD080FD27600006601</string>
-    <string>D27600014603</string>
-</array>
-```
-
-| Permission | Key | Required For | Purpose |
-|------------|-----|--------------|---------|
-| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Always (Apofinder, core package) | Find nearby pharmacies and get directions |
-| Camera | `NSCameraUsageDescription` | Always (Apofinder, `ia_over_the_counter`, `ia_prescription`) | Scan pharmacy codes, products and prescriptions |
-| NFC | `NFCReaderUsageDescription` | CardLink module | Read health insurance cards via NFC for prescription redemption |
-
-**Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
-
-CardLink also needs the following in the Runner target:
-- **NFC capability**: Add the "Near Field Communication Tag Reading" capability in the target's **Signing & Capabilities**.
-  Make sure the reader session formats in the Runner's `.entitlements` file include `TAG`:
-  ```xml
-  <key>com.apple.developer.nfc.readersession.formats</key>
-  <array>
-      <string>TAG</string>
-  </array>
-  ```
-- **Localization**: Add the
-  [`LocalizableNFC.xcstrings`](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/resources/LocalizableNFC.xcstrings)
-  file with the strings shown during NFC scanning.
 ### 4.4. Module Registration and Initialization
 
 The SDK uses a modular architecture. Register only the modules you need to minimize app size:

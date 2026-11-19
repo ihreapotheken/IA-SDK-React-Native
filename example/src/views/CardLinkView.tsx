@@ -87,7 +87,7 @@ export function CardLinkView({ cardLinkModule }: CardLinkViewProps) {
     IaCardLinkIllustrationColor.Red
   );
   const [usesCustomColors, setUsesCustomColors] = useState(false);
-  const [supportsLiquidGlass, setSupportsLiquidGlass] = useState(false);
+  const [supportsLiquidGlass, setSupportsLiquidGlass] = useState(true);
   const [areMocksEnabled, setAreMocksEnabled] = useState(false);
 
   // Results state

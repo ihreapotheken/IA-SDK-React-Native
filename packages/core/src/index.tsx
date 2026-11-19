@@ -378,7 +378,7 @@ export class IaSdk {
       },
       uiConfiguration: {
         supportsLiquidGlass:
-          config.uiConfiguration?.supportsLiquidGlass ?? false,
+          config.uiConfiguration?.supportsLiquidGlass ?? true,
         shouldShowMascotIllustrations:
           config.uiConfiguration?.shouldShowMascotIllustrations ?? true,
         header: {
