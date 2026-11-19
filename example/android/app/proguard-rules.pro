@@ -8,3 +8,6 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# The SDK's React Native packages, which FlavorPackages creates by class name.
+-keep class de.ihreapotheken.reactnative.** extends com.facebook.react.BaseReactPackage { <init>(); }

@@ -1,0 +1,14 @@
+{
+  "demo": {
+    "modules": [
+      "cardlink",
+      "ordering",
+      "over-the-counter",
+      "pharmacy",
+      "prescription"
+    ]
+  },
+  "showcase": {
+    "modules": ["ordering", "pharmacy", "prescription"]
+  }
+}
