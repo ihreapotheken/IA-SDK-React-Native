@@ -107,6 +107,23 @@ def serverEnvironmentLabel = {
     }
 }()
 
+/**
+ * The apps this example builds, one product flavor each with its launcher
+ * name. A flavor is named like the component example/index.js registers for
+ * it, which MainActivity launches, and like its iOS scheme. They share the
+ * application ID the access key is bound to, and the signing, so each is
+ * delivered like the demo; only the name differs.
+ */
+def appFlavors = [
+    demo: "AppSDK React Native Demo ${serverEnvironmentLabel}",
+    showcase: "Rx Showcase",
+]
+
+react {
+    // The debug variants are named after the flavors.
+    debuggableVariants = appFlavors.keySet().collect { "${it}Debug" }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -122,7 +139,30 @@ android {
         versionCode = System.getenv("APP_SDK_BUILD_NUMBER") == null
         ? 1
         : Integer.parseInt(System.getenv("APP_SDK_BUILD_NUMBER"))
-        resValue "string", "app_name", "AppSDK React Native Demo ${serverEnvironmentLabel}"
+    }
+
+    flavorDimensions "app"
+    productFlavors {
+        appFlavors.each { flavorName, appName ->
+            create(flavorName) {
+                dimension "app"
+                resValue "string", "app_name", appName
+            }
+        }
+        all { flavor ->
+            firebaseAppDistribution {
+                appId = "1:805028679903:android:594d3964ea5373ea24d96a"
+                artifactType = "APK"
+                artifactPath = rootProject.file("./app/build/outputs/apk/${flavor.name}/release/app-${flavor.name}-release.apk").path
+                serviceCredentialsFile = rootProject.file("./app/fb-distribution-service-credentials.json").path
+                testers = [
+                    "cvitaman@gmail.com",
+                    "4ot.testing@gmail.com",
+                    "julia.schindel@ihreapotheken.de",
+                    "lorenathiel2@gmail.com",
+                ].join(", ")
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -151,20 +191,18 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            firebaseAppDistribution {
-                appId = "1:805028679903:android:594d3964ea5373ea24d96a"
-                artifactType = "APK"
-                artifactPath = rootProject.file("./app/build/outputs/apk/release/app-release.apk").path
-                serviceCredentialsFile = rootProject.file("./app/fb-distribution-service-credentials.json").path
-                testers = [
-                    "cvitaman@gmail.com",
-                    "4ot.testing@gmail.com",
-                    "julia.schindel@ihreapotheken.de",
-                    "lorenathiel2@gmail.com",
-                ].join(", ")
-            }
         }
     }
+}
+
+// The showcase has the module set of the NativeScript plugin's demo: core (with Apofinder and appointments), ordering,
+// pharmacy and prescription. It leaves out the native SDK libraries of over-the-counter and CardLink, with everything
+// only they bring in, so its size is that of an app integrating just those modules. Their React Native packages stay
+// linked, as autolinking links every package of package.json into all variants, but they're thin wrappers without
+// the SDK code, and the showcase's JavaScript never loads them (example/index.js).
+configurations.matching { it.name.startsWith("showcase") }.configureEach {
+    exclude group: "de.ihreapotheken.sdk", module: "otc"
+    exclude group: "de.ihreapotheken.sdk", module: "cardlink"
 }
 
 repositories {

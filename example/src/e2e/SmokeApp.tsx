@@ -7,6 +7,7 @@ import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
 import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
 import { IaModulePrescription } from '@ihreapotheken/ia-sdk-prescription';
 import { IaModuleCardLink } from '@ihreapotheken/ia-sdk-cardlink';
+import { CLIENT_ID } from '../sdkConfig';
 
 /**
  * Minimal E2E smoke entry (selected via IA_E2E — see index.js).
@@ -33,7 +34,7 @@ export default function SmokeApp() {
         ]);
         await iaSdk.initialize({
           accessKey: APPSDK_ACCESS_KEY as string,
-          clientId: '6001',
+          clientId: CLIENT_ID,
           serverEnvironment: ServerEnvironment.Staging,
         });
         setStatus('ok');
@@ -51,7 +52,9 @@ export default function SmokeApp() {
         <Text accessibilityLabel="SDK initialized">SDK initialized</Text>
       )}
       {status === 'error' && (
-        <Text accessibilityLabel="SDK init failed">SDK init failed: {error}</Text>
+        <Text accessibilityLabel="SDK init failed">
+          SDK init failed: {error}
+        </Text>
       )}
     </View>
   );

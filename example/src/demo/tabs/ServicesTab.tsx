@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Platform, ScrollView, Text } from 'react-native';
+import { Platform } from 'react-native';
 import {
   iaSdk,
   IaBaseModule,
@@ -10,13 +10,16 @@ import {
   type IaOverTheCounterModule,
   type IaPharmacyModule,
 } from '@ihreapotheken/ia-sdk-core';
+import { ActionRow, Hint, Section } from '../../ui';
+import { runAction, runLaunch } from '../actions';
+import { Notice, TabScroll } from '../components/TabScroll';
+import { appearance } from '../sdk/appearance';
 import {
   mockEPrescriptionCode,
   mockJpgPrescription,
   mockPdfPrescription,
   mockPngPrescription,
 } from '../testData';
-import { ActionButton, runAction, runLaunch, Section, styles } from './ui';
 
 const TEST_PHARMACY_ID = '2163';
 
@@ -53,97 +56,118 @@ const TRANSFER_VARIANTS: {
 ];
 
 /**
- * The SDK keeps these settings while the app runs, so they're kept here
- * rather than in the view, which the tab bar remounts. They start out as the
- * SDK defaults.
- */
-const appearance = { isHapticFeedbackEnabled: true, showsMascot: true };
-
-/** Takes the mascot setting of the initialization options. */
-export function setInitialMascotVisibility(showsMascot: boolean) {
-  appearance.showsMascot = showsMascot;
-}
-
-/**
  * Calls the SDK's non-screen APIs, grouped like the native demo apps.
  */
-export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
+export function ServicesTab({ isInitialized }: { isInitialized: boolean }) {
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(
     appearance.isHapticFeedbackEnabled
   );
   const [showsMascot, setShowsMascot] = useState(appearance.showsMascot);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
+    <TabScroll>
       {!isInitialized && (
-        <Text style={styles.hint}>
+        <Notice>
           Initialize the SDK on the Home tab first; most calls need it.
-        </Text>
+        </Notice>
       )}
 
       <Section title="Prerequisites">
-        <ActionButton
+        <ActionRow
           title="Reset Prerequisites"
           description="Legal documents, onboarding and pharmacy are asked again"
-          onPress={() => runAction('Reset Prerequisites', () => iaSdk.resetPrerequisites())}
+          onPress={() =>
+            runAction('Reset Prerequisites', () => iaSdk.resetPrerequisites())
+          }
         />
-        <ActionButton
+        <ActionRow
           title="Reset Legal Disclaimer"
           platform="ios"
-          onPress={() => runAction('Reset Legal Disclaimer', () => iaSdk.resetLegalDisclaimer())}
+          onPress={() =>
+            runAction('Reset Legal Disclaimer', () =>
+              iaSdk.resetLegalDisclaimer()
+            )
+          }
         />
-        <ActionButton
+        <ActionRow
           title="Mark Onboarding Not Shown"
           platform="ios"
-          onPress={() => runAction('Onboarding', () => iaSdk.setIsOnboardingShown(false))}
+          onPress={() =>
+            runAction('Onboarding', () => iaSdk.setIsOnboardingShown(false))
+          }
         />
-        <ActionButton
+        <ActionRow
           title="Reset Analytics Consent"
           description="The legal screen asks again"
-          onPress={() => runAction('Reset Analytics Consent', () => iaSdk.resetAnalyticsConsent())}
+          onPress={() =>
+            runAction('Reset Analytics Consent', () =>
+              iaSdk.resetAnalyticsConsent()
+            )
+          }
         />
       </Section>
 
       <Section title="Pharmacy">
-        <ActionButton
+        <ActionRow
           title={`Set Pharmacy ${TEST_PHARMACY_ID}`}
-          onPress={() => runAction('Set Pharmacy', () => pharmacy().setPharmacyId(TEST_PHARMACY_ID))}
-        />
-        <ActionButton
-          title="Set Invalid Pharmacy ID"
-          description="Rejects with ARG_ERROR"
-          onPress={() => runAction('Set Pharmacy', () => pharmacy().setPharmacyId('abc'))}
-        />
-        <ActionButton
-          title={`Save Pharmacy ${TEST_PHARMACY_ID} Without Validation`}
-          platform="ios"
-          onPress={() => runAction('Save Pharmacy', () => pharmacy().savePharmacyId(TEST_PHARMACY_ID))}
-        />
-        <ActionButton
-          title="Get Pharmacy ID"
-          onPress={() => runAction('Pharmacy ID', () => pharmacy().getPharmacyId(), (id) => id ?? 'null')}
-        />
-        <ActionButton
-          title="Get Pharmacy"
-          platform="ios"
           onPress={() =>
-            runAction('Pharmacy', () => pharmacy().getPharmacy(), (details) =>
-              details
-                ? `${details.additionalInformation.name}\n${details.location.street}, ${details.location.postcode} ${details.location.city}\nOpen now: ${details.businessHours.isOpenNow}`
-                : 'No pharmacy selected'
+            runAction('Set Pharmacy', () =>
+              pharmacy().setPharmacyId(TEST_PHARMACY_ID)
             )
           }
         />
-        <ActionButton
+        <ActionRow
+          title="Set Invalid Pharmacy ID"
+          description="Rejects with ARG_ERROR"
+          onPress={() =>
+            runAction('Set Pharmacy', () => pharmacy().setPharmacyId('abc'))
+          }
+        />
+        <ActionRow
+          title={`Save Pharmacy ${TEST_PHARMACY_ID} Without Validation`}
+          platform="ios"
+          onPress={() =>
+            runAction('Save Pharmacy', () =>
+              pharmacy().savePharmacyId(TEST_PHARMACY_ID)
+            )
+          }
+        />
+        <ActionRow
+          title="Get Pharmacy ID"
+          onPress={() =>
+            runAction(
+              'Pharmacy ID',
+              () => pharmacy().getPharmacyId(),
+              (id) => id ?? 'null'
+            )
+          }
+        />
+        <ActionRow
+          title="Get Pharmacy"
+          platform="ios"
+          onPress={() =>
+            runAction(
+              'Pharmacy',
+              () => pharmacy().getPharmacy(),
+              (details) =>
+                details
+                  ? `${details.additionalInformation.name}\n${details.location.street}, ${details.location.postcode} ${details.location.city}\nOpen now: ${details.businessHours.isOpenNow}`
+                  : 'No pharmacy selected'
+            )
+          }
+        />
+        <ActionRow
           title="Clear Pharmacy ID"
           description="Also empties the cart"
-          onPress={() => runAction('Clear Pharmacy', () => pharmacy().clearPharmacyId())}
+          onPress={() =>
+            runAction('Clear Pharmacy', () => pharmacy().clearPharmacyId())
+          }
         />
       </Section>
 
       <Section title="Ordering">
         {TRANSFER_VARIANTS.map((variant) => (
-          <ActionButton
+          <ActionRow
             key={variant.label}
             title={variant.label}
             platform={variant.platform}
@@ -166,45 +190,58 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             }
           />
         ))}
-        <ActionButton
+        <ActionRow
           title="Get Cart Details"
           platform="ios"
           onPress={() =>
-            runAction('Cart Details', () => ordering().getCartDetails(), (details) => details ?? 'No cart')
-          }
-        />
-        <ActionButton
-          title="Get Cart State"
-          platform="ios"
-          onPress={() =>
-            runAction('Cart State', () => ordering().getCartState(), (state) =>
-              state ? JSON.stringify(state, null, 2) : 'No cart'
+            runAction(
+              'Cart Details',
+              () => ordering().getCartDetails(),
+              (details) => details ?? 'No cart'
             )
           }
         />
-        <ActionButton
+        <ActionRow
+          title="Get Cart State"
+          platform="ios"
+          onPress={() =>
+            runAction(
+              'Cart State',
+              () => ordering().getCartState(),
+              (state) => (state ? JSON.stringify(state, null, 2) : 'No cart')
+            )
+          }
+        />
+        <ActionRow
           title="Reload Cart and Emit Update"
           description="The update shows in the Events tab"
           platform="ios"
           onPress={() =>
             runAction('Cart State', () =>
-              ordering().getCartState({ allowCached: false, shouldEmitCartUpdate: true })
+              ordering().getCartState({
+                allowCached: false,
+                shouldEmitCartUpdate: true,
+              })
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Clear Cart"
           onPress={() => runAction('Clear Cart', () => ordering().clearCart())}
         />
-        <ActionButton
+        <ActionRow
           title="Delete Order History"
           platform="ios"
-          onPress={() => runAction('Delete Order History', () => ordering().deleteOrderHistory())}
+          onPress={() =>
+            runAction('Delete Order History', () =>
+              ordering().deleteOrderHistory()
+            )
+          }
         />
       </Section>
 
       <Section title="User">
-        <ActionButton
+        <ActionRow
           title="Set Guest User Data"
           description="Phone number with a leading zero"
           onPress={() =>
@@ -220,7 +257,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Set Billing Address"
           onPress={() =>
             runAction('Billing Address', () =>
@@ -239,7 +276,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Set Delivery Address"
           onPress={() =>
             runAction('Delivery Address', () =>
@@ -255,7 +292,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Clear Billing and Delivery Addresses"
           onPress={() =>
             runAction('Clear Addresses', async () => {
@@ -264,24 +301,28 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             })
           }
         />
-        <ActionButton
+        <ActionRow
           title="Delete User"
           platform="ios"
           onPress={() => runAction('Delete User', () => iaSdk.deleteUser())}
         />
-        <ActionButton
+        <ActionRow
           title="Logout"
           description="Resets user data, prerequisites, pharmacy and cart"
           onPress={() => runAction('Logout', () => iaSdk.logout())}
         />
-        <ActionButton
+        <ActionRow
           title="Transfer SDK v1 User Data"
-          onPress={() => runAction('Transfer SDK v1 User Data', () => iaSdk.transferSDKv1UserData())}
+          onPress={() =>
+            runAction('Transfer SDK v1 User Data', () =>
+              iaSdk.transferSDKv1UserData()
+            )
+          }
         />
       </Section>
 
       <Section title="Appearance">
-        <ActionButton
+        <ActionRow
           title={`${isHapticFeedbackEnabled ? 'Disable' : 'Enable'} Haptic Feedback`}
           platform="android"
           onPress={() =>
@@ -292,7 +333,7 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
             })
           }
         />
-        <ActionButton
+        <ActionRow
           title={`${showsMascot ? 'Hide' : 'Show'} Mascot Illustrations`}
           description="Applies to screens rendered afterwards, e.g. CardLink FAQ"
           platform="ios"
@@ -305,52 +346,73 @@ export function ServicesView({ isInitialized }: { isInitialized: boolean }) {
           }
         />
         {Platform.OS === 'android' && (
-          <Text style={styles.hint}>
-            On Android the mascot is set with the Home tab's initialization options.
-          </Text>
+          <Hint>
+            On Android the mascot is set with the Home tab's initialization
+            options.
+          </Hint>
         )}
       </Section>
 
       <Section title="Debugging">
-        <ActionButton
+        <ActionRow
           title="Present Logs"
           onPress={() => runLaunch('Present Logs', () => iaSdk.presentLogs())}
         />
-        <ActionButton
+        <ActionRow
           title="Export Logs"
           platform="android"
-          onPress={() => runAction('Export Logs', () => iaSdk.exportLogs(), (path) => path ?? 'null')}
+          onPress={() =>
+            runAction(
+              'Export Logs',
+              () => iaSdk.exportLogs(),
+              (path) => path ?? 'null'
+            )
+          }
         />
-        <ActionButton
+        <ActionRow
           title="Get User ID"
           platform="ios"
-          onPress={() => runAction('User ID', () => iaSdk.getUserId(), (id) => id ?? 'null')}
+          onPress={() =>
+            runAction(
+              'User ID',
+              () => iaSdk.getUserId(),
+              (id) => id ?? 'null'
+            )
+          }
         />
       </Section>
 
       {Platform.OS === 'ios' && (
         <Section title="Cache">
-          <ActionButton
+          <ActionRow
             title="Clean Cache"
             description="Initialization and prerequisites; initialize again afterwards"
-            onPress={() => runAction('Clean Cache', () => iaSdk.cleanCache(true, true))}
+            onPress={() =>
+              runAction('Clean Cache', () => iaSdk.cleanCache(true, true))
+            }
           />
-          <ActionButton
+          <ActionRow
             title="Remove All Cached Responses"
-            onPress={() => runAction('Cached Responses', () => iaSdk.removeAllCachedResponses())}
+            onPress={() =>
+              runAction('Cached Responses', () =>
+                iaSdk.removeAllCachedResponses()
+              )
+            }
           />
-          <ActionButton
+          <ActionRow
             title="Clear Product Grid Cache"
             onPress={() =>
               runAction('Product Grid Cache', () =>
                 iaSdk
-                  .getModule<IaOverTheCounterModule>(IaBaseModule.OverTheCounter)
+                  .getModule<IaOverTheCounterModule>(
+                    IaBaseModule.OverTheCounter
+                  )
                   .clearProductGridCache()
               )
             }
           />
         </Section>
       )}
-    </ScrollView>
+    </TabScroll>
   );
 }

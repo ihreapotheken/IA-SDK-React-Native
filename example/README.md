@@ -2,6 +2,48 @@
 
 This is a demo application showcasing the `@ihreapotheken/ia-sdk-react-native` library.
 
+## Flavors
+
+The example builds one app per flavor, from one native project:
+
+| Flavor | App | Modules |
+|---|---|---|
+| `demo` (default) | Every SDK API, with test tools, in tabs ([src/demo/](src/demo/)). | All |
+| `showcase` | Client showcase of transferring prescriptions to a local pharmacy ([src/prescription-upload-showcase/](src/prescription-upload-showcase/)). | Core (with Apofinder and appointments), ordering, pharmacy, prescription |
+
+```sh
+yarn android            # demo
+yarn android:showcase   # showcase
+yarn ios                # demo, scheme IaSdkReactNativeExample
+yarn ios:showcase       # showcase, scheme showcase
+```
+
+Each flavor is an Android product flavor (`demoDebug`, `showcaseRelease`, ...) and an iOS scheme with its own Debug
+and Release configurations. [index.js](index.js) registers one component per flavor, named after it, and the native
+app launches the one of its flavor: Android from `BuildConfig.FLAVOR`, iOS from the `IA_FLAVOR` build setting. React
+Native loads only the modules of the component it launches. All flavors share the application ID and bundle ID the
+access key is bound to, so only one is installed at a time; only the app name differs.
+
+The showcase has the module set of the NativeScript plugin's demo. On Android its build also leaves out the native
+SDK libraries of over-the-counter and CardLink (see `configurations` in
+[android/app/build.gradle](android/app/build.gradle)), so its size is that of an app integrating only its modules.
+On iOS the core pod still depends on every module's pod, so both flavors link them all. Both flavors' JS bundles hold
+both apps.
+
+To add a flavor: register its component in [index.js](index.js), add it to `appFlavors` in
+[android/app/build.gradle](android/app/build.gradle), and add the iOS configurations and scheme with
+`ruby scripts/add-example-ios-flavor.rb <flavor> '<display name>'` from the repository root, followed by
+`bundle exec pod install` in `ios/`.
+
+## Code structure
+
+| Folder | Contents |
+|---|---|
+| [src/ui/](src/ui/) | The design system both apps share: theme, icons, buttons, cards, rows. No SDK imports. |
+| [src/demo/](src/demo/) | The demo: `tabs/` (one per SDK area), `components/`, `sdk/` (registration and initialization), `testing/` (event log, SDK listeners, host answers). |
+| [src/prescription-upload-showcase/](src/prescription-upload-showcase/) | The showcase: `sections/` of its screen, `state/` (SDK state and button actions), `sdk/` (SDK calls and sample prescriptions). |
+| [src/sdkConfig.ts](src/sdkConfig.ts) | Client ID and server environment, shared by every app. |
+
 ## Prerequisites
 
 - Node.js >= 20

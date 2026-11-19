@@ -46,16 +46,5 @@
       <service
         android:name="com.mapbox.common.LifecycleService"
         tools:node="remove" />
-
-      <!-- Prevent CardLink activities from lingering in the back stack after dismissal.
-           Without this, they stay alive consuming ~200MB+ of memory. -->
-      <activity
-        android:name="de.ihreapotheken.sdk.cardlink.CardLinkActivity"
-        android:noHistory="true"
-        tools:node="merge" />
-      <activity
-        android:name="de.ihreapotheken.sdk.cardlink.MyCardsActivity"
-        android:noHistory="true"
-        tools:node="merge" />
     </application>
 </manifest>

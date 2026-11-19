@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import {
   iaSdk,
   IaBaseModule,
@@ -11,8 +11,19 @@ import {
   type IaPharmacyModule,
   type IaPrescriptionModule,
 } from '@ihreapotheken/ia-sdk-core';
-import type { EmbeddedScreenRequest } from './EmbeddedScreen';
-import { ActionButton, runAction, runLaunch, Section, styles, SwitchRow } from './ui';
+import {
+  ActionRow,
+  CardBlock,
+  colors,
+  Hint,
+  LinkButton,
+  Section,
+  SwitchRow,
+  type,
+} from '../../ui';
+import { runAction, runLaunch } from '../actions';
+import type { EmbeddedScreenRequest } from '../components/EmbeddedScreen';
+import { Notice, TabScroll } from '../components/TabScroll';
 
 function prescription() {
   return iaSdk.getModule<IaPrescriptionModule>(IaBaseModule.Prescription);
@@ -22,7 +33,7 @@ function prescription() {
  * Launches every SDK screen, with the options each takes, and embeds them
  * with `IaSdkScreenView`.
  */
-export function ScreensView({
+export function ScreensTab({
   isInitialized,
   onEmbedScreen,
 }: {
@@ -54,16 +65,18 @@ export function ScreensView({
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
+    <TabScroll>
       {!isInitialized && (
-        <Text style={styles.hint}>Initialize the SDK on the Home tab first.</Text>
+        <Notice>Initialize the SDK on the Home tab first.</Notice>
       )}
 
       <Section title="Core">
-        <ActionButton
+        <ActionRow
           title="Start Screen (Dashboard)"
           disabled={!isInitialized}
-          onPress={() => runLaunch('Start Screen', () => iaSdk.startDashboardActivity())}
+          onPress={() =>
+            runLaunch('Start Screen', () => iaSdk.startDashboardActivity())
+          }
         />
         <SwitchRow
           title="Apofinder can be closed without a pharmacy"
@@ -71,7 +84,7 @@ export function ScreensView({
           onValueChange={setIsApofinderCancellable}
           platform="ios"
         />
-        <ActionButton
+        <ActionRow
           title="Apofinder"
           description="The selection is reported in the Events tab"
           disabled={!isInitialized}
@@ -81,20 +94,24 @@ export function ScreensView({
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Finish All Activities"
           description="Closes the SDK screens"
-          onPress={() => runAction('Finish All', () => iaSdk.finishAllActivities())}
+          onPress={() =>
+            runAction('Finish All', () => iaSdk.finishAllActivities())
+          }
         />
       </Section>
 
       <Section title="Modules">
-        <ActionButton
+        <ActionRow
           title="Cart"
           disabled={!isInitialized}
           onPress={() =>
             runLaunch('Cart', () =>
-              iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering).launchCartScreen()
+              iaSdk
+                .getModule<IaOrderingModule>(IaBaseModule.Ordering)
+                .launchCartScreen()
             )
           }
         />
@@ -104,7 +121,7 @@ export function ScreensView({
           onValueChange={setFocusesSearch}
           platform="ios"
         />
-        <ActionButton
+        <ActionRow
           title="Product Search"
           disabled={!isInitialized}
           onPress={() =>
@@ -115,16 +132,18 @@ export function ScreensView({
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Pharmacy Details"
           disabled={!isInitialized}
           onPress={() =>
             runLaunch('Pharmacy Details', () =>
-              iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy).launchPharmacyDetails()
+              iaSdk
+                .getModule<IaPharmacyModule>(IaBaseModule.Pharmacy)
+                .launchPharmacyDetails()
             )
           }
         />
-        <ActionButton
+        <ActionRow
           title="Redeem Prescription"
           description="Scans go through the scan callbacks, see the Events tab"
           disabled={!isInitialized}
@@ -137,42 +156,46 @@ export function ScreensView({
       </Section>
 
       <Section title="Embedded Screens">
-        <Text style={styles.hint}>
+        <Hint>
           Embeds the screen in the app with IaSdkScreenView, shown like a pushed
           or presented screen. On iOS the SDK shows a back or close button for
           it; on Android use the close bar or back.
-        </Text>
+        </Hint>
         {Object.values(IaSdkScreenViewId).map((screen) => (
-          <View key={screen} style={embedStyles.row}>
-            <Text style={embedStyles.label}>{screen}</Text>
-            <TouchableOpacity
+          <CardBlock key={screen} style={styles.embedRow}>
+            <Text style={styles.embedLabel}>{screen}</Text>
+            <LinkButton
+              title="Push"
               disabled={!isInitialized}
               onPress={() =>
-                onEmbedScreen({ screen, embedStyle: IaSdkScreenEmbedStyle.Navigation })
+                onEmbedScreen({
+                  screen,
+                  embedStyle: IaSdkScreenEmbedStyle.Navigation,
+                })
               }
-            >
-              <Text style={[styles.linkText, !isInitialized && embedStyles.disabled]}>Push</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            />
+            <LinkButton
+              title="Present"
               disabled={!isInitialized}
               onPress={() =>
-                onEmbedScreen({ screen, embedStyle: IaSdkScreenEmbedStyle.Presentation })
+                onEmbedScreen({
+                  screen,
+                  embedStyle: IaSdkScreenEmbedStyle.Presentation,
+                })
               }
-            >
-              <Text style={[styles.linkText, !isInitialized && embedStyles.disabled]}>Present</Text>
-            </TouchableOpacity>
-          </View>
+            />
+          </CardBlock>
         ))}
       </Section>
 
       <Section title="Prescription Scanner">
-        <ActionButton
+        <ActionRow
           title="Prescription Photo Scanner"
           platform="ios"
           disabled={!isInitialized}
           onPress={() => launchScanner(IaPrescriptionScannerType.Prescription)}
         />
-        <ActionButton
+        <ActionRow
           title="E-Prescription Scanner"
           platform="ios"
           disabled={!isInitialized}
@@ -205,29 +228,25 @@ export function ScreensView({
             updateCamera({ isPreviewPaused: value });
           }}
         />
-        <Text style={styles.hint}>
-          The Android SDK has no scanner screen; open it from Redeem Prescription.
-        </Text>
+        <Hint>
+          The Android SDK has no scanner screen; open it from Redeem
+          Prescription.
+        </Hint>
       </Section>
-    </ScrollView>
+    </TabScroll>
   );
 }
 
-const embedStyles = StyleSheet.create({
-  row: {
+const styles = StyleSheet.create({
+  embedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
     paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
   },
-  label: {
+  embedLabel: {
+    ...type.body,
     flex: 1,
-    fontSize: 14,
-    color: '#333',
-  },
-  disabled: {
-    color: '#aaa',
+    color: colors.ink,
   },
 });

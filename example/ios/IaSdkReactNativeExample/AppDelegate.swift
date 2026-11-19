@@ -24,7 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
-      withModuleName: "IaSdkReactNativeExample",
+      // There's one component per flavor, named after it (example/index.js). The flavor is the IA_FLAVOR build setting
+      // of the scheme's configuration, see scripts/add-example-ios-flavor.rb.
+      withModuleName: Bundle.main.object(forInfoDictionaryKey: "IAFlavor") as? String ?? "demo",
       in: window,
       launchOptions: launchOptions
     )

@@ -15,7 +15,7 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 │   ├── ordering/      # Order management and checkout
 │   ├── over-the-counter/ # OTC product browsing
 │   └── prescription/  # Prescription management
-├── example/           # Full example app with all modules (workspace)
+├── example/           # Example app (workspace): `demo` flavor with all modules, `showcase` flavor (prescription upload)
 └── test/              # Minimal example apps
     ├── cardlink-demo/              # CardLink only (published packages)
     ├── cardlink-example/           # CardLink only (workspace)
@@ -29,8 +29,9 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 - `yarn build` - Build all packages
 
 ### Running Example Apps
-- `cd example && yarn android` - Run full example on Android
-- `cd example && yarn ios` - Run full example on iOS
+- `cd example && yarn android` - Run full example on Android (`demo` flavor)
+- `cd example && yarn ios` - Run full example on iOS (`demo` flavor)
+- `cd example && yarn android:showcase` / `yarn ios:showcase` - Run the prescription upload showcase (`showcase` flavor: ordering, pharmacy, prescription; no OTC or CardLink). See `example/README.md` → Flavors
 - `cd test/cardlink-demo && npm run android` - Run CardLink demo (published packages)
 
 ### iOS Setup
@@ -76,7 +77,7 @@ Use `^1.0.0` version specifiers and add `.npmrc`:
 - Key files:
   - `android/app/build.gradle` - App configuration
   - `android/settings.gradle` - Project settings
-  - `android/app/src/main/java/iasdkreactnative/example/MainActivity.kt` - Main component name
+  - `android/app/src/main/java/iasdkreactnative/example/MainActivity.kt` - Launches the flavor's component
 
 ### iOS
 - Bundle ID: `de.ihreapotheken.reactnative`
@@ -129,9 +130,10 @@ await iaSdk.initialize({
 ## Troubleshooting
 
 ### "Module not registered" error
-Ensure the module name in `app.json` matches:
-- Android: `MainActivity.kt` → `getMainComponentName()`
-- iOS: Xcode project target name
+The example registers one component per flavor in `example/index.js`, named after the flavor (`demo`, `showcase`).
+The native app launches the one of its flavor:
+- Android: `MainActivity.kt` → `getMainComponentName()` returns `BuildConfig.FLAVOR`
+- iOS: `AppDelegate.swift` reads the `IAFlavor` Info.plist key, the scheme configuration's `IA_FLAVOR` build setting
 
 ### Metro bundler issues
 ```bash

@@ -13,6 +13,11 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# Every build configuration of the project, the flavors' Debug- and Release-<flavor> ones included (see
+# scripts/add-example-ios-flavor.rb), so the pods build the flavors' Debug configurations as debug builds.
+project 'IaSdkReactNativeExample', Xcodeproj::Project.open(File.join(__dir__, 'IaSdkReactNativeExample.xcodeproj')).build_configurations
+  .to_h { |configuration| [configuration.name, configuration.name.start_with?('Debug') ? :debug : :release] }
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
