@@ -1,121 +1,152 @@
 # IA SDK React Native Example App
 
-This is a demo application showcasing the `@ihreapotheken/ia-sdk-react-native` library.
+The example builds two apps, called flavors, from one React Native project and one native project per platform:
 
-## Prerequisites
+| Flavor | App | SDK modules |
+|---|---|---|
+| `demo` (default) | Every SDK API, with test tools, in tabs: initialization, screens, services, inline views, CardLink and an event log ([src/demo/](src/demo/)). | All |
+| `showcase` | A client showcase of transferring prescriptions from an app to a local pharmacy, through checkout ([src/prescription-upload-showcase/](src/prescription-upload-showcase/)). | Core (with Apofinder and appointments), ordering, pharmacy, prescription |
 
-- Node.js >= 20
-- [React Native development environment](https://reactnative.dev/docs/set-up-your-environment) set up for iOS and/or Android
-- For iOS: CocoaPods installed (`gem install cocoapods`)
+Both flavors install as the same app (application ID and bundle ID `de.ihreapotheken.reactnative`, which the access key
+is bound to), so installing one replaces the other. Only the app name differs: "AppSDK React Native Demo QA" or
+"Rx Showcase".
 
-## Secrets Setup
+## Setup
 
-Before running the app, you need to configure your secrets:
+**Prerequisites**
+- Node.js 20 or newer.
+- A [React Native development environment](https://reactnative.dev/docs/set-up-your-environment) for Android and/or iOS.
+- For iOS: Ruby with Bundler, which installs CocoaPods.
 
-1. Copy the example secrets file:
-   ```sh
-   cp .secrets.example .secrets
-   ```
+**1. Access key.** Copy the secrets file and add the SDK access key:
 
-2. Edit `.secrets` and add your access key:
-   ```
-   APPSDK_ACCESS_KEY=your_access_key_here
-   ```
+```sh
+cd example
+cp .secrets.example .secrets   # then set APPSDK_ACCESS_KEY=...
+```
 
-The app will throw an error on startup if `APPSDK_ACCESS_KEY` is not configured.
+Both apps stop at startup without it.
 
-## Installation
-
-From the repository root:
+**2. Dependencies.** From the repository root:
 
 ```sh
 yarn install
 ```
 
-For iOS, install CocoaPods dependencies:
+For iOS, install the pods:
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
+cd example/ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+**3. Backend.** `SERVER_ENVIRONMENT` in the repository's [.env](../.env) picks the backend both apps use:
+`development` (DEV), `staging` (QA, the default) or `production` (PROD). QA is only reachable over the ia.de VPN. After
+changing it, run `sh scripts/sync-app-label.sh` from the repository root so the iOS demo's name shows the new label.
+
+## Running a flavor
+
+### From the command line
+
+Start Metro once in `example/`. It serves both flavors:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+yarn start
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Then, in another terminal in `example/`:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+| | Android | iOS |
+|---|---|---|
+| Demo | `yarn android` | `yarn ios` |
+| Showcase | `yarn android:showcase` | `yarn ios:showcase` |
 
-## Step 3: Modify your app
+To pick a device, add `--device "<name>"` (on Android, `yarn android --list-devices` lists them; on iOS, `--udid` and
+`--simulator "<name>"` work too). The scripts pass the flavor to the React Native CLI: `--mode demoDebug` or
+`--mode showcaseDebug` on Android, and on iOS the scheme and configuration (`--scheme showcase --mode Debug-showcase`).
 
-Now that you have successfully run the app, let's make changes!
+### From Android Studio
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `example/android`. In the Build Variants panel, set the `app` module to `demoDebug` or `showcaseDebug`, then run.
+Start Metro first.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+### From Xcode
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Open `example/ios/IaSdkReactNativeExample.xcworkspace` and pick a scheme: `IaSdkReactNativeExample` for the demo,
+`showcase` for the showcase. Then run. Start Metro first.
 
-## Congratulations! :tada:
+## Release builds
 
-You've successfully run and modified your React Native App. :partying_face:
+Release builds bundle the JavaScript, so they run without Metro.
 
-### Now what?
+**Android.** In `example/android`:
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```sh
+./gradlew assembleShowcaseRelease   # APK: app/build/outputs/apk/showcase/release/app-showcase-release.apk
+./gradlew bundleShowcaseRelease     # App bundle: app/build/outputs/bundle/showcaseRelease/
+```
 
-# Troubleshooting
+Use `Demo` instead of `Showcase` for the demo. The release signing comes from `app/key.properties`, see
+[android/app/build.gradle](android/app/build.gradle).
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+**iOS.** Archive the flavor's scheme, which uses its Release configuration:
 
-# Learn More
+```sh
+xcodebuild archive -workspace example/ios/IaSdkReactNativeExample.xcworkspace -scheme showcase \
+  -archivePath build/showcase.xcarchive
+```
 
-To learn more about React Native, take a look at the following resources:
+The deploy scripts ([scripts/deploy-demo-android.sh](../scripts/deploy-demo-android.sh),
+[scripts/deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh)) build and distribute the demo.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## How the flavors work
+
+Each flavor has its own JS entry file: [index.js](index.js) for the demo, [index.showcase.js](index.showcase.js) for
+the showcase. So each flavor's JS bundle holds only its app.
+
+| | Android | iOS |
+|---|---|---|
+| Flavor | A product flavor, from `appFlavors` in [android/app/build.gradle](android/app/build.gradle) | A scheme with `Debug-<flavor>` and `Release-<flavor>` configurations; the demo uses `Debug` and `Release` |
+| App name | `appName` in `appFlavors` | The `IA_DISPLAY_NAME` build setting |
+| JS entry, debug (from Metro) | `BuildConfig.JS_MAIN_MODULE`, from `entryFile` in `appFlavors` | The `IA_JS_ENTRY` build setting, read from Info.plist ([AppDelegate.swift](ios/IaSdkReactNativeExample/AppDelegate.swift)) |
+| JS entry, release (bundled) | The flavor's bundle task, set from `entryFile` | The `ENTRY_FILE` build setting |
+
+The showcase leaves out the over-the-counter and CardLink modules entirely, so its size is that of an app integrating
+only its modules:
+- **Android:** its build excludes those SDK libraries (`configurations` in
+  [android/app/build.gradle](android/app/build.gradle)). Their thin React Native wrappers stay linked, as autolinking
+  links every package into every variant, but the showcase's JavaScript never loads them.
+- **iOS:** [react-native.config.js](react-native.config.js) links their React Native packages only into the demo's
+  configurations, and the [Podfile](ios/Podfile) does the same for the SDK pods they bring.
+
+**Adding a flavor**
+1. Add its entry file, `index.<flavor>.js`, registering its app as `IaSdkReactNativeExample`.
+2. Add it to `appFlavors` in [android/app/build.gradle](android/app/build.gradle).
+3. Add its iOS configurations and scheme: from the repository root,
+   `ruby scripts/add-example-ios-flavor.rb <flavor> '<display name>'`, then `bundle exec pod install` in
+   `example/ios`.
+4. If it leaves out modules, exclude them as the showcase does (Android `configurations`, iOS
+   `react-native.config.js` and Podfile).
+
+Run the script again for an existing flavor after changing the Debug or Release configuration; it copies them afresh.
+
+## Code structure
+
+| Folder | Contents |
+|---|---|
+| [src/ui/](src/ui/) | The design system both apps share: theme, icons, buttons, cards and rows. It imports no SDK modules. |
+| [src/demo/](src/demo/) | The demo: `tabs/` (one per SDK area), `components/`, `sdk/` (registration and initialization) and `testing/` (event log, SDK listeners, host answers). |
+| [src/prescription-upload-showcase/](src/prescription-upload-showcase/) | The showcase: the `sections/` of its screen, `state/` (SDK state and button actions) and `sdk/` (SDK calls and sample prescriptions). |
+| [src/sdkConfig.ts](src/sdkConfig.ts) | The client ID and server environment every app uses. |
+| [src/e2e/](src/e2e/) | The SDK-initialization smoke entry for the cross-platform E2E test. Start Metro with `IA_E2E=true` and the demo boots it instead. |
+
+## Troubleshooting
+
+- **`Task 'installDebug' is ambiguous`** on Android: the build has flavors, so pass one (`--mode demoDebug`) or use the
+  yarn scripts.
+- **"… has not been registered"**: each entry file registers its app as `IaSdkReactNativeExample`. Check that the
+  flavor loads its entry: `entryFile` in `appFlavors` on Android, the `IA_JS_ENTRY` build setting on iOS.
+- **"Couldn't connect to ia.de"** or initialization never finishes: the QA backend needs the VPN.
+- **Pods out of date after adding a flavor or changing the Podfile**: run `bundle exec pod install` in `example/ios`.
+- **Stale JavaScript**: `yarn start --reset-cache`.

@@ -40,7 +40,11 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    // The flavor's entry file, without ".js" (index, index.showcase, ...): the IA_JS_ENTRY build setting of the
+    // scheme's configuration, see scripts/add-example-ios-flavor.rb. Release builds bundle it as main.jsbundle.
+    RCTBundleURLProvider.sharedSettings().jsBundleURL(
+      forBundleRoot: Bundle.main.object(forInfoDictionaryKey: "IAJSEntry") as? String ?? "index"
+    )
 #else
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif

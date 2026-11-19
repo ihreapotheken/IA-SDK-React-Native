@@ -82,7 +82,7 @@ public class IaSdkCardLinkImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        IaSdkCoreImpl.registerModule("cardLink")
+        IaSdkCoreImpl.registerModule(.cardLink)
     }
 
     // MARK: - Launch

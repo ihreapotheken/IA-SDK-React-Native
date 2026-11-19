@@ -15,6 +15,6 @@ public class IaSdkPrescriptionImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        IaSdkCoreImpl.registerModule("prescription")
+        IaSdkCoreImpl.registerModule(.prescription)
     }
 }

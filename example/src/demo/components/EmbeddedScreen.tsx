@@ -1,18 +1,12 @@
 import { useEffect } from 'react';
-import {
-  BackHandler,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { BackHandler, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   IaSdkScreenView,
   type IaSdkScreenEmbedStyle,
   type IaSdkScreenViewId,
 } from '@ihreapotheken/ia-sdk-core';
+import { colors, LinkButton, spacing, type } from '../../ui';
 import { eventLog } from '../testing/eventLog';
 
 export interface EmbeddedScreenRequest {
@@ -38,10 +32,13 @@ export function EmbeddedScreen({
 
   useEffect(() => {
     if (Platform.OS !== 'android') return undefined;
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      onClose();
-      return true;
-    });
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        onClose();
+        return true;
+      }
+    );
     return () => subscription.remove();
   }, [onClose]);
 
@@ -52,9 +49,7 @@ export function EmbeddedScreen({
           <Text style={styles.closeBarTitle}>
             {request.screen} ({request.embedStyle})
           </Text>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.closeBarButton}>Close</Text>
-          </TouchableOpacity>
+          <LinkButton title="Close" onPress={onClose} />
         </View>
       )}
       <IaSdkScreenView
@@ -73,25 +68,20 @@ export function EmbeddedScreen({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
   },
   closeBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#cccccc',
+    borderBottomColor: colors.border,
   },
   closeBarTitle: {
-    fontSize: 13,
-    color: '#666',
-  },
-  closeBarButton: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007AFF',
+    ...type.caption,
+    color: colors.inkSecondary,
   },
   screen: {
     flex: 1,

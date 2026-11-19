@@ -29,17 +29,17 @@ yarn install || exit 1
 cd "$PROJECT_DIR/example/android"
 
 # Build the Android project. Gradle handles zipalign + V1/V2 signing as part
-# of assembleRelease using the signingConfigs.release config in build.gradle,
+# of assembleDemoRelease using the signingConfigs.release config in build.gradle,
 # which reads credentials from app/key.properties (written by CI from a
 # GitHub secret) and falls back to local defaults otherwise.
 #
 # Abort on failure. Without this the upload below distributes whatever APK is
 # left in the output directory from an earlier build, and the script still
 # reports a successful deploy.
-./gradlew assembleRelease || exit 1
+./gradlew assembleDemoRelease || exit 1
 
 # Upload the APK to the Firebase app distribution service.
-./gradlew appDistributionUploadRelease || exit 1
+./gradlew appDistributionUploadDemoRelease || exit 1
 
 # Display an informative message.
 set -a # Automatically export all variables

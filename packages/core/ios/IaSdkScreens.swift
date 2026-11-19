@@ -2,10 +2,6 @@ import Combine
 import Foundation
 import IACore
 import IAIntegrations
-import IAOrdering
-import IAOverTheCounter
-import IAPharmacy
-import IAPrescription
 import SwiftUI
 import UIKit
 

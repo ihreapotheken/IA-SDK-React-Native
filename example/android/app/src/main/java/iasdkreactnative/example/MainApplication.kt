@@ -19,7 +19,8 @@ class MainApplication : Application(), ReactApplication {
               // add(MyReactNativePackage())
             }
 
-        override fun getJSMainModuleName(): String = "index"
+        // The flavor's entry file, without ".js" (index.js, index.showcase.js, ...), which Metro bundles.
+        override fun getJSMainModuleName(): String = BuildConfig.JS_MAIN_MODULE
 
         override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
