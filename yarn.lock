@@ -1802,6 +1802,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ia-example/demo@workspace:*, @ia-example/demo@workspace:example/packages/demo":
+  version: 0.0.0-use.local
+  resolution: "@ia-example/demo@workspace:example/packages/demo"
+  dependencies:
+    "@ia-example/shared": "workspace:*"
+    "@ihreapotheken/ia-sdk-cardlink": "workspace:*"
+    "@ihreapotheken/ia-sdk-core": "workspace:*"
+    "@ihreapotheken/ia-sdk-ordering": "workspace:*"
+    "@ihreapotheken/ia-sdk-over-the-counter": "workspace:*"
+    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*"
+    "@ihreapotheken/ia-sdk-prescription": "workspace:*"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-safe-area-context: "*"
+  languageName: unknown
+  linkType: soft
+
+"@ia-example/prescription-upload-showcase@workspace:*, @ia-example/prescription-upload-showcase@workspace:example/packages/prescription-upload-showcase":
+  version: 0.0.0-use.local
+  resolution: "@ia-example/prescription-upload-showcase@workspace:example/packages/prescription-upload-showcase"
+  dependencies:
+    "@ia-example/shared": "workspace:*"
+    "@ihreapotheken/ia-sdk-core": "workspace:*"
+    "@ihreapotheken/ia-sdk-ordering": "workspace:*"
+    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*"
+    "@ihreapotheken/ia-sdk-prescription": "workspace:*"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-safe-area-context: "*"
+  languageName: unknown
+  linkType: soft
+
+"@ia-example/shared@workspace:*, @ia-example/shared@workspace:example/packages/shared":
+  version: 0.0.0-use.local
+  resolution: "@ia-example/shared@workspace:example/packages/shared"
+  dependencies:
+    "@ihreapotheken/ia-sdk-core": "workspace:*"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-native:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@ihreapotheken/ia-sdk-cardlink@workspace:*, @ihreapotheken/ia-sdk-cardlink@workspace:packages/cardlink":
   version: 0.0.0-use.local
   resolution: "@ihreapotheken/ia-sdk-cardlink@workspace:packages/cardlink"
@@ -5062,13 +5112,8 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/runtime": "npm:^7.25.0"
-    "@ihreapotheken/ia-sdk-cardlink": "workspace:*"
-    "@ihreapotheken/ia-sdk-core": "workspace:*"
-    "@ihreapotheken/ia-sdk-interface": "workspace:*"
-    "@ihreapotheken/ia-sdk-ordering": "workspace:*"
-    "@ihreapotheken/ia-sdk-over-the-counter": "workspace:*"
-    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*"
-    "@ihreapotheken/ia-sdk-prescription": "workspace:*"
+    "@ia-example/demo": "workspace:*"
+    "@ia-example/prescription-upload-showcase": "workspace:*"
     "@react-native-community/cli": "npm:20.0.0"
     "@react-native-community/cli-platform-android": "npm:20.0.0"
     "@react-native-community/cli-platform-ios": "npm:20.0.0"

@@ -15,7 +15,8 @@
   "homepage": "https://github.com/ihreapotheken/IA-SDK-React-Native#readme",
   "workspaces": [
     "packages/*",
-    "example"
+    "example",
+    "example/packages/*"
   ],
   "scripts": {
     "build": "yarn workspaces foreach -A --topological run build",

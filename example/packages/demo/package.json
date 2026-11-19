@@ -1,0 +1,21 @@
+{
+  "name": "@ia-example/demo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The demo app of the example, the demo flavor: every SDK module and API, with test tools.",
+  "main": "src/index.tsx",
+  "dependencies": {
+    "@ia-example/shared": "workspace:*",
+    "@ihreapotheken/ia-sdk-cardlink": "workspace:*",
+    "@ihreapotheken/ia-sdk-core": "workspace:*",
+    "@ihreapotheken/ia-sdk-ordering": "workspace:*",
+    "@ihreapotheken/ia-sdk-over-the-counter": "workspace:*",
+    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*",
+    "@ihreapotheken/ia-sdk-prescription": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*"
+  }
+}

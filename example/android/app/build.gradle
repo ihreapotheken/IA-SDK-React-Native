@@ -120,14 +120,15 @@ def appFlavors = [
 ]
 
 /**
- * The SDK modules of each flavor, besides core, which every flavor includes. Only the flavors that list a module link
- * it (react-native.config.js); the others don't contain its React Native package or its SDK libraries.
+ * The SDK modules of each flavor besides core, which every flavor includes: those its package in example/packages/
+ * depends on (example/flavors.js). Only the flavors with a module link it (react-native.config.js); the others don't
+ * contain its React Native package or its SDK libraries.
  */
-def flavorModules = new groovy.json.JsonSlurper().parse(rootProject.file("../flavors.json")).collectEntries { flavorName, flavor ->
-    [flavorName, flavor.modules]
-}
+def flavorModules = new groovy.json.JsonSlurper().parseText(providers.exec {
+    commandLine("node", rootProject.file("../flavors.js").path)
+}.standardOutput.asText.get())
 if (flavorModules.keySet() != appFlavors.keySet()) {
-    throw new GradleException("example/flavors.json lists the flavors ${flavorModules.keySet()}, app/build.gradle ${appFlavors.keySet()}")
+    throw new GradleException("example/package.json lists the flavors ${flavorModules.keySet()}, app/build.gradle ${appFlavors.keySet()}")
 }
 
 react {
