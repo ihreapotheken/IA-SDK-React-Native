@@ -1,0 +1,19 @@
+{
+  "name": "@ia-example/prescription-upload-showcase",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The showcase flavor of the example: transferring prescriptions from an app to a local pharmacy, through checkout.",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@ia-example/shared": "workspace:*",
+    "@ihreapotheken/ia-sdk-core": "workspace:*",
+    "@ihreapotheken/ia-sdk-ordering": "workspace:*",
+    "@ihreapotheken/ia-sdk-pharmacy": "workspace:*",
+    "@ihreapotheken/ia-sdk-prescription": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*"
+  }
+}
