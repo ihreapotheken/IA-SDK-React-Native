@@ -456,7 +456,12 @@ export interface IaButtonConfiguration {
 
 /** UI appearance of the SDK screens. */
 export interface IaUIConfiguration {
-  /** Enables the Liquid Glass style (iOS). Defaults to `false`. */
+  /**
+   * Enables the Liquid Glass style (iOS). Defaults to `true`. Set it to `false`
+   * only if the iOS app is built with the iOS 26 SDK and runs in Liquid Glass
+   * compatibility mode (`UIDesignRequiresCompatibility` is `true`). Apps built
+   * with the iOS 27 SDK or later always use Liquid Glass.
+   */
   supportsLiquidGlass?: boolean;
   /** Shows the Pharmi mascot illustrations. Defaults to `true`. */
   shouldShowMascotIllustrations?: boolean;

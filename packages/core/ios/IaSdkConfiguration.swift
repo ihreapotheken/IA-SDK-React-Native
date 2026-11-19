@@ -103,7 +103,7 @@ struct IaSdkConfigurationArguments {
     @MainActor
     private static func uiConfiguration(_ map: [String: Any]) throws -> SDKConfiguration.UIConfiguration {
         var config = SDKConfiguration.UIConfiguration()
-        config.supportsLiquidGlass = map["supportsLiquidGlass"] as? Bool ?? false
+        config.supportsLiquidGlass = map["supportsLiquidGlass"] as? Bool ?? true
         config.shouldShowMascotIllustrations = map["shouldShowMascotIllustrations"] as? Bool ?? true
 
         let header = map["header"] as? [String: Any] ?? [:]
