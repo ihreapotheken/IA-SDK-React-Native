@@ -221,15 +221,24 @@ if (iaSdk.hasModule(IaBaseModule.Pharmacy)) {
 
 ---
 
-### Full Example
+### Example App
 
-The `example/` directory contains a complete example app demonstrating all modules:
+The `example/` directory builds two apps, as flavors of one project:
+
+- **`demo`**: every module and API of the SDK, with test tools.
+- **`showcase`**: a client showcase of transferring prescriptions to a local pharmacy, with the ordering, pharmacy and
+  prescription modules.
 
 ```sh
+yarn install            # in the repository root
 cd example
-yarn install
-yarn android  # or yarn ios
+yarn start              # Metro, for both flavors
+yarn android            # demo; yarn ios on iOS
+yarn android:showcase   # showcase; yarn ios:showcase on iOS
 ```
+
+[example/README.md](example/README.md) covers the setup (access key, pods, backend), running each flavor from the
+command line, Android Studio and Xcode, release builds, and adding a flavor.
 
 ### Minimal Examples
 
