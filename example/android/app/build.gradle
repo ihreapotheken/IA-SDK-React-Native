@@ -60,7 +60,7 @@ react {
     // hermesFlags = ["-O", "-output-source-map"]
 
     /* Autolinking */
-    autolinkLibrariesWithApp()
+    // autolinkLibrariesWithApp() is called after the android block, see there.
 }
 
 /**
@@ -119,6 +119,17 @@ def appFlavors = [
     showcase: [appName: "Rx Showcase", entryFile: "index.showcase.js"],
 ]
 
+/**
+ * The SDK modules of each flavor, besides core, which every flavor includes. Only the flavors that list a module link
+ * it (react-native.config.js); the others don't contain its React Native package or its SDK libraries.
+ */
+def flavorModules = new groovy.json.JsonSlurper().parse(rootProject.file("../flavors.json")).collectEntries { flavorName, flavor ->
+    [flavorName, flavor.modules]
+}
+if (flavorModules.keySet() != appFlavors.keySet()) {
+    throw new GradleException("example/flavors.json lists the flavors ${flavorModules.keySet()}, app/build.gradle ${appFlavors.keySet()}")
+}
+
 react {
     // The debug variants are named after the flavors.
     debuggableVariants = appFlavors.keySet().collect { "${it}Debug" }
@@ -163,6 +174,8 @@ android {
                 dimension "app"
                 resValue "string", "app_name", flavor.appName
                 buildConfigField "String", "JS_MAIN_MODULE", "\"${flavor.entryFile - ~/\.js$/}\""
+                // The flavor's modules, for FlavorPackages.
+                buildConfigField "String[]", "IA_MODULES", "{${flavorModules[flavorName].collect { "\"$it\"" }.join(", ")}}"
             }
         }
         all { flavor ->
@@ -211,14 +224,18 @@ android {
     }
 }
 
-// The showcase has the module set of the NativeScript plugin's demo: core (with Apofinder and appointments), ordering,
-// pharmacy and prescription. It leaves out the native SDK libraries of over-the-counter and CardLink, with everything
-// only they bring in, so its size is that of an app integrating just those modules. Their React Native packages stay
-// linked, as autolinking links every package of package.json into all variants, but they're thin wrappers without
-// the SDK code, and the showcase's JavaScript never loads them (example/index.js).
-configurations.matching { it.name.startsWith("showcase") }.configureEach {
-    exclude group: "de.ihreapotheken.sdk", module: "otc"
-    exclude group: "de.ihreapotheken.sdk", module: "cardlink"
+react {
+    // After the product flavors exist: a module that only some flavors include is added to theirs alone
+    // (demoImplementation, ...), see react-native.config.js.
+    autolinkLibrariesWithApp()
+}
+
+// The C++ part of autolinking is the same for every flavor, so it builds the codegen glue of each module, also in a
+// flavor without the module (where it's never called). Their codegen runs before any build here, as a flavor without a
+// module doesn't build the module's project.
+def modulesOfSomeFlavors = flavorModules.values().flatten().unique() - flavorModules.values().inject { common, modules -> common.intersect(modules) }
+tasks.named("preBuild").configure {
+    modulesOfSomeFlavors.each { module -> dependsOn(":ihreapotheken_ia-sdk-${module}:generateCodegenArtifactsFromSchema") }
 }
 
 repositories {

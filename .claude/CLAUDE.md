@@ -31,7 +31,7 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 ### Running Example Apps
 - `cd example && yarn android` - Run full example on Android (`demo` flavor)
 - `cd example && yarn ios` - Run full example on iOS (`demo` flavor)
-- `cd example && yarn android:showcase` / `yarn ios:showcase` - Run the prescription upload showcase (`showcase` flavor: ordering, pharmacy, prescription; no OTC or CardLink). See `example/README.md` → Flavors
+- `cd example && yarn android:showcase` / `yarn ios:showcase` - Run the prescription upload showcase (`showcase` flavor: ordering, pharmacy, prescription; no OTC or CardLink). Each flavor's modules are in `example/flavors.json`; see `example/README.md` → Modules per flavor
 - `cd test/cardlink-demo && npm run android` - Run CardLink demo (published packages)
 
 ### iOS Setup

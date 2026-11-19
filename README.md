@@ -276,9 +276,9 @@ pharmacy and prescription. "Empty app" is the same app without the ia.de SDK. 1 
 
 | | R8 enabled | R8 disabled |
 |---|---|---|
-| APK | Empty app 14.6 MB + ia.de AppSDK 38.5 MB = 53.1 MB | Empty app 17.2 MB + ia.de AppSDK 47.8 MB = 65.0 MB |
-| Google Play download | Empty app 6.3 MB + ia.de AppSDK 23.7 MB = 30.0 MB | Empty app 8.9 MB + ia.de AppSDK 33.0 MB = 41.9 MB |
-| Installed | Empty app 16.3 MB + ia.de AppSDK 57.1 MB = 73.4 MB | Empty app 23.8 MB + ia.de AppSDK 94.9 MB = 118.7 MB |
+| APK | Empty app 14.6 MB + ia.de AppSDK 38.5 MB = 53.1 MB | Empty app 17.0 MB + ia.de AppSDK 48.0 MB = 65.0 MB |
+| Google Play download | Empty app 6.3 MB + ia.de AppSDK 23.7 MB = 30.0 MB | Empty app 8.7 MB + ia.de AppSDK 33.2 MB = 41.9 MB |
+| Installed | Empty app 16.3 MB + ia.de AppSDK 57.1 MB = 73.4 MB | Empty app 23.2 MB + ia.de AppSDK 95.4 MB = 118.6 MB |
 
 **iOS** (arm64)
 
@@ -296,7 +296,8 @@ How it was measured:
 - **Google Play download** and **installed** are for a Pixel 7a (arm64, 420 dpi, German), computed with bundletool from
   the app bundle. Installed is larger than the download because Android keeps native libraries and code uncompressed.
 - **R8** shrinks the code of release builds. Host apps normally enable it; the example ships with it off.
-- **Android empty app:** the showcase built without any ia.de SDK library.
+- **Android empty app:** the showcase built without any ia.de SDK library. Neither contains the modules the showcase
+  leaves out, see [example/README.md](example/README.md#modules-per-flavor).
 - **iOS empty app:** the showcase's signed release build minus the ia.de frameworks it embeds (IACore, IAIntegrations,
   IAOrdering, IAPharmacy, IAPrescription, IOSKit). The SDK's React Native wrapper code, a small part of the app binary,
   counts toward the empty app.

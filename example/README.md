@@ -112,22 +112,41 @@ the showcase. So each flavor's JS bundle holds only its app.
 | JS entry, debug (from Metro) | `BuildConfig.JS_MAIN_MODULE`, from `entryFile` in `appFlavors` | The `IA_JS_ENTRY` build setting, read from Info.plist ([AppDelegate.swift](ios/IaSdkReactNativeExample/AppDelegate.swift)) |
 | JS entry, release (bundled) | The flavor's bundle task, set from `entryFile` | The `ENTRY_FILE` build setting |
 
-The showcase leaves out the over-the-counter and CardLink modules entirely, so its size is that of an app integrating
-only its modules:
-- **Android:** its build excludes those SDK libraries (`configurations` in
-  [android/app/build.gradle](android/app/build.gradle)). Their thin React Native wrappers stay linked, as autolinking
-  links every package into every variant, but the showcase's JavaScript never loads them.
-- **iOS:** [react-native.config.js](react-native.config.js) links their React Native packages only into the demo's
-  configurations, and the [Podfile](ios/Podfile) does the same for the SDK pods they bring.
+### Modules per flavor
+
+[flavors.json](flavors.json) lists each flavor's SDK modules, besides core, which every flavor includes:
+
+```json
+"showcase": {
+  "modules": ["ordering", "pharmacy", "prescription"]
+}
+```
+
+A flavor's build contains only its modules: their React Native packages, and the native SDK libraries and frameworks
+they bring. Its JavaScript holds only the modules its entry file imports. So the showcase, without over-the-counter and
+CardLink, has the size of an app integrating only its modules.
+
+[package.json](package.json) still lists every module. A React Native app has one, and autolinking reads only it;
+flavors.json decides which flavors each module links into:
+- **iOS:** [react-native.config.js](react-native.config.js) links a module's pod only into its flavors' configurations,
+  and the [Podfile](ios/Podfile) does the same for the SDK pods it brings.
+- **Android:** only its flavors' variants depend on the module's project (`demoImplementation`, ...), so the others
+  contain neither its React Native package nor its SDK libraries. Autolinking generates one package list for all
+  variants, which gets these packages from
+  [FlavorPackages](android/app/src/main/java/iasdkreactnative/example/FlavorPackages.kt): an empty package in a flavor
+  without the module. Only the module's small C++ codegen glue, which autolinking also shares between variants, is
+  built into every flavor; a flavor without the module never calls it.
+
+To change a flavor's modules, edit flavors.json, import only those modules in the flavor's JavaScript, and run
+`bundle exec pod install` in `example/ios`.
 
 **Adding a flavor**
 1. Add its entry file, `index.<flavor>.js`, registering its app as `IaSdkReactNativeExample`.
-2. Add it to `appFlavors` in [android/app/build.gradle](android/app/build.gradle).
+2. Add it, with its modules, to [flavors.json](flavors.json), and to `appFlavors` in
+   [android/app/build.gradle](android/app/build.gradle).
 3. Add its iOS configurations and scheme: from the repository root,
    `ruby scripts/add-example-ios-flavor.rb <flavor> '<display name>'`, then `bundle exec pod install` in
    `example/ios`.
-4. If it leaves out modules, exclude them as the showcase does (Android `configurations`, iOS
-   `react-native.config.js` and Podfile).
 
 Run the script again for an existing flavor after changing the Debug or Release configuration; it copies them afresh.
 
@@ -139,6 +158,7 @@ Run the script again for an existing flavor after changing the Debug or Release 
 | [src/demo/](src/demo/) | The demo: `tabs/` (one per SDK area), `components/`, `sdk/` (registration and initialization) and `testing/` (event log, SDK listeners, host answers). |
 | [src/prescription-upload-showcase/](src/prescription-upload-showcase/) | The showcase: the `sections/` of its screen, `state/` (SDK state and button actions) and `sdk/` (SDK calls and sample prescriptions). |
 | [src/sdkConfig.ts](src/sdkConfig.ts) | The client ID and server environment every app uses. |
+| [flavors.json](flavors.json) | The SDK modules of each flavor. |
 | [src/e2e/](src/e2e/) | The SDK-initialization smoke entry for the cross-platform E2E test. Start Metro with `IA_E2E=true` and the demo boots it instead. |
 
 ## Troubleshooting
@@ -147,6 +167,8 @@ Run the script again for an existing flavor after changing the Debug or Release 
   yarn scripts.
 - **"… has not been registered"**: each entry file registers its app as `IaSdkReactNativeExample`. Check that the
   flavor loads its entry: `entryFile` in `appFlavors` on Android, the `IA_JS_ENTRY` build setting on iOS.
+- **"TurboModuleRegistry.getEnforcing(...): 'IaSdkOtc' could not be found"** (or another module): the flavor's
+  JavaScript imports a module that its entry in [flavors.json](flavors.json) doesn't list.
 - **"Couldn't connect to ia.de"** or initialization never finishes: the QA backend needs the VPN.
 - **Pods out of date after adding a flavor or changing the Podfile**: run `bundle exec pod install` in `example/ios`.
 - **Stale JavaScript**: `yarn start --reset-cache`.
