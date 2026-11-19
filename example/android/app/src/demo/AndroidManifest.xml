@@ -1,0 +1,17 @@
+<!-- The demo flavor's additions. CardLink is only in the demo; the showcase leaves it out (see app/build.gradle). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+      <!-- Prevent CardLink activities from lingering in the back stack after dismissal.
+           Without this, they stay alive consuming ~200MB+ of memory. -->
+      <activity
+        android:name="de.ihreapotheken.sdk.cardlink.CardLinkActivity"
+        android:noHistory="true"
+        tools:node="merge" />
+      <activity
+        android:name="de.ihreapotheken.sdk.cardlink.MyCardsActivity"
+        android:noHistory="true"
+        tools:node="merge" />
+    </application>
+</manifest>

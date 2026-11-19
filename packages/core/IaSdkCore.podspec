@@ -43,11 +43,7 @@ Pod::Spec.new do |s|
 
   install_modules_dependencies(s)
 
-  # Core depends on all IA SDK modules to enable module registration
+  # Only the SDK's shared modules: each feature package (ordering, pharmacy, ...) brings its own pod, so an app links
+  # just the features it installs.
   s.dependency 'IAIntegrations', appSdkVersionId
-  s.dependency 'IAOrdering', appSdkVersionId
-  s.dependency 'IAOverTheCounter', appSdkVersionId
-  s.dependency 'IAPharmacy', appSdkVersionId
-  s.dependency 'IAPrescription', appSdkVersionId
-  s.dependency 'IACardLink', appSdkVersionId
 end

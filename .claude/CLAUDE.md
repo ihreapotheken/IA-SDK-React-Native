@@ -15,7 +15,7 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 │   ├── ordering/      # Order management and checkout
 │   ├── over-the-counter/ # OTC product browsing
 │   └── prescription/  # Prescription management
-├── example/           # Full example app with all modules (workspace)
+├── example/           # Example app (workspace): `demo` flavor with all modules, `showcase` flavor (prescription upload)
 └── test/              # Minimal example apps
     ├── cardlink-demo/              # CardLink only (published packages)
     ├── cardlink-example/           # CardLink only (workspace)
@@ -29,8 +29,9 @@ This is a React Native SDK monorepo for the Ihre Apotheken (ia.de) pharmacy serv
 - `yarn build` - Build all packages
 
 ### Running Example Apps
-- `cd example && yarn android` - Run full example on Android
-- `cd example && yarn ios` - Run full example on iOS
+- `cd example && yarn android` - Run full example on Android (`demo` flavor)
+- `cd example && yarn ios` - Run full example on iOS (`demo` flavor)
+- `cd example && yarn android:showcase` / `yarn ios:showcase` - Run the prescription upload showcase (`showcase` flavor: ordering, pharmacy, prescription; no OTC or CardLink). See `example/README.md` → Flavors
 - `cd test/cardlink-demo && npm run android` - Run CardLink demo (published packages)
 
 ### iOS Setup
@@ -129,9 +130,10 @@ await iaSdk.initialize({
 ## Troubleshooting
 
 ### "Module not registered" error
-Ensure the module name in `app.json` matches:
-- Android: `MainActivity.kt` → `getMainComponentName()`
-- iOS: Xcode project target name
+Each flavor of the example has its own entry file (`example/index.js` for the demo, `example/index.<flavor>.js`),
+which registers its app under the name in `app.json`, `IaSdkReactNativeExample`. The native app loads its flavor's entry:
+- Android: `BuildConfig.JS_MAIN_MODULE` (debug) and the bundle task's entry file (release), from `appFlavors` in `android/app/build.gradle`
+- iOS: the `IA_JS_ENTRY` build setting via the `IAJSEntry` Info.plist key (debug) and `ENTRY_FILE` (release)
 
 ### Metro bundler issues
 ```bash

@@ -173,15 +173,24 @@ if (iaSdk.hasModule(IaBaseModule.Pharmacy)) {
 
 ---
 
-### Full Example
+### Example App
 
-The `example/` directory contains a complete example app demonstrating all modules:
+The `example/` directory builds two apps, as flavors of one project:
+
+- **`demo`**: every module and API of the SDK, with test tools.
+- **`showcase`**: a client showcase of transferring prescriptions to a local pharmacy, with the ordering, pharmacy and
+  prescription modules.
 
 ```sh
+yarn install            # in the repository root
 cd example
-yarn install
-yarn android  # or yarn ios
+yarn start              # Metro, for both flavors
+yarn android            # demo; yarn ios on iOS
+yarn android:showcase   # showcase; yarn ios:showcase on iOS
 ```
+
+[example/README.md](example/README.md) covers the setup (access key, pods, backend), running each flavor from the
+command line, Android Studio and Xcode, release builds, and adding a flavor.
 
 ### Minimal Examples
 
@@ -211,14 +220,39 @@ The `test/` directory contains minimal example apps for specific use cases:
 
 ---
 
-Example app sizes with CardLink module only:
+What the ia.de AppSDK adds to a React Native app, measured with ia.de AppSDK 2.10.1 and React Native 0.81 (Hermes, new
+architecture) on the example's `showcase` flavor. Its modules are core (with Apofinder and appointments), ordering,
+pharmacy and prescription. "Empty app" is the same app without the ia.de SDK. 1 MB = 1,000,000 bytes.
 
-| Platform | Size |
-|----------|------|
-| Android APK (all architectures) | ~174 MB |
-| iOS App | ~52 MB |
+**Android** (arm64)
 
-Note: Android APK size is for all architectures. Play Store delivery uses split APKs (~45-50 MB per device).
+| | R8 enabled | R8 disabled |
+|---|---|---|
+| APK | Empty app 14.6 MB + ia.de AppSDK 38.5 MB = 53.1 MB | Empty app 17.2 MB + ia.de AppSDK 47.8 MB = 65.0 MB |
+| Google Play download | Empty app 6.3 MB + ia.de AppSDK 23.7 MB = 30.0 MB | Empty app 8.9 MB + ia.de AppSDK 33.0 MB = 41.9 MB |
+| Installed | Empty app 16.3 MB + ia.de AppSDK 57.1 MB = 73.4 MB | Empty app 23.8 MB + ia.de AppSDK 94.9 MB = 118.7 MB |
+
+**iOS** (arm64)
+
+| | Size |
+|---|---|
+| App Store download (approximate) | Empty app 5.2 MB + ia.de AppSDK 16.7 MB = 21.9 MB |
+| Installed | Empty app 17.8 MB + ia.de AppSDK 33.5 MB = 51.3 MB |
+
+**With every module** (adding over-the-counter and CardLink, as the `demo` flavor does):
+- Android, R8 enabled: APK 61.0 MB, Google Play download 37.5 MB, installed 89.1 MB.
+- iOS: App Store download about 33.5 MB, installed 69.8 MB.
+
+How it was measured:
+- **APK** is the universal APK for arm64 built from the release app bundle, the file you'd install directly.
+- **Google Play download** and **installed** are for a Pixel 7a (arm64, 420 dpi, German), computed with bundletool from
+  the app bundle. Installed is larger than the download because Android keeps native libraries and code uncompressed.
+- **R8** shrinks the code of release builds. Host apps normally enable it; the example ships with it off.
+- **Android empty app:** the showcase built without any ia.de SDK library.
+- **iOS empty app:** the showcase's signed release build minus the ia.de frameworks it embeds (IACore, IAIntegrations,
+  IAOrdering, IAPharmacy, IAPrescription, IOSKit). The SDK's React Native wrapper code, a small part of the app binary,
+  counts toward the empty app.
+- **App Store download** is approximated by the zipped app. App Store Connect reports the exact size after an upload.
 
 ## 9. Related Projects
 

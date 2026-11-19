@@ -107,6 +107,38 @@ def serverEnvironmentLabel = {
     }
 }()
 
+/**
+ * The apps this example builds, one product flavor each, named like its iOS
+ * scheme: its launcher name and its JS entry file (in example/), so each
+ * flavor's bundle holds only its app. They share the application ID the access
+ * key is bound to, and the signing, so each is delivered like the demo; only
+ * the name differs.
+ */
+def appFlavors = [
+    demo: [appName: "AppSDK React Native Demo ${serverEnvironmentLabel}", entryFile: "index.js"],
+    showcase: [appName: "Rx Showcase", entryFile: "index.showcase.js"],
+]
+
+react {
+    // The debug variants are named after the flavors.
+    debuggableVariants = appFlavors.keySet().collect { "${it}Debug" }
+}
+
+// The React Native plugin bundles one entry file for every variant; a flavor's
+// release build bundles its own instead. This callback runs after the plugin's,
+// which registers the bundle task. Debug builds load the entry from Metro, see
+// JS_MAIN_MODULE.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def bundleTask = "createBundle${variant.name.capitalize()}JsAndAssets"
+        // Debuggable variants have none.
+        if (tasks.names.contains(bundleTask)) {
+            def entryFile = rootProject.file("../${appFlavors[variant.flavorName].entryFile}")
+            tasks.named(bundleTask) { it.entryFile.set(entryFile) }
+        }
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -122,7 +154,31 @@ android {
         versionCode = System.getenv("APP_SDK_BUILD_NUMBER") == null
         ? 1
         : Integer.parseInt(System.getenv("APP_SDK_BUILD_NUMBER"))
-        resValue "string", "app_name", "AppSDK React Native Demo ${serverEnvironmentLabel}"
+    }
+
+    flavorDimensions "app"
+    productFlavors {
+        appFlavors.each { flavorName, flavor ->
+            create(flavorName) {
+                dimension "app"
+                resValue "string", "app_name", flavor.appName
+                buildConfigField "String", "JS_MAIN_MODULE", "\"${flavor.entryFile - ~/\.js$/}\""
+            }
+        }
+        all { flavor ->
+            firebaseAppDistribution {
+                appId = "1:805028679903:android:594d3964ea5373ea24d96a"
+                artifactType = "APK"
+                artifactPath = rootProject.file("./app/build/outputs/apk/${flavor.name}/release/app-${flavor.name}-release.apk").path
+                serviceCredentialsFile = rootProject.file("./app/fb-distribution-service-credentials.json").path
+                testers = [
+                    "cvitaman@gmail.com",
+                    "4ot.testing@gmail.com",
+                    "julia.schindel@ihreapotheken.de",
+                    "lorenathiel2@gmail.com",
+                ].join(", ")
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -151,20 +207,18 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            firebaseAppDistribution {
-                appId = "1:805028679903:android:594d3964ea5373ea24d96a"
-                artifactType = "APK"
-                artifactPath = rootProject.file("./app/build/outputs/apk/release/app-release.apk").path
-                serviceCredentialsFile = rootProject.file("./app/fb-distribution-service-credentials.json").path
-                testers = [
-                    "cvitaman@gmail.com",
-                    "4ot.testing@gmail.com",
-                    "julia.schindel@ihreapotheken.de",
-                    "lorenathiel2@gmail.com",
-                ].join(", ")
-            }
         }
     }
+}
+
+// The showcase has the module set of the NativeScript plugin's demo: core (with Apofinder and appointments), ordering,
+// pharmacy and prescription. It leaves out the native SDK libraries of over-the-counter and CardLink, with everything
+// only they bring in, so its size is that of an app integrating just those modules. Their React Native packages stay
+// linked, as autolinking links every package of package.json into all variants, but they're thin wrappers without
+// the SDK code, and the showcase's JavaScript never loads them (example/index.js).
+configurations.matching { it.name.startsWith("showcase") }.configureEach {
+    exclude group: "de.ihreapotheken.sdk", module: "otc"
+    exclude group: "de.ihreapotheken.sdk", module: "cardlink"
 }
 
 repositories {

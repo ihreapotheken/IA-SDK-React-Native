@@ -1,5 +1,11 @@
 const path = require('path');
 
+// The demo flavor's iOS configurations; each other flavor has Debug-<flavor> and
+// Release-<flavor>. The showcase leaves out over-the-counter and CardLink, so
+// their pods (with the SDK frameworks they bring) link only into these. Android
+// leaves them out in android/app/build.gradle.
+const DEMO_CONFIGURATIONS = ['Debug', 'Release'];
+
 module.exports = {
   project: {
     ios: {
@@ -24,7 +30,8 @@ module.exports = {
     '@ihreapotheken/ia-sdk-over-the-counter': {
       root: path.join(__dirname, '..', 'packages', 'over-the-counter'),
       platforms: {
-        ios: {},
+        // Only in the demo's configurations: the showcase leaves this module out.
+        ios: { configurations: DEMO_CONFIGURATIONS },
         android: {},
       },
     },
@@ -45,7 +52,8 @@ module.exports = {
     '@ihreapotheken/ia-sdk-cardlink': {
       root: path.join(__dirname, '..', 'packages', 'cardlink'),
       platforms: {
-        ios: {},
+        // Only in the demo's configurations: the showcase leaves this module out.
+        ios: { configurations: DEMO_CONFIGURATIONS },
         android: {},
       },
     },

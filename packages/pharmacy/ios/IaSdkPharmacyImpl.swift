@@ -13,7 +13,7 @@ public class IaSdkPharmacyImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        IaSdkCoreImpl.registerModule("pharmacyDetails")
+        IaSdkCoreImpl.registerModule(.pharmacy)
     }
 
     @objc(setPharmacyId:resolve:reject:)

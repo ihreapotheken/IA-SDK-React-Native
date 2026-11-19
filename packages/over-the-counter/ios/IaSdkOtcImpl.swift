@@ -13,7 +13,7 @@ public class IaSdkOtcImpl: NSObject {
     }
 
     @objc public func registerModule() {
-        IaSdkCoreImpl.registerModule("overTheCounter")
+        IaSdkCoreImpl.registerModule(.overTheCounter)
     }
 
     @objc(clearProductGridCacheWithResolve:reject:)
