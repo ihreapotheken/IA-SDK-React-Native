@@ -38,10 +38,10 @@ end
 target 'IaSdkReactNativeExample' do
   config = use_native_modules!
 
-  # A module that only some flavors include (../flavors.json) links only into their configurations: react-native.config.js
-  # restricts its React Native pod. CocoaPods doesn't apply that to a pod's dependencies, so the SDK pods it brings are
-  # restricted here too.
-  flavor_modules = JSON.parse(File.read(File.join(__dir__, '..', 'flavors.json'))).transform_values { |flavor| flavor['modules'] }
+  # A module that only some flavors include (their packages' dependencies, see ../flavors.js) links only into their
+  # configurations: react-native.config.js restricts its React Native pod. CocoaPods doesn't apply that to a pod's
+  # dependencies, so the SDK pods it brings are restricted here too.
+  flavor_modules = JSON.parse(Pod::Executable.execute_command('node', [File.join(__dir__, '..', 'flavors.js')]))
   flavor_modules.values.flatten.uniq.each do |sdk_module|
     flavors = flavor_modules.keys.select { |flavor| flavor_modules[flavor].include?(sdk_module) }
     next if flavors.length == flavor_modules.length

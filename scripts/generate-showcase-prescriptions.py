@@ -2,7 +2,7 @@
 """
 Generates the sample prescriptions the showcase app hands to the SDK in its "From your app" flow: a photo and a PDF of
 a statutory health insurance prescription (Muster 16), each marked MUSTER so it can't pass for a real one. Writes them
-base64-encoded to example/src/prescription-upload-showcase/sdk/samplePrescriptions.ts.
+base64-encoded to example/packages/prescription-upload-showcase/src/sdk/samplePrescriptions.ts.
 
 Usage (needs Pillow):
     python3 scripts/generate-showcase-prescriptions.py
@@ -15,7 +15,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUTPUT = os.path.join(ROOT, 'example', 'src', 'prescription-upload-showcase', 'sdk', 'samplePrescriptions.ts')
+OUTPUT = os.path.join(ROOT, 'example', 'packages', 'prescription-upload-showcase', 'src', 'sdk', 'samplePrescriptions.ts')
 
 WIDTH, HEIGHT = 1480, 1050  # A6 landscape at 254 dpi
 PAPER = (251, 226, 233)

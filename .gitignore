@@ -91,4 +91,4 @@ docs/
 example/.secrets
 
 # Generated
-example/src/generatedEnvConfig.ts
+example/packages/shared/src/generatedEnvConfig.ts

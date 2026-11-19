@@ -1,8 +1,8 @@
 const path = require('path');
-const flavors = require('./flavors.json');
+const flavorModules = require('./flavors.js').flavorModules();
 
-// The SDK's React Native packages besides core, which every flavor includes, by the module names in flavors.json,
-// with their Android ReactPackage classes.
+// The SDK's React Native packages besides core, which every flavor includes, by module name (the package name after
+// @ihreapotheken/ia-sdk-), with their Android ReactPackage classes.
 const MODULE_PACKAGES = {
   'cardlink': 'de.ihreapotheken.reactnative.cardlink.IaSdkCardLinkPackage',
   'ordering': 'de.ihreapotheken.reactnative.ordering.IaSdkOrderingPackage',
@@ -20,15 +20,15 @@ function iosConfigurations(flavor) {
 }
 
 /**
- * Links a module only into the flavors that list it in flavors.json. On iOS, its pod links only into their
+ * Links a module only into the flavors whose packages depend on it (flavors.js). On iOS, its pod links only into their
  * configurations (the Podfile does the same for the SDK pods it brings). On Android, only their variants depend on
  * its project (`demoImplementation`, ...); the package list autolinking generates is the same for every flavor, so it
  * gets the package from FlavorPackages, which gives an empty one in a flavor without the module.
  */
 function moduleDependency(module, androidPackage) {
-  const allFlavors = Object.keys(flavors);
+  const allFlavors = Object.keys(flavorModules);
   const flavorsWithModule = allFlavors.filter((flavor) =>
-    flavors[flavor].modules.includes(module)
+    flavorModules[flavor].includes(module)
   );
   let platforms;
   if (flavorsWithModule.length === allFlavors.length) {

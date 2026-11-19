@@ -1,15 +1,9 @@
 import { AppRegistry } from 'react-native';
 import { name as appName } from './app.json';
-import { IA_E2E } from './src/generatedEnvConfig';
+import DemoApp from '@ia-example/demo';
 
-// The demo flavor's entry. Every flavor has its own (index.<flavor>.js), so a
-// flavor's JS bundle holds only its app; the native app loads the one of its
-// flavor, see README.md → Flavors.
-//
-// With IA_E2E=true (see metro.config.js) the demo boots a minimal SDK-init
-// smoke entry used by the cross-platform E2E test instead.
-AppRegistry.registerComponent(appName, () =>
-  IA_E2E
-    ? require('./src/e2e/SmokeApp').default
-    : require('./src/demo/DemoApp').default
-);
+// The demo flavor's entry. Every flavor has its own (index.<flavor>.js) and its
+// own package (packages/, see package.json → flavors), so a flavor's JS bundle
+// holds only its app; the native app loads the entry of its flavor, see
+// README.md → Flavors.
+AppRegistry.registerComponent(appName, () => DemoApp);

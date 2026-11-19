@@ -31,13 +31,13 @@ const SERVER_ENVIRONMENT_LABELS = {
 const serverEnvironment = envVars.SERVER_ENVIRONMENT || 'staging';
 const serverEnvironmentLabel = SERVER_ENVIRONMENT_LABELS[serverEnvironment] || 'QA';
 
-const generatedPath = path.resolve(__dirname, 'src', 'generatedEnvConfig.ts');
+const generatedPath = path.resolve(__dirname, 'packages', 'shared', 'src', 'generatedEnvConfig.ts');
 fs.writeFileSync(generatedPath, [
   '// Auto-generated from .env by metro.config.js — do not edit',
   `export const ANDROID_APPSDK_VERSION = '${envVars.ANDROID_APPSDK_VERSION || 'N/A'}';`,
   `export const IOS_APPSDK_VERSION = '${envVars.IOS_APPSDK_VERSION || 'N/A'}';`,
   // E2E smoke flag: build/bundle with IA_E2E=true to boot the SDK-init smoke
-  // entry (see index.js + src/e2e/SmokeApp.tsx) instead of the demo app.
+  // app (packages/demo/src/e2e/SmokeApp.tsx) instead of the demo app.
   `export const IA_E2E = ${process.env.IA_E2E === 'true' || envVars.IA_E2E === 'true'};`,
   `export const SERVER_ENVIRONMENT = '${serverEnvironment}';`,
   `export const SERVER_ENVIRONMENT_LABEL = '${serverEnvironmentLabel}';`,
@@ -55,6 +55,34 @@ const workspacePackages = {
   '@ihreapotheken/ia-sdk-prescription': path.resolve(packagesDir, 'prescription', 'src'),
   '@ihreapotheken/ia-sdk-cardlink': path.resolve(packagesDir, 'cardlink', 'src'),
 };
+
+// The example's own packages: the flavors' apps and what they share.
+const examplePackagesDir = path.resolve(__dirname, 'packages');
+for (const directory of fs.readdirSync(examplePackagesDir)) {
+  workspacePackages[`@ia-example/${directory}`] = path.resolve(examplePackagesDir, directory, 'src');
+}
+
+/**
+ * Fails the bundle when a package of the example imports an SDK module that its package.json doesn't list: its
+ * flavor's native build doesn't link that module (see flavors.js), so the app would fail on the device instead.
+ */
+function checkDeclaredSdkDependency(originModulePath, moduleName) {
+  if (!moduleName.startsWith('@ihreapotheken/ia-sdk-')) {
+    return;
+  }
+  const relative = path.relative(examplePackagesDir, originModulePath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    return;
+  }
+  const packageJsonPath = path.join(examplePackagesDir, relative.split(path.sep)[0], 'package.json');
+  const { name, dependencies = {} } = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  if (!(moduleName in dependencies)) {
+    throw new Error(
+      `${path.relative(__dirname, originModulePath)} imports ${moduleName}, which isn't a dependency of ${name} ` +
+        `(${path.relative(__dirname, packageJsonPath)}). Add it there, so the flavor links the module.`
+    );
+  }
+}
 
 /**
  * Metro configuration for monorepo
@@ -88,6 +116,7 @@ const config = {
     }),
     // Resolve source files
     resolveRequest: (context, moduleName, platform) => {
+      checkDeclaredSdkDependency(context.originModulePath, moduleName);
       // Check if this is one of our workspace packages
       if (workspacePackages[moduleName]) {
         const packageSrcDir = workspacePackages[moduleName];
