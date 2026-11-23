@@ -13,7 +13,7 @@
     "**/*.android.ts",
     "**/*.ios.ts"
   ],
-  "out": "docs",
+  "out": "doc/api",
   "excludePrivate": true,
   "excludeExternals": true,
   "includeVersion": true,

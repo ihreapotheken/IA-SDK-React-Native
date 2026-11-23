@@ -2,10 +2,6 @@
 
 React Native [Module](https://reactnative.dev/docs/the-new-architecture/create-module-library) project implemented with the ia.de AppSDK services.
 
-## 1. General Info
-
----
-
 The plugin implementation is based on the native AppSDK libraries developed by the ia.de team with Kotlin and Swift.
 
 These native libraries offer both checkout services as well as view components in order to ensure seamless integration
@@ -13,7 +9,7 @@ with any client setup.
 
 Public API Reference: https://ihreapotheken.github.io/docs/appsdk/react-native
 
-## 2. Developer Setup
+## 1. Developer Setup
 
 ---
 
@@ -22,7 +18,7 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/react-native
 - [npm](https://docs.npmjs.com/getting-started) 10.x and up
 - [GitHub Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for package registry access
 
-## 3. Platform Support
+## 2. Platform Support
 
 ---
 
@@ -40,7 +36,7 @@ The library is supported on both of the major mobile operating systems, with con
 - Minimum iOS Version: `15`
 - Xcode: `26.2`
 
-## 4. Client Setup
+## 3. Client Setup
 
 ---
 
@@ -48,7 +44,7 @@ For official reference, please see
 [the React Native documentation](https://reactnative.dev/docs/libraries)
 on using libraries.
 
-### 4.1. Configure the GitHub Package Registry
+### 3.1. Configure the GitHub Package Registry
 
 The library is accessed from GitHub NPM Package Registry.
 
@@ -61,7 +57,7 @@ Create a `.npmrc` file in the root of your project:
 
 Replace `YOUR_GITHUB_PAT` with your GitHub Personal Access Token.
 
-### 4.2. Install the packages
+### 3.2. Install the packages
 
 Install the core package and the modules you need:
 
@@ -80,96 +76,88 @@ npm install @ihreapotheken/ia-sdk-over-the-counter@VERSION
 The `VERSION` value can be referenced from the
 [package release page](https://github.com/ihreapotheken/IA-SDK-React-Native/packages).
 
-### 4.3. iOS Project Setup
+### 3.3. iOS Project Setup
 
 See [iOS Project Setup](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/iOSProjectSetup.md).
 
-### 4.4. Module Registration and Initialization
+### 3.4. Plugin usage
 
-The SDK uses a modular architecture. Register only the modules you need to minimize app size:
+1. **Set the app identifier**  
+The API key is linked to your app's identifier, so set it on both platforms:
+   - iOS: the bundle identifier, in the app target's Build Settings (`PRODUCT_BUNDLE_IDENTIFIER`).
+   - Android: the `applicationId`, in `android/app/build.gradle`.
 
+2. **Import the required packages**  
+`@ihreapotheken/ia-sdk-core` is mandatory, the module packages are optional. In this example we will be using product
+search from `@ihreapotheken/ia-sdk-over-the-counter` and cart from `@ihreapotheken/ia-sdk-ordering`.
 ```typescript
 import { iaSdk, ServerEnvironment } from '@ihreapotheken/ia-sdk-core';
-import { IaModuleCardLink } from '@ihreapotheken/ia-sdk-cardlink';
-import { IaModulePharmacy } from '@ihreapotheken/ia-sdk-pharmacy';
-
-// Register modules before initialization
-await iaSdk.register([
-  new IaModuleCardLink(),
-  new IaModulePharmacy(),
-]);
-
-// Initialize the SDK
-await iaSdk.initialize({
-  accessKey: 'your-access-key',
-  clientId: 'your-client-id',
-  serverEnvironment: ServerEnvironment.Staging,
-});
+import { IaModuleOverTheCounter } from '@ihreapotheken/ia-sdk-over-the-counter';
+import { IaModuleOrdering } from '@ihreapotheken/ia-sdk-ordering';
 ```
 
-Each module must be registered before calling `initialize()`. The registration and initialization
-should only be invoked once during the application runtime.
-
-### 4.5. Using the SDK
-
-After initialization, use the SDK methods:
-
+3. **Register modules**  
+The first step is to register all the modules you plan to use. This must be done before calling any other function
+or presenting any screens, so we recommend doing it right when the app starts.
+This step is required because modules can be interconnected. For example, registering `IaModuleOrdering` makes the
+**Cart** feature (from `@ihreapotheken/ia-sdk-ordering`) internally available to the **Product Search** feature (from
+`@ihreapotheken/ia-sdk-over-the-counter`), enabling features like a cart button on the search screen.
+Integrations and Apofinder are part of the core package and are always registered.
 ```typescript
-import { iaSdk, Salutation, IaBaseModule } from '@ihreapotheken/ia-sdk-core';
-import type { IaPharmacyModule } from '@ihreapotheken/ia-sdk-interface';
+await iaSdk.register([
+  new IaModuleOverTheCounter(),
+  new IaModuleOrdering(),
+]);
+```
+> [!IMPORTANT]
+> Register all modules in one call, before `initialize`.
 
-// Core methods (always available after initialization)
-await iaSdk.startDashboardActivity();
-await iaSdk.logout();
-await iaSdk.finishAllActivities();
-
-// Set guest user data for checkout
-await iaSdk.setGuestUserData({
-  salutation: Salutation.Mr,
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@example.com',
-  phoneNumberCountryCode: 49,
-  phoneNumberWithoutCountryCode: '1234567890',
+4. **Basic setup and initialize**  
+Next, enter your API key, client ID and other options you might need in the configuration, and pass it to
+`initialize`. This fetches all required data and enables your modules.
+```typescript
+await iaSdk.initialize({
+  accessKey: 'ENTER YOUR API KEY HERE',
+  clientId: 'ENTER YOUR CLIENT ID HERE',
+  serverEnvironment: ServerEnvironment.Production,
+  initialization: {
+    shouldShowIndicator: true,
+    prerequisites: {
+      runLegalIfNeeded: true,
+      runOnboardingIfNeeded: true,
+      runApofinderIfNeeded: true,
+    },
+  },
 });
-
-// Access registered modules
-if (iaSdk.hasModule(IaBaseModule.Pharmacy)) {
-  const pharmacy = iaSdk.getModule<IaPharmacyModule>(IaBaseModule.Pharmacy);
-  await pharmacy.launchPharmacyDetails();
-  await pharmacy.setPharmacyId('2163'); // numeric pharmacy ID
-}
 ```
+> [!TIP]
+> To learn more about initialization, see [Initialization](docs/initialization.md).
 
-## 5. Available Modules
+## 4. Guides
 
----
+[Public API Overview](docs/public_api_overview.md)  
+[Initialization](docs/initialization.md)  
+[Presentation](docs/presentation.md)  
+[Appearance](docs/appearance.md)  
+[SDK Interaction](docs/interaction.md)
 
-| Package | Description | Key Methods |
-|---------|-------------|-------------|
-| `@ihreapotheken/ia-sdk-core` | Core SDK functionality (required) | `initialize()`, `startDashboardActivity()`, `logout()`, `setGuestUserData()` |
-| `@ihreapotheken/ia-sdk-interface` | TypeScript interface definitions | Type exports only |
-| `@ihreapotheken/ia-sdk-cardlink` | NFC prescription transfer | Available through dashboard |
-| `@ihreapotheken/ia-sdk-pharmacy` | Pharmacy details and management | `launchPharmacyDetails()`, `setPharmacyId()` |
-| `@ihreapotheken/ia-sdk-ordering` | Order management and checkout | `transferPrescriptions()`, `clearCart()`, `launchCartScreen()` |
-| `@ihreapotheken/ia-sdk-prescription` | Prescription management | Module registered for UI |
-| `@ihreapotheken/ia-sdk-over-the-counter` | OTC product browsing | `launchProductSearchRoute()` |
+## 5. Screens
 
-### Module Dependency Graph
+[Start Screen](docs/screens/start_screen.md)  
+[Apofinder Screen](docs/screens/apofinder_screen.md)  
+[Cart Screen](docs/screens/cart_screen.md)  
+[Pharmacy Screen](docs/screens/pharmacy_screen.md)  
+[Product Search Screen](docs/screens/product_search_screen.md)  
+[Prescription Scanner Screen](docs/screens/prescription_scanner_screen.md)  
+[Redeem Prescription Screen](docs/screens/redeem_prescription_screen.md)
 
-```
-@ihreapotheken/ia-sdk-interface (foundation)
-    ↑
-    └─── @ihreapotheken/ia-sdk-core (required)
-         ↑ (peer dependency)
-         ├─── @ihreapotheken/ia-sdk-cardlink
-         ├─── @ihreapotheken/ia-sdk-pharmacy
-         ├─── @ihreapotheken/ia-sdk-ordering
-         ├─── @ihreapotheken/ia-sdk-over-the-counter
-         └─── @ihreapotheken/ia-sdk-prescription
-```
+## 6. Components
 
-## 6. Example Apps
+[How to use components](docs/components/how_to_use_components.md)  
+[IaProductGrid](docs/components/product_grid.md)  
+[IaCartButton](docs/components/cart_button.md)
+
+## 7. Example Apps
 
 ---
 
@@ -198,7 +186,7 @@ The `test/` directory contains minimal example apps for specific use cases:
 
 - `test/cardlink-demo/` - CardLink module only using published packages
 
-## 7. Project Structure
+## 8. Project Structure
 
 ---
 
@@ -216,7 +204,7 @@ The `test/` directory contains minimal example apps for specific use cases:
     └── cardlink-demo/    # CardLink only (published packages)
 ```
 
-## 8. App Size
+## 9. App Size
 
 ---
 
@@ -255,7 +243,7 @@ How it was measured:
   counts toward the empty app.
 - **App Store download** is approximated by the zipped app. App Store Connect reports the exact size after an upload.
 
-## 9. Related Projects
+## 10. Related Projects
 
 ---
 
