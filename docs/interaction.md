@@ -23,18 +23,7 @@ const subscription = ordering.addCartUpdatedListener((cartState) => {
 });
 ```
 
-Available listeners:
-
-| Listener | Event |
-|---|---|
-| `iaSdk.addInitializationStateListener` | Initialization state changed |
-| `iaSdk.addAnalyticsEventListener` | Analytics event logged for the host app, e.g. `screen_view` or `purchase`, see [Analytics](#analytics) |
-| `iaSdk.addLogMessageListener` | SDK log message, for debugging (iOS only) |
-| `iaSdk.addApofinderPharmacyChangedListener` | The user selected a pharmacy in Apofinder; gives the `pharmacyId` and `isFromPrerequisites` |
-| `addCartUpdatedListener` (ordering module) | Cart updated |
-| `addOrderFinishedListener` (ordering module) | Order finished |
-| `addScannerCameraErrorListener` (prescription module) | Scanner camera error (iOS only) |
-| `add…Listener` (CardLink module) | CardLink events, e.g. `addEventListener` and `addPrescriptionsRedeemedListener` |
+All listeners are listed in the [Public API Overview](public_api_overview.md).
 
 ## Example of overriding default behavior
 `onSdkWillNavigateToTarget` is called when some overridable action is performed. Return `true` to let the SDK perform

@@ -26,34 +26,15 @@ const ordering = iaSdk.getModule<IaOrderingModule>(IaBaseModule.Ordering);
 await ordering.launchCartScreen();
 ```
 
-Available launch methods:
-
-| Method | Package |
-|---|---|
-| `iaSdk.startDashboardActivity()` | `@ihreapotheken/ia-sdk-core` |
-| `iaSdk.launchApofinder()` | `@ihreapotheken/ia-sdk-core` |
-| `launchProductSearchRoute()` | `@ihreapotheken/ia-sdk-over-the-counter` |
-| `launchCartScreen()` | `@ihreapotheken/ia-sdk-ordering` |
-| `launchPharmacyDetails()` | `@ihreapotheken/ia-sdk-pharmacy` |
-| `launchRedeemPrescriptionScreen()` | `@ihreapotheken/ia-sdk-prescription` |
-| `launchPrescriptionScanner(type)` (iOS only) | `@ihreapotheken/ia-sdk-prescription` |
-| `launch(...)` | `@ihreapotheken/ia-sdk-cardlink` |
+All launch methods are listed in the [Public API Overview](public_api_overview.md).
 
 The SDK handles the navigation of launched screens, including closing them. To close all SDK screens from your code,
 call `iaSdk.finishAllActivities()`.
 
 ## Screen views
 Use `IaSdkScreenView` when you need to control how the screen is shown: push it to your navigation, present it
-yourself, or embed it into your UI. Pick the screen with `screen`:
-
-| `screen` | Screen | Package |
-|---|---|---|
-| `IaSdkScreenViewId.StartScreen` | Start screen | `@ihreapotheken/ia-sdk-core` |
-| `IaSdkScreenViewId.ApofinderScreen` | Apofinder | `@ihreapotheken/ia-sdk-core` |
-| `IaSdkScreenViewId.SearchScreen` | Product search | `@ihreapotheken/ia-sdk-over-the-counter` |
-| `IaSdkScreenViewId.CartScreen` | Cart | `@ihreapotheken/ia-sdk-ordering` |
-| `IaSdkScreenViewId.PharmacyScreen` | Pharmacy details | `@ihreapotheken/ia-sdk-pharmacy` |
-| `IaSdkScreenViewId.RedeemPrescription` | Redeem prescription | `@ihreapotheken/ia-sdk-prescription` |
+yourself, or embed it into your UI. Pick the screen with `screen`, e.g. `IaSdkScreenViewId.CartScreen`; the screen's
+module must be registered. All screens you can embed are values of `IaSdkScreenViewId`.
 
 Screens fill the space you give them, so give them a size, e.g. `style={{ flex: 1 }}`. Each screen is a native view;
 the screen shows its own navigation bar and navigates within itself.
