@@ -1,0 +1,146 @@
+name: Native SDK from branch
+
+# Build the native IA SDKs (Android + iOS) from a chosen branch and verify the
+# React Native example app links against those local builds. Defaults to the
+# latest `develop` of each native SDK; any branch can be given instead.
+#
+# Android: SDK modules are published to the runner's mavenLocal at YYYY.MM.DD.MIN
+#   and ANDROID_APPSDK_VERSION is pinned to it. iOS: versioned XCFrameworks are
+#   built and the example Podfile links them via IA_LOCAL_PODS_DIR.
+#
+# Self-hosted macOS runner. Required repo secrets (scripts/ci/provision-secrets.sh):
+# PAT, STRAPI_{DEV,STAGING,PROD}_TOKEN, CARDLINK_{CUSTOMER,REPORT}_KEY_{DEBUG,DEV,RELEASE},
+# IASDK_{FILE_SERVICE,LOGGER_ENCRYPTION,SSL_PINNING_DEACTIVATION,REMOTE_CONFIGURATION_SECRET}_KEY,
+# NETRC_USER, NETRC_TOKEN, APPSDK_ACCESS_KEY.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Which native SDK(s) to build'
+        type: choice
+        default: 'all'
+        options: [all, android, ios]
+      android_branch:
+        description: 'IA-SDK-Dev-Android branch'
+        type: string
+        default: 'develop'
+      ios_branch:
+        description: 'IA-SDK-dev-ios branch'
+        type: string
+        default: 'develop'
+      build_example:
+        description: 'Also build the example app to verify linkage'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+  ANDROID_BRANCH: ${{ github.event.inputs.android_branch || 'develop' }}
+  IOS_BRANCH: ${{ github.event.inputs.ios_branch || 'develop' }}
+  JAVA_HOME: /opt/homebrew/opt/openjdk@17
+  ANDROID_HOME: /Users/nativeteam/Library/Android/sdk
+  ANDROID_SDK_ROOT: /Users/nativeteam/Library/Android/sdk
+  DEV_ANDROID_DIR: ${{ github.workspace }}/../IA-SDK-Dev-Android
+  DEV_IOS_DIR: ${{ github.workspace }}/../IA-SDK-dev-ios
+
+jobs:
+  native-from-branch:
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 75
+    steps:
+      - name: Checkout wrapper
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Set up PATH
+        run: |
+          echo "$JAVA_HOME/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+
+      - name: Compute native version
+        id: ver
+        run: echo "version=$(bash scripts/ci/native-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Clone / update native SDK checkouts
+        env:
+          PAT: ${{ secrets.PAT }}
+        run: |
+          set -euo pipefail
+          clone_or_update() {
+            local url="$1" dir="$2" branch="$3"
+            if [ -d "$dir/.git" ]; then git -C "$dir" fetch --all --quiet
+            else git clone "https://x-access-token:${PAT}@github.com/${url}.git" "$dir"; fi
+            git -C "$dir" checkout --force "$branch"
+            git -C "$dir" reset --hard "origin/$branch"
+            echo "$url @ $(git -C "$dir" rev-parse --short HEAD) ($branch)"
+          }
+          if [ "$PLATFORM" = all ] || [ "$PLATFORM" = android ]; then
+            clone_or_update ihreapotheken/IA-SDK-Dev-Android "$DEV_ANDROID_DIR" "$ANDROID_BRANCH"
+          fi
+          if [ "$PLATFORM" = all ] || [ "$PLATFORM" = ios ]; then
+            clone_or_update ihreapotheken/IA-SDK-dev-ios "$DEV_IOS_DIR" "$IOS_BRANCH"
+          fi
+
+      - name: Build native SDK(s) and wire into wrapper
+        env:
+          NATIVE_VERSION: ${{ steps.ver.outputs.version }}
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          STRAPI_DEV_TOKEN: ${{ secrets.STRAPI_DEV_TOKEN }}
+          STRAPI_STAGING_TOKEN: ${{ secrets.STRAPI_STAGING_TOKEN }}
+          STRAPI_PROD_TOKEN: ${{ secrets.STRAPI_PROD_TOKEN }}
+          CARDLINK_CUSTOMER_KEY_DEBUG: ${{ secrets.CARDLINK_CUSTOMER_KEY_DEBUG }}
+          CARDLINK_CUSTOMER_KEY_DEV: ${{ secrets.CARDLINK_CUSTOMER_KEY_DEV }}
+          CARDLINK_CUSTOMER_KEY_RELEASE: ${{ secrets.CARDLINK_CUSTOMER_KEY_RELEASE }}
+          CARDLINK_REPORT_KEY_DEBUG: ${{ secrets.CARDLINK_REPORT_KEY_DEBUG }}
+          CARDLINK_REPORT_KEY_DEV: ${{ secrets.CARDLINK_REPORT_KEY_DEV }}
+          CARDLINK_REPORT_KEY_RELEASE: ${{ secrets.CARDLINK_REPORT_KEY_RELEASE }}
+          IASDK_FILE_SERVICE_KEY: ${{ secrets.IASDK_FILE_SERVICE_KEY }}
+          IASDK_LOGGER_ENCRYPTION_KEY: ${{ secrets.IASDK_LOGGER_ENCRYPTION_KEY }}
+          IASDK_SSL_PINNING_DEACTIVATION_KEY: ${{ secrets.IASDK_SSL_PINNING_DEACTIVATION_KEY }}
+          IASDK_REMOTE_CONFIGURATION_SECRET_KEY: ${{ secrets.IASDK_REMOTE_CONFIGURATION_SECRET_KEY }}
+          NETRC_USER: ${{ secrets.NETRC_USER }}
+          NETRC_TOKEN: ${{ secrets.NETRC_TOKEN }}
+        run: bash scripts/ci/build-native.sh
+
+      - name: Build example app (verify linkage)
+        if: ${{ github.event.inputs.build_example != 'false' }}
+        env:
+          APPSDK_ACCESS_KEY: ${{ secrets.APPSDK_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          echo "APPSDK_ACCESS_KEY=${APPSDK_ACCESS_KEY}" > example/.secrets
+          yarn install --immutable || yarn install
+          if [ "$PLATFORM" = all ] || [ "$PLATFORM" = android ]; then
+            ( cd example/android && ./gradlew assembleDemoDebug --no-daemon )
+          fi
+          if [ "$PLATFORM" = all ] || [ "$PLATFORM" = ios ]; then
+            # IA_LOCAL_PODS_DIR was written to $GITHUB_ENV by build-native.sh.
+            ( cd example/ios && bundle install && bundle exec pod install )
+            ( cd example/ios && xcodebuild -workspace IaSdkReactNativeExample.xcworkspace \
+                -scheme IaSdkReactNativeExample -configuration Debug -sdk iphonesimulator \
+                -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build )
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Native SDK from branch"
+            echo "- Version: \`${{ steps.ver.outputs.version }}\`"
+            echo "- Platform: \`$PLATFORM\` · Android \`$ANDROID_BRANCH\` · iOS \`$IOS_BRANCH\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Restore wrapper working tree
+        if: always()
+        run: |
+          git checkout -- .env 2>/dev/null || true
+          rm -f example/.secrets

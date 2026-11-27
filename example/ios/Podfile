@@ -41,13 +41,26 @@ target 'IaSdkReactNativeExample' do
   # A module that only some flavors include (their packages' dependencies, see ../flavors.js) links only into their
   # configurations: react-native.config.js restricts its React Native pod. CocoaPods doesn't apply that to a pod's
   # dependencies, so the SDK pods it brings are restricted here too.
-  flavor_modules = JSON.parse(Pod::Executable.execute_command('node', [File.join(__dir__, '..', 'flavors.js')]))
-  flavor_modules.values.flatten.uniq.each do |sdk_module|
-    flavors = flavor_modules.keys.select { |flavor| flavor_modules[flavor].include?(sdk_module) }
-    next if flavors.length == flavor_modules.length
+  # CI's "native from branch" workflow sets IA_LOCAL_PODS_DIR to a directory of
+  # locally-built XCFramework pods (one <Fw>/<Fw>.podspec each). When set, link all
+  # IA frameworks from there (overriding the IA-SDK-iOS spec repo) into every
+  # configuration — a verification build doesn't need the per-flavor slimming.
+  # GematikOpenSSL still resolves from the IA-SDK-iOS source above. Unset => normal
+  # released build via the spec repo, with the per-flavor restriction below.
+  ia_local_pods_dir = ENV['IA_LOCAL_PODS_DIR']
+  if ia_local_pods_dir && !ia_local_pods_dir.empty?
+    %w[IOSKit IACore IAIntegrations IAOrdering IAOverTheCounter IAPharmacy IACardLink IAPrescription].each do |fw|
+      pod fw, :path => File.join(ia_local_pods_dir, fw)
+    end
+  else
+    flavor_modules = JSON.parse(Pod::Executable.execute_command('node', [File.join(__dir__, '..', 'flavors.js')]))
+    flavor_modules.values.flatten.uniq.each do |sdk_module|
+      flavors = flavor_modules.keys.select { |flavor| flavor_modules[flavor].include?(sdk_module) }
+      next if flavors.length == flavor_modules.length
 
-    configurations = flavors.flat_map { |flavor| flavor == 'demo' ? %w[Debug Release] : ["Debug-#{flavor}", "Release-#{flavor}"] }
-    SDK_PODS.fetch(sdk_module).each { |sdk_pod| pod sdk_pod, :configurations => configurations }
+      configurations = flavors.flat_map { |flavor| flavor == 'demo' ? %w[Debug Release] : ["Debug-#{flavor}", "Release-#{flavor}"] }
+      SDK_PODS.fetch(sdk_module).each { |sdk_pod| pod sdk_pod, :configurations => configurations }
+    end
   end
 
   use_react_native!(
